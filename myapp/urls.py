@@ -4,6 +4,8 @@ from myapp.views import View_Authorization
 from myapp.views import View_Locations
 
 urlpatterns = [
+    path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
+
     ## This is the Authorization Paths
     path('signup/', View_Authorization.register_view, name='signup'),
     path('login/', View_Authorization.token_obtain_pair_view, name='login'),     # returns access & refresh
