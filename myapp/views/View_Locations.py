@@ -6,16 +6,35 @@ from rest_framework.permissions import IsAdminUser
 from myapp.model.locations_model import Location
 from myapp.serializers import LocationSerializer
 
-# CREATE
+# # CREATE
+# @api_view(['POST'])
+# @permission_classes([IsAdminUser])   # ✅ only admins
+# def create_location(request):
+#     serializer = LocationSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 @api_view(['POST'])
 @permission_classes([IsAdminUser])   # ✅ only admins
 def create_location(request):
+    location_name = request.data.get('location_name')
+
+    # Check if location with same name already exists
+    if Location.objects.filter(location_name=location_name).exists():
+        return Response(
+            {"error": f"Location '{location_name}' already exists."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     serializer = LocationSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # READ (single + list)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])

@@ -5,7 +5,7 @@ from django.db import models
 
 class Location(models.Model):
     location_id = models.AutoField(primary_key=True)
-    location_name = models.CharField(max_length=255)
+    location_name = models.CharField(max_length=255, unique=True)
     location_address = models.TextField()
     location_timezone = models.CharField(max_length=100)
     location_call_number = models.CharField(max_length=20, blank=True, null=True)
