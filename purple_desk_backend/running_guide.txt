@@ -1,4 +1,4 @@
-
+0) Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned   (is the terminal not creating the venv)
 1) python -m venv venv
 
 2)  .\venv\Scripts\activate

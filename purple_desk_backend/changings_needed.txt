@@ -1,0 +1,4 @@
+
+1) we have to make a saperate file / folder for the require_admin  authorizatoin functions. and import it in views files
+
+

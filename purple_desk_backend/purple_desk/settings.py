@@ -114,7 +114,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'purple_desk_db',      # your database name
         'USER': 'root',                # your MySQL username
-        'PASSWORD': 'Abdullah@07',   # your MySQL password
+        'PASSWORD': 'admin',   # your MySQL password
         'HOST': 'localhost',           # or 'localhost'
         'PORT': '3306',                # default MySQL port
         # 'OPTIONS': {

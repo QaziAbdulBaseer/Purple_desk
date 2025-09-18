@@ -23,11 +23,11 @@ urlpatterns = [
     path('locations/update/<int:pk>/', View_Locations.update_location, name='update_location'), # PUT
     path('locations/delete/<int:pk>/', View_Locations.delete_location, name='delete_location'), # DELETE
 
+
+    ## Hours operations End points
+
     path("hours/<int:location_id>/", View_hours_of_operations.get_hours_of_operations, name="get_hours_of_operations"),
     path("hours/<int:location_id>/create/", View_hours_of_operations.create_hours_of_operation, name="create_hours_of_operation"),
-
-    # Single record by pk under location
-    # path("hours/<int:location_id>/<int:pk>/", View_hours_of_operations.get_hours_of_operation, name="get_hours_of_operation"),
     path("hours/<int:location_id>/<int:pk>/update/", View_hours_of_operations.update_hours_of_operation, name="update_hours_of_operation"),
     path("hours/<int:location_id>/<int:pk>/delete/", View_hours_of_operations.delete_hours_of_operation, name="delete_hours_of_operation"),
 
