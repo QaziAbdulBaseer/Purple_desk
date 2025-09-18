@@ -70,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -114,12 +114,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'purple_desk_db',      # your database name
         'USER': 'root',                # your MySQL username
-        'PASSWORD': '',   # your MySQL password
-        'HOST': '127.0.0.1',           # or 'localhost'
+        'PASSWORD': 'Abdullah@07',   # your MySQL password
+        'HOST': 'localhost',           # or 'localhost'
         'PORT': '3306',                # default MySQL port
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
+        # 'OPTIONS': {
+        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        # }
     }
 }
 
