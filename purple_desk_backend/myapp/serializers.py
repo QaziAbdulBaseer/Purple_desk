@@ -7,6 +7,9 @@ from myapp.model.hours_of_operations_model import HoursOfOperation
 
 from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
 
+from rest_framework import serializers
+from myapp.model.jump_passes_model import JumpPass
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -45,8 +48,6 @@ class HoursOfOperationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HoursOfOperation
         fields = "__all__"
-
-
 
 
 
@@ -137,3 +138,134 @@ class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Reschedule allowed days must be a positive number")
         return value
+    
+    def validate(self, data):
+        """Custom validation to check for duplicate package names within the same location"""
+        package_name = data.get('package_name')
+        location = data.get('location')
+        
+        if package_name and location:
+            # Check if we're updating an existing record
+            if self.instance:
+                # For updates, exclude the current instance from the check
+                existing_package = BirthdayPartyPackage.objects.filter(
+                    package_name__iexact=package_name.strip(),
+                    location=location
+                ).exclude(birthday_party_packages_id=self.instance.birthday_party_packages_id).first()
+            else:
+                # For new records, check if any record with this name exists
+                existing_package = BirthdayPartyPackage.objects.filter(
+                    package_name__iexact=package_name.strip(),
+                    location=location
+                ).first()
+            
+            if existing_package:
+                raise serializers.ValidationError({
+                    'package_name': f"A birthday party package with the name '{package_name}' already exists for this location."
+                })
+        
+        return data
+    
+
+
+
+
+
+
+class JumpPassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JumpPass
+        fields = [
+            'jump_pass_id',
+            'location',
+            'jump_pass_priority',
+            'jump_pass_pitch',
+            'schedule_with',
+            'pass_name',
+            'age_allowed',
+            'starting_day_name',
+            'ending_day_name',
+            'jump_time_allowed',
+            'price',
+            'tax_included',
+            'recommendation',
+            'comments',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['jump_pass_id', 'created_at', 'updated_at']
+        
+    def validate_pass_name(self, value):
+        """Validate that pass_name is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Pass name cannot be empty")
+        return value.strip()
+        
+    def validate_jump_pass_priority(self, value):
+        """Validate that priority is a positive number"""
+        if value <= 0:
+            raise serializers.ValidationError("Jump pass priority must be a positive number")
+        return value
+        
+    def validate_price(self, value):
+        """Validate that price is positive"""
+        if value <= 0:
+            raise serializers.ValidationError("Price must be greater than 0")
+        return value
+        
+    def validate_tax_included(self, value):
+        """Validate tax percentage is between 0 and 100"""
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("Tax percentage must be between 0 and 100")
+        return value
+        
+    def validate_schedule_with(self, value):
+        """Validate that schedule_with is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Schedule with cannot be empty")
+        return value.strip()
+        
+    def validate_age_allowed(self, value):
+        """Validate that age_allowed is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Age allowed cannot be empty")
+        return value.strip()
+        
+    def validate_jump_time_allowed(self, value):
+        """Validate that jump_time_allowed is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Jump time allowed cannot be empty")
+        return value.strip()
+        
+    def validate_recommendation(self, value):
+        """Validate that recommendation is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Recommendation cannot be empty")
+        return value.strip()
+    
+    def validate(self, data):
+        """Custom validation to check for duplicate pass names within the same location"""
+        pass_name = data.get('pass_name')
+        location = data.get('location')
+        
+        if pass_name and location:
+            # Check if we're updating an existing record
+            if self.instance:
+                # For updates, exclude the current instance from the check
+                existing_pass = JumpPass.objects.filter(
+                    pass_name__iexact=pass_name.strip(),
+                    location=location
+                ).exclude(jump_pass_id=self.instance.jump_pass_id).first()
+            else:
+                # For new records, check if any record with this name exists
+                existing_pass = JumpPass.objects.filter(
+                    pass_name__iexact=pass_name.strip(),
+                    location=location
+                ).first()
+            
+            if existing_pass:
+                raise serializers.ValidationError({
+                    'pass_name': f"A jump pass with the name '{pass_name}' already exists for this location."
+                })
+        
+        return data

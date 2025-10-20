@@ -4,10 +4,10 @@ from myapp.views import View_Authorization
 from myapp.views import View_Locations
 from myapp.views import View_hours_of_operations
 from myapp.views import View_birthday_party_packages
+from myapp.views import View_jump_passes
 
 urlpatterns = [
     # path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
-
     ## This is the Authorization Paths
     path('signup/', View_Authorization.register_view, name='signup'),
     path('login/', View_Authorization.token_obtain_pair_view, name='login'),     # returns access & refresh
@@ -38,5 +38,14 @@ urlpatterns = [
     path("birthday-packages/<int:location_id>/<int:pk>/list/", View_birthday_party_packages.get_birthday_party_package, name="get_birthday_party_package"), #get one
     path("birthday-packages/<int:location_id>/<int:pk>/update/", View_birthday_party_packages.update_birthday_party_package, name="update_birthday_party_package"),  # Update
     path("birthday-packages/<int:location_id>/<int:pk>/delete/", View_birthday_party_packages.delete_birthday_party_package, name="delete_birthday_party_package"),  # Delete one
+
+    ## jump passes end points
+    path("jump-passes/<int:location_id>/", View_jump_passes.get_jump_passes, name="get_jump_passes"), #Get all 
+    path("jump-passes/<int:location_id>/<int:pk>/", View_jump_passes.get_jump_pass, name="get_jump_pass"), # Get a specific jump pass
+    path("jump-passes/<int:location_id>/create/", View_jump_passes.create_jump_pass, name="create_jump_pass"), # create
+    path("jump-passes/<int:location_id>/<int:pk>/update/", View_jump_passes.update_jump_pass, name="update_jump_pass"), # Update
+    path("jump-passes/<int:location_id>/<int:pk>/delete/", View_jump_passes.delete_jump_pass, name="delete_jump_pass"), # Delete
+
+
 
 ]
