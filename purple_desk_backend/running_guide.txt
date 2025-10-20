@@ -3,7 +3,7 @@
 
 2)  .\venv\Scripts\activate
 
-3) pip install django djangorestframework djangorestframework-simplejwt PyMySQL  mysqlclient uvicorn
+3) pip install django djangorestframework djangorestframework-simplejwt PyMySQL  mysqlclient uvicorn django-cors-headers
 
 
 4) django-admin startproject purple_desk .
