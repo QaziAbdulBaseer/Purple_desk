@@ -9,7 +9,7 @@ class HoursOfOperation(models.Model):
     starting_date = models.DateField(null=True, blank=True)
     ending_date = models.DateField(null=True, blank=True)
     starting_day_name = models.CharField(max_length=20)
-    ending_day_name = models.CharField(max_length=20)
+    ending_day_name = models.CharField(max_length=20, null=True, blank=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
     reason = models.TextField(null=True, blank=True)

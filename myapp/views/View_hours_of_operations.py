@@ -38,13 +38,31 @@ async def create_hours_of_operation(request, location_id):
         data = json.loads(body)
         data["location"] = location_id   # attach FK
         
-        restricted_types = ["special", "early_closing", "late_closing", "early_opening", "late_opening"]
+        restricted_types = ["early_closing", "late_closing", "early_opening", "late_opening"]
         if data.get("hours_type") in restricted_types:
             if not data.get("reason") or not data.get("starting_date"):
                 return JsonResponse(
-                    {"error": "For special/closing/opening hours, 'reason' and 'starting_date' are required."},
+                    {"error": "For early_closing, late_closing, early_opening, late_opening 'reason' and 'starting_date' are required."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            data.setdefault("schedule_with", "N/A")
+            data.setdefault("ages_allowed", "N/A")
+        if data.get("hours_type") == "special":
+            if not data.get("schedule_with") or not data.get("starting_date") or not data.get("ages_allowed"):
+                return JsonResponse(
+                    {"error": "For special, 'ages allowed' and 'starting_date' is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        if data.get("hours_type") == "closed":
+            if not data.get("starting_date") or not data.get("reason"):
+                return JsonResponse(
+                    {"error": "For closed, 'starting' and 'reason' is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            data.setdefault("schedule_with", "closed")
+            data.setdefault("ages_allowed", "closed")
+            data.setdefault("start_time", "00:00:00")
+            data.setdefault("end_time", "00:00:00")
         
         serializer = HoursOfOperationSerializer(data=data)
         is_valid = await sync_to_async(serializer.is_valid)()
