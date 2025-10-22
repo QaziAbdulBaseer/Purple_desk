@@ -13,6 +13,7 @@ from myapp.serializers import RegisterSerializer , UserSerializer
 
 
 
+
 # ---------------------------
 # Signup (Register)
 # ---------------------------
@@ -30,6 +31,7 @@ def register_view(request):
             },
             status=status.HTTP_201_CREATED
         )
+    print("This is the error:", serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -86,6 +88,7 @@ def token_obtain_pair_view(request):
                 'role': user.role
             }
         }, status=status.HTTP_200_OK)
+    print("This is the error:", serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

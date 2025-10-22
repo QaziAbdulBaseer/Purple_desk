@@ -35,6 +35,7 @@ class BirthdayPartyPackage(models.Model):
     roller_birthday_party_search_id = models.CharField(max_length=255, blank=True, null=True)
     roller_additional_jumper_price_search_id = models.CharField(max_length=255, blank=True, null=True)
     roller_birthday_party_booking_id = models.CharField(max_length=255, blank=True, null=True)
+    each_additional_jump_half_hour_after_room_time = models.CharField(max_length=255, blank=True, null=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

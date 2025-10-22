@@ -75,6 +75,7 @@ class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
             'price',
             'guest_of_honour_included_in_total_jumpers',
             'tax_included',
+            'tax_percentage',
             'each_additional_jump_hour_after_room_time',
             'additional_instructions',
             'birthday_party_booking_lead_allowed_days',
@@ -85,6 +86,7 @@ class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
             'each_additional_jumper_price',
             'roller_additional_jumper_price_search_id',
             'roller_birthday_party_booking_id',
+            'each_additional_jump_half_hour_after_room_time'
             'is_available',
             'created_at',
             'updated_at'
@@ -188,6 +190,7 @@ class JumpPassSerializer(serializers.ModelSerializer):
             'jump_time_allowed',
             'price',
             'tax_included',
+            'tax_percentage',
             'recommendation',
             'comments',
             'created_at',

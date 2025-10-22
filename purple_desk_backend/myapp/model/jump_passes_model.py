@@ -13,7 +13,11 @@ class JumpPass(models.Model):
     age_allowed = models.CharField(max_length=255)
     jump_time_allowed = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    tax_included = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage (e.g., 10.00 for 10%)")
+    # tax_included = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage (e.g., 10.00 for 10%)")
+    tax_included = models.BooleanField(
+        help_text="Check if tax is included in the price (Yes/No or 1/0)."
+    )
+    tax_percentage = models.CharField(max_length=50, blank=True, null=True)
     recommendation = models.TextField()
     
     # Optional fields

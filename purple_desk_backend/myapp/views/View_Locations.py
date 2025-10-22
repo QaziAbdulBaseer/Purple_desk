@@ -41,6 +41,7 @@ async def create_location(request):
     if is_valid:
         await sync_to_async(serializer.save)()
         return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+    print("This is the error:", serializer.errors)
     return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -89,6 +90,7 @@ async def update_location(request, pk):
     if is_valid:
         await sync_to_async(serializer.save)()
         return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+    print("This is the error:", serializer.errors)
     return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

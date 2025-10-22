@@ -69,8 +69,10 @@ async def create_hours_of_operation(request, location_id):
         if is_valid:
             await sync_to_async(serializer.save)()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        print("This is the error:", serializer.errors)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print("This is the error:", str(e))
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 async def get_hours_of_operations(request, location_id):
@@ -122,6 +124,7 @@ async def update_hours_of_operation(request, location_id, pk):
         if is_valid:
             await sync_to_async(serializer.save)()
             return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+        print("This is the error:", serializer.errors)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except HoursOfOperation.DoesNotExist:
         return JsonResponse({"error": "Hours of Operation not found"}, status=status.HTTP_404_NOT_FOUND)

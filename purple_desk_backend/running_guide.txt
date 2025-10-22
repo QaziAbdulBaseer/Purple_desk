@@ -5,6 +5,8 @@
 
 3) pip install django djangorestframework djangorestframework-simplejwt PyMySQL  mysqlclient uvicorn django-cors-headers
 
+
+
 4) django-admin startproject purple_desk .
 
 5) python manage.py startapp myapp
@@ -17,4 +19,4 @@
 
 9) python manage.py runserver
 
-10) uvicorn purple_desk.asgi:application --reload 
+10) uvicorn purple_desk.asgi:application --relo
