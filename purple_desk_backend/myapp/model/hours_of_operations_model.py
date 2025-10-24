@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 class HoursOfOperation(models.Model):
@@ -14,6 +15,7 @@ class HoursOfOperation(models.Model):
     end_time = models.TimeField(null=True, blank=True)
     reason = models.TextField(null=True, blank=True)
     is_modified = models.BooleanField(default=False)  # yes/no flag
+    same_entry_id = models.UUIDField( null=True, blank=True, editable=False)
 
     class Meta:
         db_table = "hours_of_operation"

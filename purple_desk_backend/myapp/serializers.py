@@ -28,7 +28,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -44,13 +43,35 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 
+# class HoursOfOperationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = HoursOfOperation
+#         fields = "__all__"
+
+
+
+
+
 class HoursOfOperationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HoursOfOperation
-        fields = "__all__"
-
-
-
+        fields = [
+            'hours_of_operation_id',
+            'location',
+            'hours_type',
+            'schedule_with',
+            'ages_allowed',
+            'starting_date',
+            'ending_date',
+            'starting_day_name',
+            'ending_day_name',
+            'start_time',
+            'end_time',
+            'reason',
+            'is_modified',
+            'same_entry_id'  # ⬅️ ADD THIS LINE
+        ]
+        read_only_fields = ['hours_of_operation_id', 'same_entry_id']  # ⬅️ ADD same_entry_id here too
 
 class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
     class Meta:
