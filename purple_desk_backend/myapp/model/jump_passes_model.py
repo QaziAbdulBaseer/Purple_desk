@@ -1,5 +1,7 @@
 from django.db import models
 from myapp.model.locations_model import Location
+# from django.contrib.postgres.fields import ArrayField
+from django.db.models import JSONField
 
 
 class JumpPass(models.Model):
@@ -8,7 +10,8 @@ class JumpPass(models.Model):
     
     # Required fields
     jump_pass_priority = models.IntegerField()
-    schedule_with = models.CharField(max_length=255)
+    schedule_with = models.JSONField(default=list, null=True, blank=True)
+
     pass_name = models.CharField(max_length=255, blank=False, null=False)
     age_allowed = models.CharField(max_length=255)
     jump_time_allowed = models.CharField(max_length=255)
@@ -17,7 +20,8 @@ class JumpPass(models.Model):
     tax_included = models.BooleanField(
         help_text="Check if tax is included in the price (Yes/No or 1/0)."
     )
-    tax_percentage = models.CharField(max_length=50, blank=True, null=True)
+    # tax_percentage = models.CharField(max_length=50, blank=True, null=True)
+    can_custom_take_part_in_multiple = models.BooleanField(default=False)
     recommendation = models.TextField()
     
     # Optional fields

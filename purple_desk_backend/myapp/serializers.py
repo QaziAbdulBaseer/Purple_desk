@@ -96,8 +96,9 @@ class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
             'price',
             'guest_of_honour_included_in_total_jumpers',
             'tax_included',
-            'tax_percentage',
+            # 'tax_percentage',
             'each_additional_jump_hour_after_room_time',
+            'can_custom_take_part_in_multiple'
             'additional_instructions',
             'birthday_party_booking_lead_allowed_days',
             'birthday_party_reschedule_allowed_days',
@@ -211,7 +212,8 @@ class JumpPassSerializer(serializers.ModelSerializer):
             'jump_time_allowed',
             'price',
             'tax_included',
-            'tax_percentage',
+            # 'tax_percentage',
+            'can_custom_take_part_in_multiple',
             'recommendation',
             'comments',
             'created_at',
@@ -243,11 +245,22 @@ class JumpPassSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Tax percentage must be between 0 and 100")
         return value
         
+    # def validate_schedule_with(self, value):
+    #     """Validate that schedule_with is not empty"""
+    #     if not value or not value.strip():
+    #         raise serializers.ValidationError("Schedule with cannot be empty")
+    #     return value.strip()
+
     def validate_schedule_with(self, value):
-        """Validate that schedule_with is not empty"""
-        if not value or not value.strip():
-            raise serializers.ValidationError("Schedule with cannot be empty")
-        return value.strip()
+        """Validate that schedule_with is a non-empty list of strings"""
+        if not isinstance(value, list) or not value:
+            raise serializers.ValidationError("Schedule with must be a non-empty list.")
+        # Optionally check that every element is a non-empty string
+        for item in value:
+            if not isinstance(item, str) or not item.strip():
+                raise serializers.ValidationError("Each schedule type must be a non-empty string.")
+        return value
+
         
     def validate_age_allowed(self, value):
         """Validate that age_allowed is not empty"""
