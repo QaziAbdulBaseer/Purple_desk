@@ -5,6 +5,7 @@ from myapp.views import View_Locations
 from myapp.views import View_hours_of_operations
 from myapp.views import View_birthday_party_packages
 from myapp.views import View_jump_passes
+from myapp.views import View_Get_Prompt
 
 urlpatterns = [
     # path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
@@ -46,6 +47,8 @@ urlpatterns = [
     path("jump-passes/<int:location_id>/<int:pk>/update/", View_jump_passes.update_jump_pass, name="update_jump_pass"), # Update
     path("jump-passes/<int:location_id>/<int:pk>/delete/", View_jump_passes.delete_jump_pass, name="delete_jump_pass"), # Delete
 
+    ## Get Prompt
+    path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get
 
 
 ]

@@ -1,0 +1,86 @@
+=== CURRENT INFORMATION ===
+Today Date: 2025-10-24 (24 October, 2025)
+Current Time (Today): 04:45 AM
+Today Day Name: Friday
+7-Day Schedule Range: Friday 24 October, 2025 to Thursday October 30, 2025
+
+=== NEXT 7 DAYS SCHEDULE ===
+
+Friday (October 24,2025):
+  Open Jump:
+    4 pm to 8 pm - all ages
+  Glow:
+    8 pm to 10 pm - 3 years old and above
+
+Saturday (October 25,2025):
+  Open Jump:
+    10 am to 8 pm - all ages
+  Glow:
+    8 pm to 10 pm - 3 years old and above
+  Little Leaper:
+    8 am to 10 am - 6 years old and below
+
+Sunday (October 26,2025):
+  Open Jump:
+    11 am to 7 pm - all ages
+  Little Leaper:
+    9 am to 11 am - 6 years old and below
+
+Monday (October 27,2025):
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Tuesday (October 28,2025):
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Wednesday (October 29,2025):
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Thursday (October 30,2025):
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+
+=== REGULAR WEEKLY SCHEDULE ===
+
+Monday:
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Tuesday:
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Wednesday:
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Thursday:
+  Open Jump:
+    4 pm to 8 pm - all ages
+
+Friday:
+  Open Jump:
+    4 pm to 8 pm - all ages
+  Glow:
+    8 pm to 10 pm - 3 years old and above
+
+Saturday:
+  Open Jump:
+    10 am to 8 pm - all ages
+  Glow:
+    8 pm to 10 pm - 3 years old and above
+  Little Leaper:
+    8 am to 10 am - 6 years old and below
+
+Sunday:
+  Open Jump:
+    11 am to 7 pm - all ages
+  Little Leaper:
+    9 am to 11 am - 6 years old and below
+    ### End of Birthday Party Packages Data
+
+
+
