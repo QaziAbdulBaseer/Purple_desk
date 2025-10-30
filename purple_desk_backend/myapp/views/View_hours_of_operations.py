@@ -169,7 +169,7 @@ async def update_hours_of_operation(request, location_id, pk):
         
         restricted_types = ["special", "early_closing", "late_closing", "early_opening", "late_opening"]
         if data.get("hours_type") in restricted_types:
-            if not data.get("reason") or not data.get("starting_date"):
+            if not data.get("starting_date"):
                 return JsonResponse(
                     {"error": "For special/closing/opening hours, 'reason' and 'starting_date' are required."},
                     status=status.HTTP_400_BAD_REQUEST

@@ -3,14 +3,4 @@
 
 2) i have to write a code that will deleate of hide that past date data
 
-
-3) the edit is not working in some hours of operations
-
-
-
-4) just change the text Tax Included *(In price)  (jump pass)
-
-
-
-
   
