@@ -29,6 +29,8 @@ class JumpPass(models.Model):
     starting_day_name = models.CharField(max_length=50, blank=True, null=True)
     ending_day_name = models.CharField(max_length=50, blank=True, null=True)
     comments = models.TextField(blank=True, null=True)
+
+    roller_booking_id = models.CharField(max_length=255, blank=True, null=True , unique=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

@@ -3,4 +3,8 @@
 
 2) i have to write a code that will deleate of hide that past date data
 
-  
+
+3) I have to update the Roller API permation. just super admin able to (perforem CRUD operation on it)
+
+
+

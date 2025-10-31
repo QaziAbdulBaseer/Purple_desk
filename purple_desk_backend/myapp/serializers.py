@@ -216,6 +216,7 @@ class JumpPassSerializer(serializers.ModelSerializer):
             'can_custom_take_part_in_multiple',
             'recommendation',
             'comments',
+            'roller_booking_id',
             'created_at',
             'updated_at'
         ]

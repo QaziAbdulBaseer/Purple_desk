@@ -394,7 +394,26 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
                     
             age = row['age_allowed']
             jump_time = row['jump_time_allowed']
-            price = str(row['price']).strip().replace('.', ' point ')
+            # price = str(row['price']).strip().replace('.', ' point ')
+            price = str(row['price']).strip()
+            print("This is the test 0 = ", price)
+
+            # Handle the decimal point replacement
+            if '.' in price:
+                # Split into whole and decimal parts
+                parts = price.split('.')
+                whole_part = parts[0]
+                decimal_part = parts[1] if len(parts) > 1 else ''
+                
+                # If decimal part is just '0' or empty, use only whole part
+                if decimal_part in ('0', '00', ''):
+                    price = whole_part
+                else:
+                    # For actual decimals, use ' point '
+                    price = whole_part + ' point ' + decimal_part
+            
+            print("This is the test 1 = " , price)
+            # Now use this formatted price
             introductory_pitch = row["pitch_introduction"]
             priority = row["pitch_priority"]
             availability = row["availability_days"]
@@ -462,6 +481,7 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
     # print("This is jump passes information:", jump_passes_information['jump_passes_info'])
 
     return jump_passes_information
+
 
 
 async def handle_jump_passes(jump_passes_info, location):
