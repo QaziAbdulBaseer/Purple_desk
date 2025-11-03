@@ -57,7 +57,7 @@ async def get_hours_data_from_db(location_id: int) -> pd.DataFrame:
         df = pd.DataFrame(hours_data)
         
         # Print for debugging
-        print("Raw data from database (with AM/PM times):")
+        # print("Raw data from database (with AM/PM times):")
         for i, row in df.iterrows():
             print(f"{i:2} {row['hours_type']:12} {str(row['schedule_with']):15} {str(row['ages_allowed']):15} {str(row['starting_date']):15} {str(row['ending_date']):15} {str(row['starting_day_name']):15} {str(row['ending_day_name']):15} {str(row['start_time']):10} {str(row['end_time']):10} {str(row['reason']):10}")
         
@@ -264,212 +264,6 @@ def minutes_to_time(minutes: int) -> str:
 
 
 
-# async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, current_time: str = None) -> Dict:
-#     """Get all events and their status for a specific date - async version"""
-#     def _process_events():
-#         target_date_str = target_date.strftime("%B %d,%Y")
-#         day_name = target_date.strftime("%A").lower()
-        
-#         # Convert target_date to naive datetime for comparison
-#         if hasattr(target_date, 'tzinfo') and target_date.tzinfo is not None:
-#             target_date_naive = target_date.replace(tzinfo=None)
-#         else:
-#             target_date_naive = target_date
-        
-#         result = {
-#             "status": "open",
-#             "events": {},
-#             "notes": []
-#         }
-        
-#         # DEBUG: Print closed entries for troubleshooting
-#         print(f"Processing date: {target_date_naive.date()}")
-#         closed_entries = df[df["hours_type"] == "closed"]
-#         print(f"Found {len(closed_entries)} closed entries")
-        
-#         # Check if location is closed - FIXED LOGIC
-#         for _, row in closed_entries.iterrows():
-#             start_date = parse_date(row["starting_date"])
-#             end_date = parse_date(row["ending_date"])
-            
-#             print(f"Closed entry: start={start_date}, end={end_date}, target={target_date_naive.date()}")
-            
-#             if start_date and end_date:
-#                 # For date range closure
-#                 if start_date.date() <= target_date_naive.date() <= end_date.date():
-#                     result["status"] = "closed"
-#                     reason = row.get("reason", "Operational reasons") or "Operational reasons"
-#                     result["notes"].append(f"Location closed from {start_date.strftime('%B %d,%Y')} to {end_date.strftime('%B %d,%Y')} - {reason}")
-#                     result["events"] = {}
-#                     print(f"CLOSED: Date in range {start_date.date()} to {end_date.date()}")
-#                     return result
-#             elif start_date and start_date.date() == target_date_naive.date():
-#                 # For single day closure
-#                 result["status"] = "closed"
-#                 reason = row.get("reason", "Operational reasons") or "Operational reasons"
-#                 result["notes"].append(f"Location closed on {target_date_str} - {reason}")
-#                 result["events"] = {}
-#                 print(f"CLOSED: Single day closure on {start_date.date()}")
-#                 return result
-        
-#         # Check for early closing
-#         early_closing = df[df["hours_type"] == "early_closing"]
-#         early_close_time = None
-#         early_close_reason = None
-#         for _, row in early_closing.iterrows():
-#             start_date = parse_date(row["starting_date"])
-#             if start_date and start_date.date() == target_date_naive.date():
-#                 early_close_time = row["end_time"]
-#                 early_close_reason = row.get("reason", "Operational reasons") or "Operational reasons"
-#                 result["notes"].append(f"Early closing at {clean_time(early_close_time)} - {early_close_reason}")
-#                 break
-        
-#         # Check for late opening
-#         late_opening = df[df["hours_type"] == "late_opening"]
-#         late_open_time = None
-#         late_open_reason = None
-#         for _, row in late_opening.iterrows():
-#             start_date = parse_date(row["starting_date"])
-#             if start_date and start_date.date() == target_date_naive.date():
-#                 late_open_time = row["start_time"]
-#                 late_open_reason = row.get("reason", "Operational reasons") or "Operational reasons"
-#                 result["notes"].append(f"Late opening at {clean_time(late_open_time)} - {late_open_reason}")
-#                 break
-        
-#         # Get jump types - only if location is open
-#         if result["status"] == "open":
-#             jump_types = df["jump_type"].unique()
-#             jump_types = [jt for jt in jump_types if jt and str(jt) != "" and str(jt) != "nan" and not pd.isna(jt) and str(jt) != "closed"]
-            
-#             print(f"Processing jump types for {target_date_naive.date()}: {jump_types}")
-            
-#             for jump_type in jump_types:
-#                 jump_df = df[df["jump_type"] == jump_type]
-#                 print(f"Processing jump_type: {jump_type}, found {len(jump_df)} entries")
-#                 event_schedule = get_event_schedule_for_date(jump_df, target_date_naive, day_name, early_close_time, late_open_time)
-#                 if event_schedule:
-#                     result["events"][str(jump_type).replace('_', ' ').title()] = event_schedule
-#                     print(f"Added event schedule for {jump_type}: {event_schedule}")
-        
-#         return result
-    
-#     # Run in executor to avoid blocking
-#     loop = asyncio.get_event_loop()
-#     with ThreadPoolExecutor() as executor:
-#         return await loop.run_in_executor(executor, _process_events)
-
-# def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date: datetime, day_name: str, 
-#                                             early_close_time: str = None, late_open_time: str = None,
-#                                             all_special_hours: Dict = None) -> List[Dict]:
-#     """Get schedule for a specific jump type on a specific date with overlap detection"""
-#     schedule = []
-#     target_date_str = target_date.strftime("%B %d,%Y")
-    
-#     # DEBUG: Print special hours for troubleshooting
-#     special_hours = jump_df[jump_df["hours_type"] == "special"]
-#     print(f"Found {len(special_hours)} special hours for {target_date.date()}")
-    
-#     # Check for special hours first
-#     special_found = False
-    
-#     for _, row in special_hours.iterrows():
-#         start_date = parse_date(row["starting_date"])
-#         end_date = parse_date(row["ending_date"])
-        
-#         print(f"Special hour: start={start_date}, end={end_date}, target={target_date.date()}, jump_type={row['jump_type']}")
-        
-#         # Check if target date falls within special hours range
-#         if start_date and end_date:
-#             if start_date.date() <= target_date.date() <= end_date.date():
-#                 time_range = format_time_range(row["start_time"], row["end_time"])
-#                 if time_range:
-#                     schedule.append({
-#                         "type": "special",
-#                         "time": time_range,
-#                         "ages": row["ages_allowed"] or ""
-#                     })
-#                     special_found = True
-#                     print(f"SPECIAL HOURS ADDED (range): {time_range} for {row['jump_type']}")
-#         elif start_date and start_date.date() == target_date.date():
-#             time_range = format_time_range(row["start_time"], row["end_time"])
-#             if time_range:
-#                 schedule.append({
-#                     "type": "special",
-#                     "time": time_range,
-#                     "ages": row["ages_allowed"] or ""
-#                 })
-#                 special_found = True
-#                 print(f"SPECIAL HOURS ADDED (single day): {time_range} for {row['jump_type']}")
-    
-#     # If no special hours, get regular hours with overlap adjustment
-#     if not special_found:
-#         regular_hours = jump_df[jump_df["hours_type"] == "regular"]
-#         print(f"No special hours found, checking {len(regular_hours)} regular hours")
-        
-#         for _, row in regular_hours.iterrows():
-#             start_day = str(row["starting_day_name"]).lower() if row["starting_day_name"] and str(row["starting_day_name"]) != "nan" and not pd.isna(row["starting_day_name"]) else ""
-#             end_day = str(row["ending_day_name"]).lower() if row["ending_day_name"] and str(row["ending_day_name"]) != "nan" and not pd.isna(row["ending_day_name"]) else ""
-            
-#             # Check if current day falls in the range
-#             day_in_range = is_day_in_range(day_name, start_day, end_day)
-            
-#             if day_in_range:
-#                 start_time = row["start_time"]
-#                 end_time = row["end_time"]
-                
-#                 # Convert times to minutes for easier comparison
-#                 start_minutes = time_to_minutes(start_time)
-#                 end_minutes = time_to_minutes(end_time)
-                
-#                 # Check for overlaps with special hours from other jump types
-#                 if all_special_hours:
-#                     for other_jump_type, special_sessions in all_special_hours.items():
-#                         for special_session in special_sessions:
-#                             special_start = special_session["start_minutes"]
-#                             special_end = special_session["end_minutes"]
-                            
-#                             # Check if there's an overlap
-#                             if not (end_minutes <= special_start or start_minutes >= special_end):
-#                                 # There is an overlap, adjust the regular hours
-#                                 print(f"Overlap detected: {row['jump_type']} regular ({start_time}-{end_time}) overlaps with {other_jump_type} special ({special_session['start_time']}-{special_session['end_time']})")
-                                
-#                                 # Adjust regular end time to special start time if regular starts before special
-#                                 if start_minutes < special_start and end_minutes > special_start:
-#                                     end_minutes = special_start
-#                                     end_time = minutes_to_time(end_minutes)
-#                                     print(f"Adjusted {row['jump_type']} end time to {end_time}")
-                
-#                 # Apply early closing
-#                 if early_close_time:
-#                     early_close_minutes = time_to_minutes(early_close_time)
-                    
-#                     if start_minutes < early_close_minutes:
-#                         end_minutes = min(end_minutes, early_close_minutes)
-#                         end_time = minutes_to_time(end_minutes)
-#                     else:
-#                         continue
-                
-#                 # Apply late opening
-#                 if late_open_time:
-#                     late_open_minutes = time_to_minutes(late_open_time)
-                    
-#                     if end_minutes > late_open_minutes:  # Only adjust if we're opening after the late opening time
-#                         start_minutes = max(start_minutes, late_open_minutes)
-#                         start_time = minutes_to_time(start_minutes)
-                
-#                 # Only add event if it still has valid time range
-#                 if start_minutes < end_minutes:
-#                     time_range = format_time_range(start_time, end_time)
-#                     if time_range:
-#                         schedule.append({
-#                             "type": "regular",
-#                             "time": time_range,
-#                             "ages": row["ages_allowed"] or ""
-#                         })
-#                         print(f"REGULAR HOURS ADDED: {time_range} for {row['jump_type']}")
-    
-#     return schedule
-
 def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date: datetime, day_name: str, 
                                             early_close_time: str = None, late_open_time: str = None,
                                             all_special_hours: Dict = None) -> List[Dict]:
@@ -479,7 +273,7 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
     
     # DEBUG: Print special hours for troubleshooting
     special_hours = jump_df[jump_df["hours_type"] == "special"]
-    print(f"Found {len(special_hours)} special hours for {target_date.date()}")
+    # print(f"Found {len(special_hours)} special hours for {target_date.date()}")
     
     # Check for special hours first
     special_found = False
@@ -488,7 +282,7 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
         start_date = parse_date(row["starting_date"])
         end_date = parse_date(row["ending_date"])
         
-        print(f"Special hour: start={start_date}, end={end_date}, target={target_date.date()}, jump_type={row['jump_type']}")
+        # print(f"Special hour: start={start_date}, end={end_date}, target={target_date.date()}, jump_type={row['jump_type']}")
         
         # Check if target date falls within special hours range
         if start_date and end_date:
@@ -501,7 +295,7 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
                         "ages": row["ages_allowed"] or ""
                     })
                     special_found = True
-                    print(f"SPECIAL HOURS ADDED (range): {time_range} for {row['jump_type']}")
+                    # print(f"SPECIAL HOURS ADDED (range): {time_range} for {row['jump_type']}")
         elif start_date and start_date.date() == target_date.date():
             time_range = format_time_range(row["start_time"], row["end_time"])
             if time_range:
@@ -511,12 +305,12 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
                     "ages": row["ages_allowed"] or ""
                 })
                 special_found = True
-                print(f"SPECIAL HOURS ADDED (single day): {time_range} for {row['jump_type']}")
+                # print(f"SPECIAL HOURS ADDED (single day): {time_range} for {row['jump_type']}")
     
     # If no special hours for this jump type, get regular hours with overlap adjustment
     if not special_found:
         regular_hours = jump_df[jump_df["hours_type"] == "regular"]
-        print(f"No special hours found for this jump type, checking {len(regular_hours)} regular hours")
+        # print(f"No special hours found for this jump type, checking {len(regular_hours)} regular hours")
         
         for _, row in regular_hours.iterrows():
             start_day = str(row["starting_day_name"]).lower() if row["starting_day_name"] and str(row["starting_day_name"]) != "nan" and not pd.isna(row["starting_day_name"]) else ""
@@ -544,7 +338,7 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
                             # Check if regular hours are completely within special hours
                             if start_minutes >= special_start and end_minutes <= special_end:
                                 completely_covered = True
-                                print(f"Regular hours {row['jump_type']} ({start_time}-{end_time}) completely covered by {other_jump_type} special hours ({special_session['start_time']}-{special_session['end_time']}) - HIDING")
+                                # print(f"Regular hours {row['jump_type']} ({start_time}-{end_time}) completely covered by {other_jump_type} special hours ({special_session['start_time']}-{special_session['end_time']}) - HIDING")
                                 break
                         if completely_covered:
                             break
@@ -563,19 +357,19 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
                             # Check if there's a partial overlap
                             if not (end_minutes <= special_start or start_minutes >= special_end):
                                 # There is an overlap, adjust the regular hours
-                                print(f"Partial overlap: {row['jump_type']} regular ({start_time}-{end_time}) overlaps with {other_jump_type} special ({special_session['start_time']}-{special_session['end_time']})")
+                                # print(f"Partial overlap: {row['jump_type']} regular ({start_time}-{end_time}) overlaps with {other_jump_type} special ({special_session['start_time']}-{special_session['end_time']})")
                                 
                                 # Adjust regular end time to special start time if regular starts before special
                                 if start_minutes < special_start and end_minutes > special_start:
                                     end_minutes = special_start
                                     end_time = minutes_to_time(end_minutes)
-                                    print(f"Adjusted {row['jump_type']} end time to {end_time}")
+                                    # print(f"Adjusted {row['jump_type']} end time to {end_time}")
                                 
                                 # Adjust regular start time to special end time if regular ends after special
                                 elif start_minutes < special_end and end_minutes > special_end:
                                     start_minutes = special_end
                                     start_time = minutes_to_time(start_minutes)
-                                    print(f"Adjusted {row['jump_type']} start time to {start_time}")
+                                    # print(f"Adjusted {row['jump_type']} start time to {start_time}")
                 
                 # Apply early closing
                 if early_close_time:
@@ -604,9 +398,12 @@ def get_event_schedule_for_date_with_overlaps(jump_df: pd.DataFrame, target_date
                             "time": time_range,
                             "ages": row["ages_allowed"] or ""
                         })
-                        print(f"REGULAR HOURS ADDED: {time_range} for {row['jump_type']}")
+                        # print(f"REGULAR HOURS ADDED: {time_range} for {row['jump_type']}")
     
     return schedule
+
+
+
 async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, current_time: str = None) -> Dict:
     """Get all events and their status for a specific date - async version"""
     def _process_events():
@@ -626,16 +423,16 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
         }
         
         # DEBUG: Print closed entries for troubleshooting
-        print(f"Processing date: {target_date_naive.date()}")
+        # print(f"Processing date: {target_date_naive.date()}")
         closed_entries = df[df["hours_type"] == "closed"]
-        print(f"Found {len(closed_entries)} closed entries")
+        # print(f"Found {len(closed_entries)} closed entries")
         
         # Check if location is closed - FIXED LOGIC
         for _, row in closed_entries.iterrows():
             start_date = parse_date(row["starting_date"])
             end_date = parse_date(row["ending_date"])
             
-            print(f"Closed entry: start={start_date}, end={end_date}, target={target_date_naive.date()}")
+            # print(f"Closed entry: start={start_date}, end={end_date}, target={target_date_naive.date()}")
             
             if start_date and end_date:
                 # For date range closure
@@ -644,7 +441,7 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
                     reason = row.get("reason", "Operational reasons") or "Operational reasons"
                     result["notes"].append(f"Location closed from {start_date.strftime('%B %d,%Y')} to {end_date.strftime('%B %d,%Y')} - {reason}")
                     result["events"] = {}
-                    print(f"CLOSED: Date in range {start_date.date()} to {end_date.date()}")
+                    # print(f"CLOSED: Date in range {start_date.date()} to {end_date.date()}")
                     return result
             elif start_date and start_date.date() == target_date_naive.date():
                 # For single day closure
@@ -652,7 +449,7 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
                 reason = row.get("reason", "Operational reasons") or "Operational reasons"
                 result["notes"].append(f"Location closed on {target_date_str} - {reason}")
                 result["events"] = {}
-                print(f"CLOSED: Single day closure on {start_date.date()}")
+                # print(f"CLOSED: Single day closure on {start_date.date()}")
                 return result
         
         # Check for early closing
@@ -684,7 +481,7 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
             jump_types = df["jump_type"].unique()
             jump_types = [jt for jt in jump_types if jt and str(jt) != "" and str(jt) != "nan" and not pd.isna(jt) and str(jt) != "closed"]
             
-            print(f"Processing jump types for {target_date_naive.date()}: {jump_types}")
+            # print(f"Processing jump types for {target_date_naive.date()}: {jump_types}")
             
             # First pass: Collect all special hours to check for overlaps
             all_special_hours = {}
@@ -715,12 +512,12 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
                             "end_minutes": time_to_minutes(row["end_time"])
                         })
             
-            print(f"Found special hours: {all_special_hours}")
+            # print(f"Found special hours: {all_special_hours}")
             
             # Second pass: Process each jump type with overlap detection
             for jump_type in jump_types:
                 jump_df = df[df["jump_type"] == jump_type]
-                print(f"Processing jump_type: {jump_type}, found {len(jump_df)} entries")
+                # print(f"Processing jump_type: {jump_type}, found {len(jump_df)} entries")
                 
                 # Get event schedule with special hours information for overlap detection
                 event_schedule = get_event_schedule_for_date_with_overlaps(
@@ -729,7 +526,7 @@ async def get_events_for_date_async(df: pd.DataFrame, target_date: datetime, cur
                 
                 if event_schedule:
                     result["events"][str(jump_type).replace('_', ' ').title()] = event_schedule
-                    print(f"Added event schedule for {jump_type}: {event_schedule}")
+                    # print(f"Added event schedule for {jump_type}: {event_schedule}")
         
         return result
     
@@ -746,7 +543,7 @@ def get_event_schedule_for_date(jump_df: pd.DataFrame, target_date: datetime, da
     
     # DEBUG: Print special hours for troubleshooting
     special_hours = jump_df[jump_df["hours_type"] == "special"]
-    print(f"Found {len(special_hours)} special hours for {target_date.date()}")
+    # print(f"Found {len(special_hours)} special hours for {target_date.date()}")
     
     # Check for special hours first
     special_found = False
@@ -755,7 +552,7 @@ def get_event_schedule_for_date(jump_df: pd.DataFrame, target_date: datetime, da
         start_date = parse_date(row["starting_date"])
         end_date = parse_date(row["ending_date"])
         
-        print(f"Special hour: start={start_date}, end={end_date}, target={target_date.date()}, jump_type={row['jump_type']}")
+        # print(f"Special hour: start={start_date}, end={end_date}, target={target_date.date()}, jump_type={row['jump_type']}")
         
         # Check if target date falls within special hours range
         if start_date and end_date:
@@ -768,7 +565,7 @@ def get_event_schedule_for_date(jump_df: pd.DataFrame, target_date: datetime, da
                         "ages": row["ages_allowed"] or ""
                     })
                     special_found = True
-                    print(f"SPECIAL HOURS ADDED (range): {time_range} for {row['jump_type']}")
+                    # print(f"SPECIAL HOURS ADDED (range): {time_range} for {row['jump_type']}")
         elif start_date and start_date.date() == target_date.date():
             time_range = format_time_range(row["start_time"], row["end_time"])
             if time_range:
@@ -778,12 +575,12 @@ def get_event_schedule_for_date(jump_df: pd.DataFrame, target_date: datetime, da
                     "ages": row["ages_allowed"] or ""
                 })
                 special_found = True
-                print(f"SPECIAL HOURS ADDED (single day): {time_range} for {row['jump_type']}")
+                # print(f"SPECIAL HOURS ADDED (single day): {time_range} for {row['jump_type']}")
     
     # If no special hours, get regular hours
     if not special_found:
         regular_hours = jump_df[jump_df["hours_type"] == "regular"]
-        print(f"No special hours found, checking {len(regular_hours)} regular hours")
+        # print(f"No special hours found, checking {len(regular_hours)} regular hours")
         
         for _, row in regular_hours.iterrows():
             start_day = str(row["starting_day_name"]).lower() if row["starting_day_name"] and str(row["starting_day_name"]) != "nan" and not pd.isna(row["starting_day_name"]) else ""
@@ -827,7 +624,7 @@ def get_event_schedule_for_date(jump_df: pd.DataFrame, target_date: datetime, da
                             "time": time_range,
                             "ages": row["ages_allowed"] or ""
                         })
-                        print(f"REGULAR HOURS ADDED: {time_range} for {row['jump_type']}")
+                        # print(f"REGULAR HOURS ADDED: {time_range} for {row['jump_type']}")
     
     return schedule
 
@@ -860,13 +657,13 @@ def is_day_in_range(target_day: str, start_day: str, end_day: str) -> bool:
 
 async def get_future_special_events_async(df: pd.DataFrame, start_date: datetime) -> List[Dict]:
     """Get future special hours events (excluding those in the 7-day range) - async version"""
-    print("get_future_special_events_async called" , df)
+    # print("get_future_special_events_async called" , df)
     def _process_special_events():
         special_events = []
         special_hours = df[df["hours_type"] == "special"]
-        print("get_future_special_events_async called")
-        print("This is the special hours df:", special_hours)
-        print("get_future_special_events_async called after")
+        # print("get_future_special_events_async called")
+        # print("This is the special hours df:", special_hours)
+        # print("get_future_special_events_async called after")
 
         
         # Convert start_date to naive for comparison
@@ -905,13 +702,13 @@ async def get_future_special_events_async(df: pd.DataFrame, start_date: datetime
         return await loop.run_in_executor(executor, _process_special_events)
 
 async def get_future_closures_async(df: pd.DataFrame, start_date: datetime) -> List[Dict]:
-    print("get_future_closures_async called" , df)
-    print("get_future_closures_async called" , start_date)
+    # print("get_future_closures_async called" , df)
+    # print("get_future_closures_async called" , start_date)
     """Get future closure dates (excluding those in the 7-day range) - async version"""
     def _process_closures():
         closures = []
         closed_entries = df[df["hours_type"] == "closed"]
-        print("Closed entries:", closed_entries)
+        # print("Closed entries:", closed_entries)
         
         # Convert start_date to naive for comparison
         if hasattr(start_date, 'tzinfo') and start_date.tzinfo is not None:
@@ -935,7 +732,7 @@ async def get_future_closures_async(df: pd.DataFrame, start_date: datetime) -> L
                         closure_info["end_date"] = end_date_obj.strftime("%A, %B %d, %Y")
                     
                     closures.append(closure_info)
-                    print("Added closure:", closure_info)
+                    # print("Added closure:", closure_info)
         
         return sorted(closures, key=lambda x: parse_date(x["start_date"].split(", ", 1)[1] if x["start_date"] else datetime.min))
     

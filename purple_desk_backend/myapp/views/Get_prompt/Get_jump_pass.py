@@ -1,11 +1,4 @@
 
-# Pitch
-
-
-# roller id
-
-
-
 # Get_prompt/Get_jump_pass.py
 
 import pandas as pd
@@ -366,7 +359,7 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
         summary.append(scheduling_instruction)
         summary.append(f"Passes information that schedule with {section_title}:")
         summary.append("")
-        
+
         if sched not in jump_passes_available_for_jumping:
             jump_passes_available_for_jumping.append(sched)
         
@@ -396,7 +389,6 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
             jump_time = row['jump_time_allowed']
             # price = str(row['price']).strip().replace('.', ' point ')
             price = str(row['price']).strip()
-            print("This is the test 0 = ", price)
 
             # Handle the decimal point replacement
             if '.' in price:
@@ -412,7 +404,6 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
                     # For actual decimals, use ' point '
                     price = whole_part + ' point ' + decimal_part
             
-            print("This is the test 1 = " , price)
             # Now use this formatted price
             introductory_pitch = row["pitch_introduction"]
             priority = row["pitch_priority"]

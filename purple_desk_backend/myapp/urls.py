@@ -6,6 +6,7 @@ from myapp.views import View_hours_of_operations
 from myapp.views import View_birthday_party_packages
 from myapp.views import View_jump_passes
 from myapp.views import View_Get_Prompt
+from myapp.views import View_membership
 
 urlpatterns = [
     # path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
@@ -46,6 +47,16 @@ urlpatterns = [
     path("jump-passes/<int:location_id>/create/", View_jump_passes.create_jump_pass, name="create_jump_pass"), # create
     path("jump-passes/<int:location_id>/<int:pk>/update/", View_jump_passes.update_jump_pass, name="update_jump_pass"), # Update
     path("jump-passes/<int:location_id>/<int:pk>/delete/", View_jump_passes.delete_jump_pass, name="delete_jump_pass"), # Delete
+
+
+
+    ## memberships end points
+    path('locations/<int:location_id>/memberships/', View_membership.get_memberships, name='get_memberships'), # GET all memberships for a location
+    path('locations/<int:location_id>/memberships/create/', View_membership.create_membership, name='create_membership'), # POST create membership
+    path('locations/<int:location_id>/memberships/<int:pk>/', View_membership.get_membership, name='get_membership'), # GET one membership
+    path('locations/<int:location_id>/memberships/<int:pk>/update/', View_membership.update_membership, name='update_membership'), # PUT update membership
+    path('locations/<int:location_id>/memberships/<int:pk>/delete/', View_membership.delete_membership, name='delete_membership'), # DELETE membership
+
 
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get

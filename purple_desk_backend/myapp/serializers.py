@@ -11,6 +11,8 @@ from rest_framework import serializers
 from myapp.model.jump_passes_model import JumpPass
 
 
+from myapp.model.membership_model import Membership
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -307,3 +309,36 @@ class JumpPassSerializer(serializers.ModelSerializer):
                 })
         
         return data
+
+
+
+
+
+
+
+
+
+
+
+
+class MembershipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Membership
+        fields = [
+            'membership_id',
+            'location',
+            'title',
+            'schedule_with',
+            'pitch_priority',
+            'pitch_introduction',
+            'activity_time',
+            'features',
+            'valid_until',
+            'party_discount',
+            'price',
+            'parent_addon_price',
+            'subscription',
+            'tax_included',
+            'created_at',
+            'updated_at'
+        ]
