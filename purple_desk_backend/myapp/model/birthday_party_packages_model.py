@@ -28,6 +28,7 @@ class BirthdayPartyPackage(models.Model):
     
     # Optional fields
     birthday_party_pitch = models.TextField(blank=True, null=True)
+    Is_additional_jumpers_allowed = models.BooleanField(default=True)
     each_additional_jump_hour_after_room_time = models.CharField(max_length=255, blank=True, null=True)
     additional_instructions = models.TextField(blank=True, null=True)
     birthday_party_discount_code = models.CharField(max_length=50, blank=True, null=True)

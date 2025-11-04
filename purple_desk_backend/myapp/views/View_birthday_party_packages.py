@@ -1,3 +1,8 @@
+
+
+
+
+
 import json
 from django.http import JsonResponse
 from rest_framework import status
@@ -58,6 +63,7 @@ async def get_birthday_party_packages(request, location_id):
             BirthdayPartyPackage.objects.filter(location_id=location_id)
         ))()
         serializer = BirthdayPartyPackageSerializer(packages, many=True)
+        # print("Serialized data:", serializer.data)
         return JsonResponse(serializer.data, safe=False, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -75,6 +81,8 @@ async def get_birthday_party_package(request, location_id, pk):
             birthday_party_packages_id=pk, location_id=location_id
         )
         serializer = BirthdayPartyPackageSerializer(package)
+        # print("Serialized data:", serializer.data)
+
         return JsonResponse(serializer.data, status=status.HTTP_200_OK)
     except BirthdayPartyPackage.DoesNotExist:
         return JsonResponse(
