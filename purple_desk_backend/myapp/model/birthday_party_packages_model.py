@@ -20,7 +20,7 @@ class BirthdayPartyPackage(models.Model):
     outside_food_drinks_fee = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     guest_of_honour_included_in_total_jumpers = models.BooleanField(default=False)
-    tax_included = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage (e.g., 10.00 for 10%)")
+    tax_included = models.BooleanField(default=True)
     birthday_party_booking_lead_allowed_days = models.IntegerField()
     birthday_party_reschedule_allowed_days = models.IntegerField()
     each_additional_jumper_price = models.DecimalField(max_digits=10, decimal_places=2)
