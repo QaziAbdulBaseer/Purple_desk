@@ -15,8 +15,12 @@
 
 7) python manage.py migrate   
 
-8) python manage.py createsuperuser   (admin ,sybrid@098)
+8) python manage.py createsuperuser   (admin ,sybrid@098)+
 
 9) python manage.py runserver
 
 10) uvicorn purple_desk.asgi:application --relo
+
+
+
+

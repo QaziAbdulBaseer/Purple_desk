@@ -7,8 +7,7 @@ from myapp.views import View_birthday_party_packages
 from myapp.views import View_jump_passes
 from myapp.views import View_Get_Prompt
 from myapp.views import View_membership
-from myapp.views import View_Balloon_packages
-from myapp.views import View_birthday_balloon_association
+
 urlpatterns = [
     # path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
     ## This is the Authorization Paths
@@ -57,27 +56,6 @@ urlpatterns = [
     path('locations/<int:location_id>/memberships/<int:pk>/', View_membership.get_membership, name='get_membership'), # GET one membership
     path('locations/<int:location_id>/memberships/<int:pk>/update/', View_membership.update_membership, name='update_membership'), # PUT update membership
     path('locations/<int:location_id>/memberships/<int:pk>/delete/', View_membership.delete_membership, name='delete_membership'), # DELETE membership
-
-    ## Party Balloon Packages endpoints
-    path('locations/<int:location_id>/party_balloon_packages/', View_Balloon_packages.get_party_balloon_packages, name='get_party_balloon_packages'),
-    path('locations/<int:location_id>/party_balloon_packages/create/', View_Balloon_packages.create_party_balloon_package, name='create_party_balloon_package'),
-    path('locations/<int:location_id>/party_balloon_packages/<int:pk>/', View_Balloon_packages.get_party_balloon_package, name='get_party_balloon_package'),
-    path('locations/<int:location_id>/party_balloon_packages/<int:pk>/update/', View_Balloon_packages.update_party_balloon_package, name='update_party_balloon_package'),
-    path('locations/<int:location_id>/party_balloon_packages/<int:pk>/delete/', View_Balloon_packages.delete_party_balloon_package, name='delete_party_balloon_package'),
-
-
-    # Birthday Balloon Association endpoints
-    path('locations/<int:location_id>/birthday_packages/<int:birthday_package_id>/available_balloon_packages/', View_birthday_balloon_association.get_available_balloon_packages_for_birthday_package, name='get_available_balloon_packages'),
-    path('locations/<int:location_id>/birthday_balloon_associations/', View_birthday_balloon_association.get_birthday_party_balloon_packages, name='get_birthday_balloon_associations'),
-    path('locations/<int:location_id>/birthday_balloon_associations/create/', View_birthday_balloon_association.create_birthday_party_balloon_package, name='create_birthday_balloon_association'),
-    path('locations/<int:location_id>/birthday_balloon_associations/<int:pk>/', View_birthday_balloon_association.get_birthday_party_balloon_package, name='get_birthday_balloon_association'),
-    path('locations/<int:location_id>/birthday_balloon_associations/<int:pk>/update/', View_birthday_balloon_association.update_birthday_party_balloon_package, name='update_birthday_balloon_association'),
-    path('locations/<int:location_id>/birthday_balloon_associations/<int:pk>/delete/', View_birthday_balloon_association.delete_birthday_party_balloon_package, name='delete_birthday_balloon_association'),
-
-    # Special endpoints for birthday package associations
-    path('locations/<int:location_id>/birthday_packages/<int:birthday_package_id>/balloon_packages/', View_birthday_balloon_association.get_birthday_party_balloon_packages_by_birthday_package, name='get_balloon_packages_by_birthday_package'),
-    path('locations/<int:location_id>/birthday_packages/<int:birthday_package_id>/available_balloon_packages/', View_birthday_balloon_association.get_available_balloon_packages_for_birthday_package, name='get_available_balloon_packages_for_birthday_package'),
-
 
 
     ## Get Prompt
