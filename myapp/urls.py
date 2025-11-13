@@ -1,3 +1,6 @@
+
+
+
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from myapp.views import View_Authorization
@@ -7,6 +10,9 @@ from myapp.views import View_birthday_party_packages
 from myapp.views import View_jump_passes
 from myapp.views import View_Get_Prompt
 from myapp.views import View_membership
+from myapp.views import View_balloon_party_packages
+from myapp.views import View_birthday_balloon_bridge
+
 
 urlpatterns = [
     # path("get_csrf/", View_Locations.get_csrf, name="get_csrf"),
@@ -57,6 +63,18 @@ urlpatterns = [
     path('locations/<int:location_id>/memberships/<int:pk>/update/', View_membership.update_membership, name='update_membership'), # PUT update membership
     path('locations/<int:location_id>/memberships/<int:pk>/delete/', View_membership.delete_membership, name='delete_membership'), # DELETE membership
 
+
+    # Balloon Party Packages URLs
+    path('balloon-packages/<int:location_id>/', View_balloon_party_packages.get_balloon_party_packages, name='get_balloon_party_packages'),
+    path('balloon-packages/<int:location_id>/create/', View_balloon_party_packages.create_balloon_party_package, name='create_balloon_party_package'),
+    path('balloon-packages/<int:location_id>/<int:pk>/', View_balloon_party_packages.get_balloon_party_package, name='get_balloon_party_package'),
+    path('balloon-packages/<int:location_id>/<int:pk>/update/', View_balloon_party_packages.update_balloon_party_package, name='update_balloon_party_package'),
+    path('balloon-packages/<int:location_id>/<int:pk>/delete/', View_balloon_party_packages.delete_balloon_party_package, name='delete_balloon_party_package'),
+    
+    # Birthday-Balloon Bridge URLs
+    path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/', View_birthday_balloon_bridge.get_birthday_package_balloons, name='get_birthday_package_balloons'),
+    path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/add/', View_birthday_balloon_bridge.add_balloon_to_birthday_package, name='add_balloon_to_birthday_package'),
+    path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/<int:balloon_package_id>/remove/', View_birthday_balloon_bridge.remove_balloon_from_birthday_package, name='remove_balloon_from_birthday_package'),
 
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get

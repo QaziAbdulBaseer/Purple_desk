@@ -1,6 +1,8 @@
+
+
 from django.db import models
 from myapp.model.locations_model import Location
-
+from myapp.model.balloon_party_packages_model import BalloonPartyPackage
 
 class BirthdayPartyPackage(models.Model):
     birthday_party_packages_id = models.AutoField(primary_key=True)
@@ -37,6 +39,13 @@ class BirthdayPartyPackage(models.Model):
     roller_additional_jumper_price_search_id = models.CharField(max_length=255, blank=True, null=True)
     roller_birthday_party_booking_id = models.CharField(max_length=255, blank=True, null=True)
     each_additional_jump_half_hour_after_room_time = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Many-to-many relationship with BalloonPartyPackage through bridge table
+    balloon_packages = models.ManyToManyField(
+        BalloonPartyPackage,
+        through='BirthdayBalloonBridge',
+        related_name='birthday_party_packages'
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
