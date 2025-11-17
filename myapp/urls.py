@@ -3,6 +3,7 @@
 
 from django.urls import path
 from myapp.views import View_FAQs
+from myapp.views import View_Policies
 from myapp.views import View_Locations
 from myapp.views import View_membership
 from myapp.views import View_Get_Prompt
@@ -87,6 +88,18 @@ urlpatterns = [
     path('locations/<int:location_id>/faqs/bulk-create/', View_FAQs.bulk_create_faqs, name='bulk_create_faqs'),
 
 
+
+    ## Policies End points
+    path('locations/<int:location_id>/policies/', View_Policies.get_policies, name='get_policies'),
+    path('locations/<int:location_id>/policies/create/', View_Policies.create_policy, name='create_policy'),
+    path('locations/<int:location_id>/policies/<int:pk>/', View_Policies.get_policy, name='get_policy'),
+    path('locations/<int:location_id>/policies/<int:pk>/update/', View_Policies.update_policy, name='update_policy'),
+    path('locations/<int:location_id>/policies/<int:pk>/delete/', View_Policies.delete_policy, name='delete_policy'),
+    path('locations/<int:location_id>/policies/bulk-create/', View_Policies.bulk_create_policies, name='bulk_create_policies'),
+    path('locations/<int:location_id>/policies/types/', View_Policies.get_policy_types, name='get_policy_types'),
+
+
+    
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get
 

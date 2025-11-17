@@ -3,6 +3,7 @@
 from .models import User
 from rest_framework import serializers
 from myapp.model.faqs_model import FAQ
+from myapp.model.policy_model import Policy
 from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
 from myapp.model.membership_model import Membership
@@ -395,3 +396,25 @@ class FAQSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = ['faq_id', 'created_at', 'updated_at']
+
+
+
+
+
+
+
+class PolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Policy
+        fields = [
+            'policy_id',
+            'location',
+            'policy_type',
+            'details',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['policy_id', 'created_at', 'updated_at']
+
+class PolicyBulkCreateSerializer(serializers.Serializer):
+    policies = PolicySerializer(many=True)
