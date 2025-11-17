@@ -2,6 +2,7 @@
 
 from .models import User
 from rest_framework import serializers
+from myapp.model.faqs_model import FAQ
 from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
 from myapp.model.membership_model import Membership
@@ -376,3 +377,21 @@ class BirthdayPackageWithBalloonsSerializer(serializers.ModelSerializer):
             'balloon_packages'
         ]
         read_only_fields = ['birthday_party_packages_id', 'created_at', 'updated_at']
+
+
+
+
+
+class FAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
+        fields = [
+            'faq_id',
+            'location',
+            'question_type',
+            'question',
+            'answer',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['faq_id', 'created_at', 'updated_at']

@@ -2,16 +2,17 @@
 
 
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from myapp.views import View_Authorization
+from myapp.views import View_FAQs
 from myapp.views import View_Locations
-from myapp.views import View_hours_of_operations
-from myapp.views import View_birthday_party_packages
-from myapp.views import View_jump_passes
-from myapp.views import View_Get_Prompt
 from myapp.views import View_membership
+from myapp.views import View_Get_Prompt
+from myapp.views import View_jump_passes
+from myapp.views import View_Authorization
+from myapp.views import View_hours_of_operations
 from myapp.views import View_balloon_party_packages
+from myapp.views import View_birthday_party_packages
 from myapp.views import View_birthday_balloon_bridge
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 urlpatterns = [
@@ -75,6 +76,16 @@ urlpatterns = [
     path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/', View_birthday_balloon_bridge.get_birthday_package_balloons, name='get_birthday_package_balloons'),
     path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/add/', View_birthday_balloon_bridge.add_balloon_to_birthday_package, name='add_balloon_to_birthday_package'),
     path('birthday-packages/<int:location_id>/<int:birthday_package_id>/balloons/<int:balloon_package_id>/remove/', View_birthday_balloon_bridge.remove_balloon_from_birthday_package, name='remove_balloon_from_birthday_package'),
+
+
+    ## FAQs End points
+    path('locations/<int:location_id>/faqs/', View_FAQs.get_faqs, name='get_faqs'),
+    path('locations/<int:location_id>/faqs/create/', View_FAQs.create_faq, name='create_faq'),
+    path('locations/<int:location_id>/faqs/<int:pk>/', View_FAQs.get_faq, name='get_faq'),
+    path('locations/<int:location_id>/faqs/<int:pk>/update/', View_FAQs.update_faq, name='update_faq'),
+    path('locations/<int:location_id>/faqs/<int:pk>/delete/', View_FAQs.delete_faq, name='delete_faq'),
+    path('locations/<int:location_id>/faqs/bulk-create/', View_FAQs.bulk_create_faqs, name='bulk_create_faqs'),
+
 
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get
