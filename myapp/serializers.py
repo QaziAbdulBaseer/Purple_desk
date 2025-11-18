@@ -6,11 +6,13 @@ from myapp.model.faqs_model import FAQ
 from myapp.model.policy_model import Policy
 from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
+from myapp.model.promotions_model import Promotion
 from myapp.model.membership_model import Membership
 from myapp.model.hours_of_operations_model import HoursOfOperation
 from myapp.model.balloon_party_packages_model import BalloonPartyPackage
 from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
 from myapp.model.birthday_balloon_bridge_model import BirthdayBalloonBridge
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -418,3 +420,89 @@ class PolicySerializer(serializers.ModelSerializer):
 
 class PolicyBulkCreateSerializer(serializers.Serializer):
     policies = PolicySerializer(many=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class PromotionSerializer(serializers.ModelSerializer):
+    is_active = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = Promotion
+        fields = [
+            'promotion_id',
+            'location',
+            'start_date',
+            'end_date',
+            'start_day',
+            'end_day',
+            'start_time',
+            'end_time',
+            'schedule_type',
+            'promotion_code',
+            'title',
+            'details',
+            'category',
+            'sub_category',
+            'eligibility_type',
+            'constraint_value',
+            'instructions',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['promotion_id', 'created_at', 'updated_at', 'is_active']
+    
+    def validate(self, data):
+        """Custom validation for promotion data"""
+        # Validate date range for one-time promotions
+        if data.get('schedule_type') == 'one_time':
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+            
+            if start_date and end_date and start_date > end_date:
+                raise serializers.ValidationError({
+                    "end_date": "End date must be after start date"
+                })
+        
+        # Validate time range
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        
+        if start_time and end_time and start_time >= end_time:
+            raise serializers.ValidationError({
+                "end_time": "End time must be after start time"
+            })
+        
+        # Validate constraint_value for specific eligibility types
+        eligibility_type = data.get('eligibility_type')
+        constraint_value = data.get('constraint_value')
+        
+        if eligibility_type in ['min_purchase', 'min_visit'] and not constraint_value:
+            raise serializers.ValidationError({
+                "constraint_value": f"Constraint value is required for {eligibility_type} eligibility type"
+            })
+        
+        return data
+    
+    def validate_promotion_code(self, value):
+        """Validate promotion code uniqueness"""
+        if self.instance:  # Update operation
+            if Promotion.objects.filter(promotion_code=value).exclude(pk=self.instance.pk).exists():
+                raise serializers.ValidationError("Promotion code already exists")
+        else:  # Create operation
+            if Promotion.objects.filter(promotion_code=value).exists():
+                raise serializers.ValidationError("Promotion code already exists")
+        return value

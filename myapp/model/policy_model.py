@@ -1,3 +1,4 @@
+
 from django.db import models
 from myapp.model.locations_model import Location
 

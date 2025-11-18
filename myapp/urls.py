@@ -5,6 +5,7 @@ from django.urls import path
 from myapp.views import View_FAQs
 from myapp.views import View_Policies
 from myapp.views import View_Locations
+from myapp.views import View_Promotions
 from myapp.views import View_membership
 from myapp.views import View_Get_Prompt
 from myapp.views import View_jump_passes
@@ -99,7 +100,17 @@ urlpatterns = [
     path('locations/<int:location_id>/policies/types/', View_Policies.get_policy_types, name='get_policy_types'),
 
 
-    
+    ## Promotions End points
+    path('locations/<int:location_id>/promotions/', View_Promotions.get_promotions, name='get_promotions'),
+    path('locations/<int:location_id>/promotions/active/', View_Promotions.get_active_promotions, name='get_active_promotions'),
+    path('locations/<int:location_id>/promotions/create/', View_Promotions.create_promotion, name='create_promotion'),
+    path('locations/<int:location_id>/promotions/<int:pk>/', View_Promotions.get_promotion, name='get_promotion'),
+    path('locations/<int:location_id>/promotions/<int:pk>/update/', View_Promotions.update_promotion, name='update_promotion'),
+    path('locations/<int:location_id>/promotions/<int:pk>/delete/', View_Promotions.delete_promotion, name='delete_promotion'),
+    path('locations/<int:location_id>/promotions/bulk-create/', View_Promotions.bulk_create_promotions, name='bulk_create_promotions'),
+    path('locations/<int:location_id>/promotions/categories/', View_Promotions.get_promotion_categories, name='get_promotion_categories'),
+
+
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get
 
