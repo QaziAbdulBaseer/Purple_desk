@@ -1,5 +1,54 @@
 
 
+
+
+
+
+# #         SELECT * FROM purple_desk_db.balloon_party_packages;
+
+# # desc purple_desk_db.balloon_party_packages;
+
+# # ALTER TABLE balloon_party_packages
+# # ADD COLUMN location_id INT NOT NULL;
+
+# # ALTER TABLE balloon_party_packages
+# # ADD CONSTRAINT fk_location
+# # FOREIGN KEY (location_id) REFERENCES locations(location_id);
+
+
+# # ALTER TABLE balloon_party_packages 
+# # ADD CONSTRAINT fk_location
+# # FOREIGN KEY (location_id) REFERENCES myapp_location(location_id);
+
+
+# # ALTER TABLE balloon_party_packages 
+# # ADD COLUMN location_id INT NOT NULL;
+
+
+
+# # ALTER TABLE balloon_party_packages
+# # ADD CONSTRAINT fk_location
+# # FOREIGN KEY (location_id) REFERENCES locations(location_id);
+
+
+# # ALTER TABLE balloon_party_packages
+# # MODIFY COLUMN location_id INT NOT NULL;
+
+
+# # ALTER TABLE balloon_party_packages
+# # DROP FOREIGN KEY fk_location;
+
+
+# # ALTER TABLE balloon_party_packages
+# # ADD CONSTRAINT fk_location
+# # FOREIGN KEY (location_id) REFERENCES myapp_location(location_id);
+
+
+
+
+
+
+
 from django.db import models
 from myapp.model.locations_model import Location
 
@@ -24,49 +73,3 @@ class BalloonPartyPackage(models.Model):
         
     def __str__(self):
         return f"{self.package_name} - {self.location.location_name}"
-
-
-
-
-
-
-
-
-#         SELECT * FROM purple_desk_db.balloon_party_packages;
-
-# desc purple_desk_db.balloon_party_packages;
-
-# ALTER TABLE balloon_party_packages
-# ADD COLUMN location_id INT NOT NULL;
-
-# ALTER TABLE balloon_party_packages
-# ADD CONSTRAINT fk_location
-# FOREIGN KEY (location_id) REFERENCES locations(location_id);
-
-
-# ALTER TABLE balloon_party_packages 
-# ADD CONSTRAINT fk_location
-# FOREIGN KEY (location_id) REFERENCES myapp_location(location_id);
-
-
-# ALTER TABLE balloon_party_packages 
-# ADD COLUMN location_id INT NOT NULL;
-
-
-
-# ALTER TABLE balloon_party_packages
-# ADD CONSTRAINT fk_location
-# FOREIGN KEY (location_id) REFERENCES locations(location_id);
-
-
-# ALTER TABLE balloon_party_packages
-# MODIFY COLUMN location_id INT NOT NULL;
-
-
-# ALTER TABLE balloon_party_packages
-# DROP FOREIGN KEY fk_location;
-
-
-# ALTER TABLE balloon_party_packages
-# ADD CONSTRAINT fk_location
-# FOREIGN KEY (location_id) REFERENCES myapp_location(location_id);

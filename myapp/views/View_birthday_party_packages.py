@@ -1,8 +1,5 @@
 
-
-
-
-
+        
 import json
 from django.http import JsonResponse
 from rest_framework import status
@@ -51,8 +48,6 @@ async def create_birthday_party_package(request, location_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# @permission_classes([IsAdminUser])
 async def get_birthday_party_packages(request, location_id):
     """Get all birthday party packages for a specific location"""
     try:
@@ -60,16 +55,13 @@ async def get_birthday_party_packages(request, location_id):
         if error_response:
             return error_response
         packages = await sync_to_async(lambda: list(
-            BirthdayPartyPackage.objects.filter(location_id=location_id)
+            BirthdayPartyPackage.objects.filter(location_id=location_id).select_related('balloon_party_package')
         ))()
         serializer = BirthdayPartyPackageSerializer(packages, many=True)
-        # print("Serialized data:", serializer.data)
         return JsonResponse(serializer.data, safe=False, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# @permission_classes([IsAdminUser])
 async def get_birthday_party_package(request, location_id, pk):
     """Get a specific birthday party package by its primary key and location"""
     try:
@@ -77,12 +69,10 @@ async def get_birthday_party_package(request, location_id, pk):
         if error_response:
             return error_response
 
-        package = await sync_to_async(BirthdayPartyPackage.objects.get)(
+        package = await sync_to_async(BirthdayPartyPackage.objects.select_related('balloon_party_package').get)(
             birthday_party_packages_id=pk, location_id=location_id
         )
         serializer = BirthdayPartyPackageSerializer(package)
-        # print("Serialized data:", serializer.data)
-
         return JsonResponse(serializer.data, status=status.HTTP_200_OK)
     except BirthdayPartyPackage.DoesNotExist:
         return JsonResponse(
@@ -92,8 +82,6 @@ async def get_birthday_party_package(request, location_id, pk):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# @permission_classes([IsAdminUser])
 async def update_birthday_party_package(request, location_id, pk):
     """Update a birthday party package"""
     try:
@@ -125,8 +113,6 @@ async def update_birthday_party_package(request, location_id, pk):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# @permission_classes([IsAdminUser])
 async def delete_birthday_party_package(request, location_id, pk):
     """Delete a birthday party package"""
     try:
@@ -149,7 +135,3 @@ async def delete_birthday_party_package(request, location_id, pk):
         )
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-        

@@ -1,5 +1,9 @@
 
 
+
+
+
+
 from django.db import models
 from myapp.model.locations_model import Location
 from myapp.model.balloon_party_packages_model import BalloonPartyPackage
@@ -22,12 +26,26 @@ class BirthdayPartyPackage(models.Model):
     outside_food_drinks_fee = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     guest_of_honour_included_in_total_jumpers = models.BooleanField(default=False)
-    # tax_included = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage (e.g., 10.00 for 10%)")
     tax_included = models.BooleanField(default=True)
     birthday_party_booking_lead_allowed_days = models.IntegerField()
     birthday_party_reschedule_allowed_days = models.IntegerField()
     each_additional_jumper_price = models.DecimalField(max_digits=10, decimal_places=2)
     is_available = models.BooleanField(default=True)
+    
+    # New fields for balloon package
+    balloon_package_included = models.BooleanField(default=False)
+    promotion_code = models.CharField(max_length=50, blank=True, null=True)
+    credit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    balloon_party_package = models.ForeignKey(
+        BalloonPartyPackage, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True,
+        related_name='birthday_party_packages'
+    )
+    
+    # NEW FIELD: is_any_balloon_package_is_free
+    is_any_balloon_package_is_free = models.BooleanField(default=False)
     
     # Optional fields
     birthday_party_pitch = models.TextField(blank=True, null=True)
@@ -40,13 +58,6 @@ class BirthdayPartyPackage(models.Model):
     roller_additional_jumper_price_search_id = models.CharField(max_length=255, blank=True, null=True)
     roller_birthday_party_booking_id = models.CharField(max_length=255, blank=True, null=True)
     each_additional_jump_half_hour_after_room_time = models.CharField(max_length=255, blank=True, null=True)
-    
-    # Many-to-many relationship with BalloonPartyPackage through bridge table
-    balloon_packages = models.ManyToManyField(
-        BalloonPartyPackage,
-        through='BirthdayBalloonBridge',
-        related_name='birthday_party_packages'
-    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
