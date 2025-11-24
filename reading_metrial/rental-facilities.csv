@@ -1,0 +1,9 @@
+﻿Location,Rental_jumper_group,call_flow_priority,per_jumper_price,Minimum_jumpers,Instruction,inclusions
+Biloxi,60 minute rental facility (40 to 75 jumper ),3,22,40,"- Our 60 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 60 minute rental facility
+- 60 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",
+Biloxi,90 minute rental facility (40 to 75 jumper ),2,24,40,"- Our 90 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 90 minute rental facility
+- 90 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",
+Biloxi,120 minute rental facility (40 to 75 jumper ),1,26,40,"- Our 120 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 120 minute rental facility
+- 120 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",
+Biloxi,60 minute rental facility (76 to 100 jumpers ),3,16,76,"- Our 60 minutes rental facility is only available for groups of 76+ jumpers. If the number of jumpers is less than 76, they are not eligible to book rental facility event. 
+- 60 minute rental facility (76 - 100 Jumpers) can be booked during normal business hours only.",

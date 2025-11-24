@@ -10,10 +10,12 @@ from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
 from myapp.model.promotions_model import Promotion
 from myapp.model.membership_model import Membership
+from myapp.model.rental_facility_model import RentalFacility
 from myapp.model.items_food_drinks_model import ItemsFoodDrinks
 from myapp.model.hours_of_operations_model import HoursOfOperation
 from myapp.model.balloon_party_packages_model import BalloonPartyPackage
 from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -454,3 +456,81 @@ class ItemsFoodDrinksSerializer(serializers.ModelSerializer):
     
     def get_t_shirt_sizes_list(self, obj):
         return obj.get_t_shirt_sizes_list()
+
+
+
+
+
+
+
+
+class RentalFacilitySerializer(serializers.ModelSerializer):
+    location_name = serializers.CharField(source='location.location_name', read_only=True)
+    
+    class Meta:
+        model = RentalFacility
+        fields = [
+            'rental_facility_id',
+            'location',
+            'location_name',
+            'rental_jumper_group',
+            'call_flow_priority',
+            'per_jumper_price',
+            'minimum_jumpers',
+            'instruction',
+            'inclusions',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['rental_facility_id', 'created_at', 'updated_at']
+        
+    def validate_rental_jumper_group(self, value):
+        """Validate that rental_jumper_group is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Rental jumper group cannot be empty")
+        return value.strip()
+        
+    def validate_call_flow_priority(self, value):
+        """Validate that call_flow_priority is a positive number"""
+        if value <= 0:
+            raise serializers.ValidationError("Call flow priority must be a positive number")
+        return value
+        
+    def validate_per_jumper_price(self, value):
+        """Validate that per_jumper_price is positive"""
+        if value <= 0:
+            raise serializers.ValidationError("Per jumper price must be greater than 0")
+        return value
+        
+    def validate_minimum_jumpers(self, value):
+        """Validate that minimum_jumpers is a positive number"""
+        if value <= 0:
+            raise serializers.ValidationError("Minimum jumpers must be a positive number")
+        return value
+    
+    def validate(self, data):
+        """Custom validation to check for duplicate rental_jumper_group within the same location"""
+        rental_jumper_group = data.get('rental_jumper_group')
+        location = data.get('location')
+        
+        if rental_jumper_group and location:
+            # Check if we're updating an existing record
+            if self.instance:
+                # For updates, exclude the current instance from the check
+                existing_facility = RentalFacility.objects.filter(
+                    rental_jumper_group__iexact=rental_jumper_group.strip(),
+                    location=location
+                ).exclude(rental_facility_id=self.instance.rental_facility_id).first()
+            else:
+                # For new records, check if any record with this name exists
+                existing_facility = RentalFacility.objects.filter(
+                    rental_jumper_group__iexact=rental_jumper_group.strip(),
+                    location=location
+                ).first()
+            
+            if existing_facility:
+                raise serializers.ValidationError({
+                    'rental_jumper_group': f"A rental facility with the name '{rental_jumper_group}' already exists for this location."
+                })
+        
+        return data
