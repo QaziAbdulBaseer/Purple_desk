@@ -8,6 +8,7 @@ from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
 from myapp.model.promotions_model import Promotion
 from myapp.model.membership_model import Membership
+from myapp.model.items_food_drinks_model import ItemsFoodDrinks
 from myapp.model.hours_of_operations_model import HoursOfOperation
 from myapp.model.balloon_party_packages_model import BalloonPartyPackage
 from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
@@ -506,3 +507,62 @@ class PromotionSerializer(serializers.ModelSerializer):
             if Promotion.objects.filter(promotion_code=value).exists():
                 raise serializers.ValidationError("Promotion code already exists")
         return value
+
+
+
+
+
+
+class ItemsFoodDrinksSerializer(serializers.ModelSerializer):
+    location_name = serializers.CharField(source='location.location_name', read_only=True)
+    t_shirt_sizes_list = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = ItemsFoodDrinks
+        fields = [
+            'item_id',
+            'location',
+            'location_name',
+            'category',
+            'category_priority',
+            'category_type',
+            'options_type_per_category',
+            'additional_instructions',
+            'item',
+            'price',
+            't_shirt_sizes',
+            't_shirt_sizes_list',
+            't_shirt_type',
+            'pitch_in_party_package',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['item_id', 'created_at', 'updated_at']
+    
+    def get_t_shirt_sizes_list(self, obj):
+        return obj.get_t_shirt_sizes_list()
+    
+    def validate_price(self, value):
+        """Validate that price is positive"""
+        if value < 0:
+            raise serializers.ValidationError("Price cannot be negative")
+        return value
+    
+    def validate_category_priority(self, value):
+        """Validate category priority"""
+        if value < 0:
+            raise serializers.ValidationError("Category priority cannot be negative")
+        return value
+
+class BulkItemsFoodDrinksSerializer(serializers.Serializer):
+    """Serializer for bulk operations"""
+    items = ItemsFoodDrinksSerializer(many=True)
+    
+    def create(self, validated_data):
+        items_data = validated_data['items']
+        items = [ItemsFoodDrinks(**item_data) for item_data in items_data]
+        return ItemsFoodDrinks.objects.bulk_create(items)
+
+
+
+

@@ -14,6 +14,7 @@ from myapp.views import View_hours_of_operations
 from myapp.views import View_balloon_party_packages
 from myapp.views import View_birthday_party_packages
 from myapp.views import View_birthday_balloon_bridge
+from myapp.views import View_ItemsFoodDrinks
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -110,6 +111,19 @@ urlpatterns = [
     path('locations/<int:location_id>/promotions/bulk-create/', View_Promotions.bulk_create_promotions, name='bulk_create_promotions'),
     path('locations/<int:location_id>/promotions/categories/', View_Promotions.get_promotion_categories, name='get_promotion_categories'),
 
+
+
+
+    # Food/Drink Items endpoints
+    path('locations/<int:location_id>/food-drink-items/',View_ItemsFoodDrinks.get_food_drink_items, name='get_food_drink_items'),
+    path('locations/<int:location_id>/food-drink-items/categories/',View_ItemsFoodDrinks.get_food_drink_items_by_category, name='get_food_drink_items_by_category'),
+    path('locations/<int:location_id>/food-drink-items/categories-list/',View_ItemsFoodDrinks.get_food_drink_categories, name='get_food_drink_categories'),
+    path('locations/<int:location_id>/food-drink-items/party-package/',View_ItemsFoodDrinks.get_party_package_items, name='get_party_package_items'),
+    path('locations/<int:location_id>/food-drink-items/create/',View_ItemsFoodDrinks.create_food_drink_item, name='create_food_drink_item'),
+    path('locations/<int:location_id>/food-drink-items/bulk-create/',View_ItemsFoodDrinks.bulk_create_food_drink_items, name='bulk_create_food_drink_items'),
+    path('locations/<int:location_id>/food-drink-items/<int:pk>/',View_ItemsFoodDrinks.get_food_drink_item, name='get_food_drink_item'),
+    path('locations/<int:location_id>/food-drink-items/<int:pk>/update/',View_ItemsFoodDrinks.update_food_drink_item, name='update_food_drink_item'),
+    path('locations/<int:location_id>/food-drink-items/<int:pk>/delete/',View_ItemsFoodDrinks.delete_food_drink_item, name='delete_food_drink_item'),
 
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"), # Get
