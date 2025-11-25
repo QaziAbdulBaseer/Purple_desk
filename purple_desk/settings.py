@@ -112,13 +112,13 @@ DATABASES = {
     }
 }
 
-# Render deployment database (PostgreSQL)
-if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        default=os.environ["DATABASE_URL"],
-        conn_max_age=600,
-        ssl_require=True
-    )
+# # Render deployment database (PostgreSQL)
+# if os.environ.get("DATABASE_URL"):
+#     DATABASES["default"] = dj_database_url.config(
+#         default=os.environ["DATABASE_URL"],
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
 
 
 # -------------------------
