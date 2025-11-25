@@ -10,7 +10,7 @@ class User(AbstractUser):
         (ADMIN, 'Admin'),
         (BOT, 'Bot'),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=BOT)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=ADMIN)
 
     def __str__(self):
         return f"{self.username} ({self.role})"  
