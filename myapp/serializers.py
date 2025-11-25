@@ -10,12 +10,12 @@ from myapp.model.locations_model import Location
 from myapp.model.jump_passes_model import JumpPass
 from myapp.model.promotions_model import Promotion
 from myapp.model.membership_model import Membership
+from myapp.model.group_booking_model import GroupBooking
 from myapp.model.rental_facility_model import RentalFacility
 from myapp.model.items_food_drinks_model import ItemsFoodDrinks
 from myapp.model.hours_of_operations_model import HoursOfOperation
 from myapp.model.balloon_party_packages_model import BalloonPartyPackage
 from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -531,6 +531,81 @@ class RentalFacilitySerializer(serializers.ModelSerializer):
             if existing_facility:
                 raise serializers.ValidationError({
                     'rental_jumper_group': f"A rental facility with the name '{rental_jumper_group}' already exists for this location."
+                })
+        
+        return data
+
+
+
+
+
+class GroupBookingSerializer(serializers.ModelSerializer):
+    location_name = serializers.CharField(source='location.location_name', read_only=True)
+    
+    class Meta:
+        model = GroupBooking
+        fields = [
+            'group_booking_id',
+            'location',
+            'location_name',
+            'group_packages',
+            'call_flow_priority',
+            'flat_fee_jumper_price',
+            'minimum_jumpers',
+            'instruction',
+            'package_inclusions',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['group_booking_id', 'created_at', 'updated_at']
+        
+    def validate_group_packages(self, value):
+        """Validate that group_packages is not empty"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Group packages cannot be empty")
+        return value.strip()
+        
+    def validate_call_flow_priority(self, value):
+        """Validate that call_flow_priority is a positive number"""
+        if value <= 0:
+            raise serializers.ValidationError("Call flow priority must be a positive number")
+        return value
+        
+    def validate_flat_fee_jumper_price(self, value):
+        """Validate that flat_fee_jumper_price is positive"""
+        if value <= 0:
+            raise serializers.ValidationError("Flat fee jumper price must be greater than 0")
+        return value
+        
+    def validate_minimum_jumpers(self, value):
+        """Validate that minimum_jumpers is a positive number"""
+        if value <= 0:
+            raise serializers.ValidationError("Minimum jumpers must be a positive number")
+        return value
+    
+    def validate(self, data):
+        """Custom validation to check for duplicate group_packages within the same location"""
+        group_packages = data.get('group_packages')
+        location = data.get('location')
+        
+        if group_packages and location:
+            # Check if we're updating an existing record
+            if self.instance:
+                # For updates, exclude the current instance from the check
+                existing_booking = GroupBooking.objects.filter(
+                    group_packages__iexact=group_packages.strip(),
+                    location=location
+                ).exclude(group_booking_id=self.instance.group_booking_id).first()
+            else:
+                # For new records, check if any record with this name exists
+                existing_booking = GroupBooking.objects.filter(
+                    group_packages__iexact=group_packages.strip(),
+                    location=location
+                ).first()
+            
+            if existing_booking:
+                raise serializers.ValidationError({
+                    'group_packages': f"A group booking with the name '{group_packages}' already exists for this location."
                 })
         
         return data

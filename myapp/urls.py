@@ -141,12 +141,14 @@ from myapp.views import View_membership
 from myapp.views import View_Get_Prompt
 from myapp.views import View_jump_passes
 from myapp.views import View_Authorization
+from myapp.views import View_group_booking
 from myapp.views import View_ItemsFoodDrinks
 from myapp.views import View_rental_facility
 from myapp.views import View_hours_of_operations
 from myapp.views import View_balloon_party_packages
 from myapp.views import View_birthday_party_packages
 from rest_framework_simplejwt.views import TokenRefreshView
+
 
 urlpatterns = [
     ## Authorization Paths
@@ -244,6 +246,18 @@ urlpatterns = [
     path('locations/<int:location_id>/rental-facilities/<int:pk>/update/', View_rental_facility.update_rental_facility, name='update_rental_facility'),
     path('locations/<int:location_id>/rental-facilities/<int:pk>/delete/', View_rental_facility.delete_rental_facility, name='delete_rental_facility'),
     path('locations/<int:location_id>/rental-facilities/bulk-create/', View_rental_facility.bulk_create_rental_facilities, name='bulk_create_rental_facilities'),
+
+
+ 
+    ## Group Booking End points
+    path('locations/<int:location_id>/group-bookings/', View_group_booking.get_group_bookings, name='get_group_bookings'),
+    path('locations/<int:location_id>/group-bookings/create/', View_group_booking.create_group_booking, name='create_group_booking'),
+    path('locations/<int:location_id>/group-bookings/<int:pk>/', View_group_booking.get_group_booking, name='get_group_booking'),
+    path('locations/<int:location_id>/group-bookings/<int:pk>/update/', View_group_booking.update_group_booking, name='update_group_booking'),
+    path('locations/<int:location_id>/group-bookings/<int:pk>/delete/', View_group_booking.delete_group_booking, name='delete_group_booking'),
+    path('locations/<int:location_id>/group-bookings/bulk-create/', View_group_booking.bulk_create_group_bookings, name='bulk_create_group_bookings'),
+
+
 
     ## Get Prompt
     path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"),
