@@ -1,0 +1,50 @@
+﻿Location,group_packages,call_flow_priority,Flat_fee_jumper_price,Minimum_jumpers,Maximum_jumpers,Instruction,package_inclusions
+Evansville,Small Groups 60 minutes group package,15,17,25,,"- Our Small Groups 60 minutes group package is only available for groups of 25 to 50 jumpers. If the number of jumpers is less than 25, they are not eligible to book group rate events. Maximum number of jumpers allowed are 50 in this group booking
+- 50% deposit is required to hold your date
+- Small Groups (25 - 50 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,Small Groups 90 minutes group package,14,19,25,,"- Our Small Groups 90 minutes group package is only available for groups of 25 to 50 jumpers. If the number of jumpers is less than 25, they are not eligible to book group rate events. Maximum number of jumpers allowed are 50 in this group booking
+- 50% deposit is required to hold your date
+- Small Groups (25 - 50 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,Small Groups 120 minutes group package,13,22,25,,"- Our Small Groups 120 minutes group package is only available for groups of 25 to 50 jumpers If the number of jumpers is less than 25, they are not eligible to book group rate events. Maximum number of jumpers allowed are 50 in this group booking
+- 50% deposit is required to hold your date
+- Small Groups (25 - 50 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,Small Groups 150 minutes group package,12,25,25,,"- Our Small Groups 120 minutes group package is only available for groups of 25 to 50 jumpers If the number of jumpers is less than 25, they are not eligible to book group rate events. Maximum number of jumpers allowed are 50 in this group booking
+- 50% deposit is required to hold your date
+- Small Groups (25 - 50 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,Small Groups 180 minutes group package,11,28,25,,"- Our Small Groups 120 minutes group package is only available for groups of 25 to 50 jumpers If the number of jumpers is less than 25, they are not eligible to book group rate events. Maximum number of jumpers allowed are 50 in this group booking
+- 50% deposit is required to hold your date
+- Small Groups (25 - 50 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,medium Groups 60 minutes group package,10,15,51,,"- Our Medium Groups 60 minutes group package is only available for groups of 51 to 100 jumpers. If the number of jumpers is less than 51, they are not eligible to book group rate events. Maximum number of jumpers allowed are 150 in this group booking
+- 50% deposit is required to hold your date
+- large Groups (51-100 Jumpers) can be booked during normal business hours only.
+
+", Sky socks are not included on group events
+Evansville,Medium Groups 90 minutes group package,9,18,51,,"- Our Medium Groups 90 minutes group package is only available for groups of 51 to 100 jumpers. If the number of jumpers is less than 51, they are not eligible to book group rate events. Maximum number of jumpers allowed are 100 in this group booking
+- 50% deposit is required to hold your date
+- large Groups (51-100 Jumpers) can be booked during normal business hours only.
+", Sky socks are not included on group events
+Evansville,Medium Groups 120 minutes group package,8,21,51,,"- Our Medium Groups 120 minutes group package is only available for groups of 51 to 100 jumpers. If the number of jumpers is less than 51, they are not eligible to book group rate events. Maximum number of jumpers allowed are 100 in this group booking
+- 50% deposit is required to hold your date
+- large Groups (51-100 Jumpers) can be booked during normal business hours only.
+", Sky socks are not included on group events
+Evansville,Medium Groups 150 minutes group package,7,24,51,,"- Our Medium Groups 150 minutes group package is only available for groups of 51 to 100 jumpers. If the number of jumpers is less than 51, they are not eligible to book group rate events. Maximum number of jumpers allowed are 100 in this group booking
+- 50% deposit is required to hold your date
+- large Groups (51-100 Jumpers) can be booked during normal business hours only.
+", Sky socks are not included on group events
+Evansville,Medium Groups 180 minutes group package,6,27,51,,"- Our Medium Groups 180 minutes group package is only available for groups of 51 to 100 jumpers. If the number of jumpers is less than 49, they are not eligible to book group rate events. Maximum number of jumpers allowed are 100 in this group booking
+- 50% deposit is required to hold your date
+- large Groups (51-100 Jumpers) can be booked during normal business hours only.", Sky socks are not included on group events
+Evansville,Larger Groups 60 minutes group package,5,14,100,,"- Our Large Groups 60 minutes group package is only available for groups of more than 100 jumpers. If the number of jumpers is less than 100, they are not eligible to book group rate events. 
+- 50% deposit is required to hold your date
+", Sky socks are included on group events
+Evansville,large Groups 90 minutes group package,4,17,100,,"- Our Large Groups 90 minutes group package is only available for groups of more than 100 jumpers. If the number of jumpers is less than 100, they are not eligible to book group rate events. 
+- 50% deposit is required to hold your date
+", Sky socks are included on group events
+Evansville,large Groups 120 minutes group package,3,20,100,,"- Our Large Groups 120 minutes group package is only available for groups of more than 100 jumpers. If the number of jumpers is less than 100, they are not eligible to book group rate events. 
+- 50% deposit is required to hold your date
+", Sky socks are included on group events
+Evansville,large Groups 150 minutes group package,2,23,100,,"- Our Large Groups 150 minutes group package is only available for groups of more than 100 jumpers. If the number of jumpers is less than 100, they are not eligible to book group rate events. 
+- 50% deposit is required to hold your date
+", Sky socks are included on group events
+Evansville,large Groups 180 minutes group package,1,26,100,,"- Our Large Groups 180 minutes group package is only available for groups of more than 100 jumpers. If the number of jumpers is less than 100, they are not eligible to book group rate events. 
+- 50% deposit is required to hold your date", Sky socks are included on group events

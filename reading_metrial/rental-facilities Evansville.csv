@@ -1,0 +1,23 @@
+﻿Location,Rental_jumper_group,call_flow_priority,per_jumper_price,Minimum_jumpers,Instruction,inclusions
+Evansville,60 minute rental facility (40 to 75 jumper ),4,17,40,"- Our 60 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 60 minute rental facility
+- 60 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are not included on 60 minute rental facility
+Evansville,90 minute rental facility (40 to 75 jumper ),2,19,40,"- Our 90 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 90 minute rental facility
+- 90 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are not included on 90 minute rental facility
+Evansville,120 minute rental facility (40 to 75 jumper ),6,22,40,"- Our 120 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 120 minute rental facility
+- 120 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are not included on 120 minute rental facility
+Evansville,150 minute rental facility (40 to 75 jumper ),8,25,40,"- Our 150 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 150 minute rental facility
+- 150 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are not included on 150 minute rental facility
+Evansville,180 minute rental facility (40 to 75 jumper ),10,28,40,"- Our 180 minutes rental facility is only available for groups of 40 to 75 jumpers. If the number of jumpers is less than 40, they are not eligible to book rental facility event. Maximum number of jumpers allowed are 40 in 180 minute rental facility
+- 180 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are not included on 180 minute rental facility
+Evansville,60 minute rental facility (75 plus jumper ),3,14,75,"- Our 60 minutes rental facility is only available for groups of 75+ jumpers. If the number of jumpers is less than 75, they are not eligible to book rental facility event. 
+- 60 minute rental facility (40 - 75 Jumpers) can be booked during normal business hours only.",- Sky socks are included on 60 minute rental facility
+Evansville,90 minute rental facility (75 plus jumper ),1,17,75,"- Our 90 minutes rental facility is only available for groups of 75+ jumpers. If the number of jumpers is less than 75, they are not eligible to book rental facility event. 
+- 90 minute rental facility (75+ Jumpers) can be booked during normal business hours only.",- Sky socks are included on 90 minute rental facility
+Evansville,120 minute rental facility (75 plus jumper ),5,20,75,"- Our 120 minutes rental facility is only available for groups of 75+ jumpers. If the number of jumpers is less than 75, they are not eligible to book rental facility event. 
+- 120 minute rental facility ( 75+ Jumpers) can be booked during normal business hours only.",- Sky socks are included on 120 minute rental facility
+Evansville,150 minute rental facility (75 plus jumper ),7,23,75,"- Our 150 minutes rental facility is only available for groups of 75+ jumpers. If the number of jumpers is less than 75, they are not eligible to book rental facility event. 
+- 150 minute rental facility (75+ Jumpers) can be booked during normal business hours only.",- Sky socks are included on 150 minute rental facility
+Evansville,180 minute rental facility (75 plus jumper ),9,26,75,"- Our 180 minutes rental facility is only available for groups of 75+ jumpers. If the number of jumpers is less than 75, they are not eligible to book rental facility event. 
+- 180 minute rental facility (75+ Jumpers) can be booked during normal business hours only.",- Sky socks are included on 180 minute rental facility
+Evansville,,,,,"The price for rental facility do not include tax. If a group is tax exempt, they will pay the exact price for the group. 
+If they are not tax exempt they will pay the price PLUS tax",

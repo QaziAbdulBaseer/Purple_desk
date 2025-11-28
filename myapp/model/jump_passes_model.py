@@ -30,7 +30,9 @@ class JumpPass(models.Model):
     ending_day_name = models.CharField(max_length=50, blank=True, null=True)
     comments = models.TextField(blank=True, null=True)
 
-    roller_booking_id = models.CharField(max_length=255, blank=True, null=True , unique=True)
+    # roller_booking_id = models.CharField(max_length=255, blank=True, null=True , unique=True)
+    roller_booking_id = models.CharField(max_length=255, blank=True, null=True)
+
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

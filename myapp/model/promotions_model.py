@@ -27,7 +27,7 @@ class Promotion(models.Model):
     schedule_type = models.CharField(max_length=20, default='always_active')
     
     # Promotion Details
-    promotion_code = models.CharField(max_length=100, unique=True, blank=False, null=False)
+    promotion_code = models.CharField(max_length=100, null=True, blank=True)
     title = models.CharField(max_length=255, blank=False, null=False)
     details = models.TextField(blank=False, null=False)
     
@@ -36,7 +36,7 @@ class Promotion(models.Model):
     sub_category = models.CharField(max_length=100, blank=True, null=True)
     
 
-    eligibility_type = models.CharField(max_length=50, default='birthday_party_purchase')
+    eligibility_type = models.CharField(max_length=50, null=True, blank=True)
     
     # Constraint Value - Changed to CharField to allow text input
     constraint_value = models.CharField(max_length=255, null=True, blank=True, help_text="Constraint value (can be text, number, or any format)")

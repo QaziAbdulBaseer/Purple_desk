@@ -16,7 +16,7 @@ class ItemsFoodDrinks(models.Model):
     
     # Item Details
     item = models.CharField(max_length=255, blank=False, null=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=True)
     
     # Additional Information
     additional_instructions = models.TextField(blank=True, null=True)

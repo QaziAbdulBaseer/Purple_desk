@@ -1,109 +1,6 @@
 
-# hi, i have to make a new table. then I have to write a crud operation for that table. and creat the apis end points. 
-# i give you tables colums name, and also give you an example code. how i am doing work
-# so you have to tell me which new file i have to create and which code i have to past. 
-# the new table is == 
-# Table: FAQs
 
-# Location_id (FK)
 
-# FAQs_id (PK)
-
-# question_type
-
-# question
-
-# answer
-# this is my file structure = 
-# (venv) PS D:\Sybrid\purple_desk\New_purple_desk\New_purple_desk_backend\myapp> tree /f
-# Folder PATH listing for volume Data center
-# Volume serial number is C6C6-DE32
-# D:.
-# │   admin.py
-# │   apps.py
-# │   models.py
-# │   serializers.py
-# │   urls.py
-# │   viewsww.py
-# │   __init__.py
-# │
-# ├───migrations
-# │   │   0001_initial.py
-# │   │   0002_alter_birthdaypartypackage_tax_included.py
-# │   │   __init__.py
-# │   │
-# │   └───__pycache__
-# │           0001_initial.cpython-39.pyc
-# │           0002_alter_birthdayballoonbridge_balloon_party_package_and_more.cpython-39.pyc
-# │           0002_alter_birthdaypartypackage_tax_included.cpython-39.pyc
-# │           0003_alter_birthdayballoonbridge_balloon_party_package_and_more.cpython-39.pyc
-# │           __init__.cpython-39.pyc
-# │
-# ├───model
-# │   │   balloon_party_packages_model.py
-# │   │   birthday_balloon_bridge_model.py
-# │   │   birthday_party_packages_model.py
-# │   │   hours_of_operations_model.py
-# │   │   jump_passes_model.py
-# │   │   locations_model.py
-# │   │   membership_model.py
-# │   │
-# │   └───__pycache__
-# │           balloon_party_packages_model.cpython-39.pyc
-# │           birthday_balloon_bridge_model.cpython-39.pyc
-# │           birthday_party_packages_model.cpython-39.pyc
-# │           hours_of_operations_model.cpython-39.pyc
-# │           jump_passes_model.cpython-311.pyc
-# │           jump_passes_model.cpython-39.pyc
-# │           locations_model.cpython-39.pyc
-# │           membership_model.cpython-39.pyc
-# │
-# ├───serializers
-# │       Location_serializers.py
-# │
-# ├───views
-# │   │   View_Authorization.py
-# │   │   View_balloon_party_packages.py
-# │   │   View_birthday_balloon_bridge.py
-# │   │   View_birthday_party_packages.py
-# │   │   View_Get_Prompt.py
-# │   │   View_hours_of_operations.py
-# │   │   View_jump_passes.py
-# │   │   View_Locations.py
-# │   │   View_membership.py
-# │   │
-# │   ├───Get_prompt
-# │   │   │   Get_hours_of_operation.py
-# │   │   │   Get_jump_pass.py
-# │   │   │   Get_membership.py
-# │   │   │   Get_membershipEXP.py
-# │   │   │
-# │   │   └───__pycache__
-# │   │           Get_hours_of_operation.cpython-39.pyc
-# │   │           Get_jump_pass.cpython-39.pyc
-# │   │           Get_membership.cpython-39.pyc
-# │   │
-# │   └───__pycache__
-# │           View_Authorization.cpython-39.pyc
-# │           View_balloon_party_packages.cpython-39.pyc
-# │           View_birthday_balloon_bridge.cpython-39.pyc
-# │           View_birthday_party_packages.cpython-39.pyc
-# │           View_Get_Prompt.cpython-39.pyc
-# │           View_hours_of_operations.cpython-39.pyc
-# │           View_jump_passes.cpython-311.pyc
-# │           View_jump_passes.cpython-39.pyc
-# │           View_Locations.cpython-39.pyc
-# │           View_membership.cpython-39.pyc
-# │
-# └───__pycache__
-#         admin.cpython-39.pyc
-#         apps.cpython-39.pyc
-#         models.cpython-39.pyc
-#         serializers.cpython-39.pyc
-#         urls.cpython-39.pyc
-#         __init__.cpython-39.pyc
-
-# (venv) PS D:\Sybrid\purple_desk\New_purple_desk\New_purple_desk_backend\myapp> 
 
 
 
@@ -129,7 +26,7 @@ class Membership(models.Model):
     valid_until = models.DateField(blank=True, null=True)
     party_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
-    parent_addon_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    parent_addon_price = models.TextField(max_length=255, blank=True, null=True)
     subscription = models.CharField(max_length=255, blank=True, null=True)
     tax_included = models.BooleanField(
         null=False,
