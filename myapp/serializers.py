@@ -62,247 +62,6 @@ class HoursOfOperationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['hours_of_operation_id', 'same_entry_id']
 
-# class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
-#     balloon_party_package_name = serializers.CharField(source='balloon_party_package.package_name', read_only=True)
-    
-#     class Meta:
-#         model = BirthdayPartyPackage
-#         fields = [
-#             'birthday_party_packages_id',
-#             'location',
-#             'package_name',
-#             'birthday_party_priority',
-#             'birthday_party_pitch',
-#             'availability_days',
-#             'schedule_with',
-#             'minimum_jumpers',
-#             'jump_time',
-#             'party_room_time',
-#             'food_and_drinks',
-#             'paper_goods',
-#             'skysocks',
-#             'dessert_policy',
-#             'other_perks',
-#             'outside_food_drinks_fee',
-#             'price',
-#             'guest_of_honour_included_in_total_jumpers',
-#             'tax_included',
-#             'each_additional_jump_hour_after_room_time',
-#             'additional_instructions',
-#             'birthday_party_booking_lead_allowed_days',
-#             'birthday_party_reschedule_allowed_days',
-#             'birthday_party_discount_code',
-#             'birthday_party_discount_percentage',
-#             'roller_birthday_party_search_id',
-#             'each_additional_jumper_price',
-#             'roller_additional_jumper_price_search_id',
-#             'roller_birthday_party_booking_id',
-#             'each_additional_jump_half_hour_after_room_time',
-#             'is_available',
-#             'Is_additional_jumpers_allowed',
-#             'created_at',
-#             'updated_at',
-#             # New fields
-#             'balloon_package_included',
-#             'promotion_code',
-#             'credit',
-#             'balloon_party_package',
-#             'balloon_party_package_name'
-#         ]
-#         read_only_fields = ['birthday_party_packages_id', 'created_at', 'updated_at']
-        
-#     def validate_package_name(self, value):
-#         """Validate that package_name is not empty"""
-#         if not value or not value.strip():
-#             raise serializers.ValidationError("Package name cannot be empty")
-#         return value.strip()
-        
-#     def validate_birthday_party_priority(self, value):
-#         """Validate that priority is a positive number"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Birthday party priority must be a positive number")
-#         return value
-        
-#     def validate_minimum_jumpers(self, value):
-#         """Validate that minimum_jumpers is a positive number"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Minimum jumpers must be a positive number")
-#         return value
-        
-#     def validate_price(self, value):
-#         """Validate that price is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Price must be greater than 0")
-#         return value
-        
-#     def validate_each_additional_jumper_price(self, value):
-#         """Validate that additional jumper price is positive"""
-#         if value < 0:
-#             raise serializers.ValidationError("Each additional jumper price cannot be negative")
-#         return value
-        
-#     def validate_birthday_party_booking_lead_allowed_days(self, value):
-#         """Validate booking lead days is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Booking lead allowed days must be a positive number")
-#         return value
-        
-#     def validate_birthday_party_reschedule_allowed_days(self, value):
-#         """Validate reschedule days is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Reschedule allowed days must be a positive number")
-#         return value
-    
-#     def validate(self, data):
-#         """Custom validation to check for duplicate package names within the same location"""
-#         package_name = data.get('package_name')
-#         location = data.get('location')
-        
-#         if package_name and location:
-#             # Check if we're updating an existing record
-#             if self.instance:
-#                 # For updates, exclude the current instance from the check
-#                 existing_package = BirthdayPartyPackage.objects.filter(
-#                     package_name__iexact=package_name.strip(),
-#                     location=location
-#                 ).exclude(birthday_party_packages_id=self.instance.birthday_party_packages_id).first()
-#             else:
-#                 # For new records, check if any record with this name exists
-#                 existing_package = BirthdayPartyPackage.objects.filter(
-#                     package_name__iexact=package_name.strip(),
-#                     location=location
-#                 ).first()
-            
-#             if existing_package:
-#                 raise serializers.ValidationError({
-#                     'package_name': f"A birthday party package with the name '{package_name}' already exists for this location."
-#                 })
-        
-#         return data
-
-
-
-
-# class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
-#     balloon_party_package_name = serializers.CharField(source='balloon_party_package.package_name', read_only=True)
-    
-#     class Meta:
-#         model = BirthdayPartyPackage
-#         fields = [
-#             'birthday_party_packages_id',
-#             'location',
-#             'package_name',
-#             'birthday_party_priority',
-#             'birthday_party_pitch',
-#             'availability_days',
-#             'schedule_with',
-#             'minimum_jumpers',
-#             'jump_time',
-#             'party_room_time',
-#             'food_and_drinks',
-#             'paper_goods',
-#             'skysocks',
-#             'dessert_policy',
-#             'other_perks',
-#             'outside_food_drinks_fee',
-#             'price',
-#             'guest_of_honour_included_in_total_jumpers',
-#             'tax_included',
-#             'each_additional_jump_hour_after_room_time',
-#             'additional_instructions',
-#             'birthday_party_booking_lead_allowed_days',
-#             'birthday_party_reschedule_allowed_days',
-#             'birthday_party_discount_code',
-#             'birthday_party_discount_percentage',
-#             'roller_birthday_party_search_id',
-#             'each_additional_jumper_price',
-#             'roller_additional_jumper_price_search_id',
-#             'roller_birthday_party_booking_id',
-#             'each_additional_jump_half_hour_after_room_time',
-#             'is_available',
-#             'Is_additional_jumpers_allowed',
-#             'created_at',
-#             'updated_at',
-#             # New fields
-#             'balloon_package_included',
-#             'promotion_code',
-#             'credit',
-#             'balloon_party_package',
-#             'balloon_party_package_name',
-#             # NEW FIELD: is_any_balloon_package_is_free
-#             'is_any_balloon_package_is_free'
-#         ]
-#         read_only_fields = ['birthday_party_packages_id', 'created_at', 'updated_at']
-        
-#     def validate_package_name(self, value):
-#         """Validate that package_name is not empty"""
-#         if not value or not value.strip():
-#             raise serializers.ValidationError("Package name cannot be empty")
-#         return value.strip()
-        
-#     def validate_birthday_party_priority(self, value):
-#         """Validate that priority is a positive number"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Birthday party priority must be a positive number")
-#         return value
-        
-#     def validate_minimum_jumpers(self, value):
-#         """Validate that minimum_jumpers is a positive number"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Minimum jumpers must be a positive number")
-#         return value
-        
-#     def validate_price(self, value):
-#         """Validate that price is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Price must be greater than 0")
-#         return value
-        
-#     def validate_each_additional_jumper_price(self, value):
-#         """Validate that additional jumper price is positive"""
-#         if value < 0:
-#             raise serializers.ValidationError("Each additional jumper price cannot be negative")
-#         return value
-        
-#     def validate_birthday_party_booking_lead_allowed_days(self, value):
-#         """Validate booking lead days is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Booking lead allowed days must be a positive number")
-#         return value
-        
-#     def validate_birthday_party_reschedule_allowed_days(self, value):
-#         """Validate reschedule days is positive"""
-#         if value <= 0:
-#             raise serializers.ValidationError("Reschedule allowed days must be a positive number")
-#         return value
-    
-#     def validate(self, data):
-#         """Custom validation to check for duplicate package names within the same location"""
-#         package_name = data.get('package_name')
-#         location = data.get('location')
-        
-#         if package_name and location:
-#             # Check if we're updating an existing record
-#             if self.instance:
-#                 # For updates, exclude the current instance from the check
-#                 existing_package = BirthdayPartyPackage.objects.filter(
-#                     package_name__iexact=package_name.strip(),
-#                     location=location
-#                 ).exclude(birthday_party_packages_id=self.instance.birthday_party_packages_id).first()
-#             else:
-#                 # For new records, check if any record with this name exists
-#                 existing_package = BirthdayPartyPackage.objects.filter(
-#                     package_name__iexact=package_name.strip(),
-#                     location=location
-#                 ).first()
-            
-#             if existing_package:
-#                 raise serializers.ValidationError({
-#                     'package_name': f"A birthday party package with the name '{package_name}' already exists for this location."
-#                 })
-        
-#         return data
-
 
 class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
     balloon_party_package_name = serializers.CharField(source='balloon_party_package.package_name', read_only=True)
@@ -431,31 +190,6 @@ class BirthdayPartyPackageSerializer(serializers.ModelSerializer):
         
         return data
 
-
-# class JumpPassSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = JumpPass
-#         fields = [
-#             'jump_pass_id',
-#             'location',
-#             'jump_pass_priority',
-#             'jump_pass_pitch',
-#             'schedule_with',
-#             'pass_name',
-#             'age_allowed',
-#             'starting_day_name',
-#             'ending_day_name',
-#             'jump_time_allowed',
-#             'price',
-#             'tax_included',
-#             'can_custom_take_part_in_multiple',
-#             'recommendation',
-#             'comments',
-#             'roller_booking_id',
-#             'created_at',
-#             'updated_at'
-#         ]
-#         read_only_fields = ['jump_pass_id', 'created_at', 'updated_at']
 
 
 class JumpPassSerializer(serializers.ModelSerializer):
@@ -640,10 +374,12 @@ class RentalFacilitySerializer(serializers.ModelSerializer):
             'location',
             'location_name',
             'rental_jumper_group',
-            'call_flow_priority',
+            'rental_group_name',
+            # 'call_flow_priority',
             'per_jumper_price',
             'minimum_jumpers',
-            'instruction',
+            'maximum_jumpers',
+            # 'instruction',
             'inclusions',
             'created_at',
             'updated_at'
@@ -656,11 +392,11 @@ class RentalFacilitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Rental jumper group cannot be empty")
         return value.strip()
         
-    def validate_call_flow_priority(self, value):
-        """Validate that call_flow_priority is a positive number"""
-        if value <= 0:
-            raise serializers.ValidationError("Call flow priority must be a positive number")
-        return value
+    # def validate_call_flow_priority(self, value):
+    #     """Validate that call_flow_priority is a positive number"""
+    #     if value <= 0:
+    #         raise serializers.ValidationError("Call flow priority must be a positive number")
+    #     return value
         
     def validate_per_jumper_price(self, value):
         """Validate that per_jumper_price is positive"""

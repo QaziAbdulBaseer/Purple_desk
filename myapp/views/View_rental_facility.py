@@ -279,3 +279,7 @@ async def bulk_create_rental_facilities(request, location_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+

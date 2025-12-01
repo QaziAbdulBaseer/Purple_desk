@@ -31,7 +31,7 @@ class JumpPass(models.Model):
     comments = models.TextField(blank=True, null=True)
 
     # roller_booking_id = models.CharField(max_length=255, blank=True, null=True , unique=True)
-    roller_booking_id = models.CharField(max_length=255, blank=True, null=True , unique=False)
+    roller_booking_id = models.CharField(max_length=255, blank=True, null=True)
 
     
     # Timestamps
