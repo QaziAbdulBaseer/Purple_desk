@@ -58,8 +58,8 @@ async def get_hours_data_from_db(location_id: int) -> pd.DataFrame:
         
         # Print for debugging
         # print("Raw data from database (with AM/PM times):")
-        for i, row in df.iterrows():
-            print(f"{i:2} {row['hours_type']:12} {str(row['schedule_with']):15} {str(row['ages_allowed']):15} {str(row['starting_date']):15} {str(row['ending_date']):15} {str(row['starting_day_name']):15} {str(row['ending_day_name']):15} {str(row['start_time']):10} {str(row['end_time']):10} {str(row['reason']):10}")
+        # for i, row in df.iterrows():
+        #     print(f"{i:2} {row['hours_type']:12} {str(row['schedule_with']):15} {str(row['ages_allowed']):15} {str(row['starting_date']):15} {str(row['ending_date']):15} {str(row['starting_day_name']):15} {str(row['ending_day_name']):15} {str(row['start_time']):10} {str(row['end_time']):10} {str(row['reason']):10}")
         
         # Rename 'schedule_with' to 'jump_type' to match your existing code
         if 'schedule_with' in df.columns:

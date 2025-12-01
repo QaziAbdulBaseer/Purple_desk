@@ -698,7 +698,7 @@ async def handle_jump_passes(jump_passes_info, location):
     
    ############ End Of Jump Passes or Jump Tickets Flow #####################
     """
-    print("This is jump pass system message", System_Message)
+    # print("This is jump pass system message", System_Message)
     return 
     
 
