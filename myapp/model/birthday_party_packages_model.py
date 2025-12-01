@@ -98,12 +98,12 @@ class BirthdayPartyPackage(models.Model):
     minimum_jumpers = models.IntegerField()
     jump_time = models.CharField(max_length=255)
     party_room_time = models.CharField(max_length=255)
-    food_and_drinks = models.CharField(max_length=500)
-    paper_goods = models.CharField(max_length=255)
+    food_and_drinks = models.CharField(max_length=5000)
+    paper_goods = models.CharField(max_length=2550)
     skysocks = models.CharField(max_length=255)
-    dessert_policy = models.CharField(max_length=255)
+    dessert_policy = models.CharField(max_length=2550)
     other_perks = models.CharField(max_length=500)
-    outside_food_drinks_fee = models.CharField(max_length=255)
+    outside_food_drinks_fee = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     guest_of_honour_included_in_total_jumpers = models.BooleanField(default=False)
     tax_included = models.BooleanField(default=True)
@@ -155,3 +155,7 @@ class BirthdayPartyPackage(models.Model):
         
     def __str__(self):
         return f"{self.package_name} - {self.location.location_name}"
+
+
+
+

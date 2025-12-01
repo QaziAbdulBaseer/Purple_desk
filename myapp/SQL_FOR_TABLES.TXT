@@ -1,0 +1,282 @@
+CREATE TABLE testing (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO testing (name, email, password)
+VALUES ('John Doe', 'john@example.com', 'secret123');
+
+
+select * from testing;
+
+select * from myapp_location;
+
+select promotion_code  from birthday_party_packages;
+
+
+ALTER TABLE birthday_party_packages ADD COLUMN promotion_code varchar(50);
+-- ALTER TABLE birthday_party_packages ADD COLUMN balloon_package_included boolean DEFAULT false;
+ALTER TABLE birthday_party_packages ADD COLUMN credit numeric(10,2);
+ALTER TABLE birthday_party_packages ADD COLUMN is_any_balloon_package_is_free boolean DEFAULT false;
+-- etc...
+
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN balloon_party_package_id integer REFERENCES balloon_party_packages(balloon_party_packages_id);
+
+
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN balloon_package_included boolean DEFAULT false;
+
+
+CREATE TABLE myapp_location (
+    location_id SERIAL PRIMARY KEY,
+    location_name VARCHAR(255) UNIQUE NOT NULL,
+    location_address TEXT NOT NULL,
+    location_timezone VARCHAR(100) NOT NULL,
+    location_call_number VARCHAR(20),
+    location_transfer_number VARCHAR(20),
+    location_google_map_link VARCHAR(500),
+
+    minimum_jumpers_party INTEGER NOT NULL DEFAULT 10,
+    guest_of_honor_included_in_minimum_jumpers_party BOOLEAN NOT NULL DEFAULT FALSE,
+    add_additional_hour_of_jump_instruction BOOLEAN NOT NULL DEFAULT FALSE,
+    add_additional_half_hour_of_jump_instruction BOOLEAN NOT NULL DEFAULT FALSE,
+    party_booking_allowed_days_before_party_date INTEGER NOT NULL DEFAULT 3,
+    party_reschedule_allowed_before_party_date_days INTEGER NOT NULL DEFAULT 3,
+    add_shirts_while_booking BOOLEAN NOT NULL DEFAULT FALSE,
+    elite_member_party_discount_percentage INTEGER NOT NULL DEFAULT 20,
+    membership_cancellation_days INTEGER NOT NULL DEFAULT 3,
+    little_leaper_age_bracket VARCHAR(255) NOT NULL DEFAULT 'Recommended for Kids of age 6 years old and under',
+    glow_age_bracket VARCHAR(255) NOT NULL DEFAULT 'Recommended for Kids of 3 years old and above',
+    from_email_address VARCHAR(254) NOT NULL DEFAULT 'shereen@purpledesk.ai',
+    minimum_deposit_required_for_booking VARCHAR(50) NOT NULL DEFAULT '50 percents',
+    pitch_ballons_while_booking BOOLEAN NOT NULL DEFAULT FALSE,
+    is_booking_bot BOOLEAN NOT NULL DEFAULT FALSE,
+    is_edit_bot BOOLEAN NOT NULL DEFAULT FALSE,
+    pitch_group_rates BOOLEAN NOT NULL DEFAULT TRUE,
+    pitch_rental_facility BOOLEAN NOT NULL DEFAULT TRUE,
+    additional_jumper_discount BOOLEAN NOT NULL DEFAULT FALSE,
+    add_party_space_sentence BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+
+
+-- ALTER TABLE birthday_party_packages ADD COLUMN balloon_package_included boolean DEFAULT false;
+-- ALTER TABLE birthday_party_packages ADD COLUMN promotion_code varchar(50);
+-- ALTER TABLE birthday_party_packages ADD COLUMN credit numeric(10,2);
+-- ALTER TABLE birthday_party_packages ADD COLUMN balloon_party_package_id integer REFERENCES balloon_party_packages(balloon_party_packages_id);
+-- ALTER TABLE birthday_party_packages ADD COLUMN is_any_balloon_package_is_free boolean DEFAULT false;
+ALTER TABLE birthday_party_packages ADD COLUMN party_environment_name varchar(255);
+
+
+
+
+-- Add balloon package fields
+ALTER TABLE birthday_party_packages
+ADD COLUMN balloon_package_included BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN promotion_code VARCHAR(50);
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN credit NUMERIC(10,2);
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN balloon_party_package_id INTEGER REFERENCES balloon_party_packages(balloon_party_packages_id);
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN is_any_balloon_package_is_free BOOLEAN DEFAULT FALSE;
+
+-- Add new party details fields
+ALTER TABLE birthday_party_packages
+ADD COLUMN party_environment_name VARCHAR(255);
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN food_included_count INTEGER;
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN drinks_included_count INTEGER;
+
+
+ALTER TABLE birthday_party_packages
+ADD COLUMN perks_for_guest_of_honor TEXT;
+
+
+ALTER TABLE birthday_party_packages
+ALTER COLUMN tax_included TYPE BOOLEAN USING (tax_included <> 0);
+
+
+ALTER TABLE birthday_party_packages
+DROP COLUMN birthday_party_booking_lead_allowed_days;
+
+ALTER TABLE birthday_party_packages
+ALTER COLUMN birthday_party_reschedule_allowed_days DROP NOT NULL;
+
+
+
+
+
+
+CREATE TABLE items_food_drinks (
+    item_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    category VARCHAR(100) NOT NULL,
+    category_priority INTEGER DEFAULT 0,
+    category_type VARCHAR(101),
+    options_type_per_category VARCHAR(100),
+    
+    item VARCHAR(255) NOT NULL,
+    price NUMERIC(10,2),
+    
+    additional_instructions TEXT,
+    
+    t_shirt_sizes VARCHAR(255),
+    t_shirt_type VARCHAR(100),
+    
+    pitch_in_party_package BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE INDEX idx_items_food_drinks_location_category ON items_food_drinks(location_id, category);
+CREATE INDEX idx_items_food_drinks_category ON items_food_drinks(category);
+CREATE INDEX idx_items_food_drinks_pitch_in_party_package ON items_food_drinks(pitch_in_party_package);
+CREATE INDEX idx_items_food_drinks_category_priority ON items_food_drinks(category_priority);
+
+
+
+
+CREATE TABLE rental_facility (
+    rental_facility_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    rental_jumper_group VARCHAR(255) NOT NULL,
+    call_flow_priority INTEGER NOT NULL,
+    per_jumper_price NUMERIC(10,2) NOT NULL,
+    minimum_jumpers INTEGER NOT NULL,
+    instruction TEXT,
+    inclusions TEXT,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT unique_location_jumper_group UNIQUE (location_id, rental_jumper_group)
+);
+
+-- Index to help ordering by call_flow_priority
+CREATE INDEX idx_rental_facility_call_flow_priority ON rental_facility(call_flow_priority);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Table: promotions
+CREATE TABLE promotions (
+    promotion_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    start_date DATE,
+    end_date DATE,
+    start_day VARCHAR(20),
+    end_day VARCHAR(20),
+    start_time TIME,
+    end_time TIME,
+    
+    schedule_type VARCHAR(20) DEFAULT 'always_active',
+    
+    promotion_code VARCHAR(100),
+    title VARCHAR(255) NOT NULL,
+    details TEXT NOT NULL,
+    
+    category VARCHAR(100) NOT NULL,
+    sub_category VARCHAR(100),
+    
+    eligibility_type VARCHAR(50),
+    constraint_value VARCHAR(255),
+    instructions TEXT,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for promotions
+CREATE INDEX idx_promotions_promotion_code ON promotions(promotion_code);
+CREATE INDEX idx_promotions_start_end_date ON promotions(start_date, end_date);
+CREATE INDEX idx_promotions_category ON promotions(category);
+CREATE INDEX idx_promotions_is_active ON promotions(is_active);
+
+-----------------------------------------------------------------
+
+-- Table: policies
+CREATE TABLE policies (
+    policy_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    policy_type VARCHAR(255) NOT NULL,
+    details TEXT NOT NULL,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT unique_location_policy_type UNIQUE(location_id, policy_type)
+);
+
+-----------------------------------------------------------------
+
+-- Table: faqs
+CREATE TABLE faqs (
+    faq_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    question_type VARCHAR(255) NOT NULL,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-----------------------------------------------------------------
+
+-- Table: group_booking
+CREATE TABLE group_booking (
+    group_booking_id SERIAL PRIMARY KEY,
+    location_id INTEGER NOT NULL REFERENCES myapp_location(location_id) ON DELETE CASCADE,
+    
+    group_packages VARCHAR(255) NOT NULL,
+    call_flow_priority INTEGER NOT NULL,
+    flat_fee_jumper_price NUMERIC(10,2) NOT NULL,
+    minimum_jumpers INTEGER NOT NULL,
+    instruction TEXT,
+    package_inclusions TEXT,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT unique_location_group_packages UNIQUE(location_id, group_packages)
+);
+
+-- Index for ordering by call_flow_priority
+CREATE INDEX idx_group_booking_call_flow_priority ON group_booking(call_flow_priority);

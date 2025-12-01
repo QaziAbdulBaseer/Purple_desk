@@ -11,7 +11,7 @@ class ItemsFoodDrinks(models.Model):
     # Category Fields
     category = models.CharField(max_length=100, blank=False, null=False)
     category_priority = models.IntegerField(default=0, help_text="Priority for category ordering")
-    category_type = models.CharField(max_length=100, blank=True, null=True)
+    category_type = models.CharField(max_length=101, blank=True, null=True)
     options_type_per_category = models.CharField(max_length=100, blank=True, null=True)
     
     # Item Details
