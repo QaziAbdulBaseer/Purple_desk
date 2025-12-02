@@ -36,19 +36,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'myapp',
-]
+    'myapp.apps.MyappConfig',
+    ]
 
 AUTH_USER_MODEL = 'myapp.User'
 
 
 # -------------------------
 # JWT
-# -------------------------
+# ------------------------- 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
