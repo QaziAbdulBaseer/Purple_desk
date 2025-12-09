@@ -1,9 +1,3 @@
-# <!-- jump pass instructions are missing -->
-# <!-- membership flow is missing -->
-# <!-- issue in: Short Notice Birthday Party Booking. The booking day before is static. it shoule be dynamic -->
-# <!-- the food options like pizza, party trays and drinks should be like {food} options and then other {food} options -->
-# <!-- minimum number of jumpers and food inclusion count in the package need to be made dynamic also -->
-# <!-- t-shirts flow needs to be tested -->
 
 import os
 from datetime import datetime
@@ -20,7 +14,7 @@ from myapp.views.Get_prompt.Get_Static_text_functions import starting_guidelines
 from myapp.views.Get_prompt.Get_Static_text_functions import current_time_information
 from myapp.views.Get_prompt.Get_location_and_available_items import create_location_info_prompt
 from django.http import JsonResponse
-
+from django.conf import settings
 
 async def get_prompt(request, location_id):
     try:
@@ -114,6 +108,8 @@ async def get_prompt(request, location_id):
         save_path = os.path.join("generated_md", filename)
         os.makedirs("generated_md", exist_ok=True)
 
+        markdown_file_url = request.build_absolute_uri(f'{settings.MEDIA_URL}{filename}')
+
         with open(save_path, "w", encoding="utf-8") as f:
             f.write(combined_prompt)
         return JsonResponse({
@@ -130,7 +126,9 @@ async def get_prompt(request, location_id):
             "policies_info": policies_info['formatted_policies'],
             "rental_facility_info": rental_facility_info['formatted_prompt'],
             "birthday_party_packages_info": birthday_party_packages_info['system_message'],
-            "markdown_file_path": save_path
+            # "markdown_file_path": save_path
+            "markdown_file_url": markdown_file_url,
+            "markdown_filename": filename
         }, status=200)
 
 
