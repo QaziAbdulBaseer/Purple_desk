@@ -15,7 +15,6 @@ class Policy(models.Model):
     class Meta:
         db_table = 'policies'
         ordering = ['policy_id']
-        unique_together = ['location', 'policy_type']
         
     def __str__(self):
         return f"{self.policy_type} - {self.location.location_name}"

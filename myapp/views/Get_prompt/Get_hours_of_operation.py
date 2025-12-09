@@ -658,8 +658,13 @@ def is_day_in_range(target_day: str, start_day: str, end_day: str) -> bool:
 async def get_future_special_events_async(df: pd.DataFrame, start_date: datetime) -> List[Dict]:
     """Get future special hours events (excluding those in the 7-day range) - async version"""
     # print("get_future_special_events_async called" , df)
+    # print('test 1')
+    if df.empty:
+        # print('test 2')
+        return []
     def _process_special_events():
         special_events = []
+
         special_hours = df[df["hours_type"] == "special"]
         # print("get_future_special_events_async called")
         # print("This is the special hours df:", special_hours)
@@ -705,6 +710,10 @@ async def get_future_closures_async(df: pd.DataFrame, start_date: datetime) -> L
     # print("get_future_closures_async called" , df)
     # print("get_future_closures_async called" , start_date)
     """Get future closure dates (excluding those in the 7-day range) - async version"""
+    # print('test 1')
+    if df.empty:
+        # print('test 2')
+        return []
     def _process_closures():
         closures = []
         closed_entries = df[df["hours_type"] == "closed"]
@@ -742,6 +751,7 @@ async def get_future_closures_async(df: pd.DataFrame, start_date: datetime) -> L
 
 async def get_future_early_closings_async(df: pd.DataFrame, start_date: datetime) -> List[Dict]:
     """Get future early closing dates (excluding those in the 7-day range) - async version"""
+
     def _process_early_closings():
         early_closings = []
         early_entries = df[df["hours_type"] == "early_closing"]
@@ -858,6 +868,10 @@ async def process_comprehensive_schedule(location_id: int, timezone: str) -> Dic
     hours_df = hours_df.astype(str).apply(lambda x: x.str.strip())
     hours_df.replace(["nan", ""], "", inplace=True)
     
+    # print('test 1')
+    if hours_df.empty:
+        # print('test 2')
+        return {"status": "No data available"}
     # Get current California time
     california_time = await get_california_time(timezone)
     current_date = california_time.date()
@@ -1004,6 +1018,20 @@ async def format_schedule_for_display(schedule_data: Dict) -> str:
             for late in schedule_data["future_late_openings"]:
                 output_lines.append(f"  {late['date']}: Opening late at {late['time']} - {late['reason']}")
         
+
+        output_lines.append("""
+**Discounts:**
+- a 15% discount is available for military personnel and first responders, valid on tickets and parties only..
+- get 15% off when booking a party through the app from monday to thursday using the code 10-b-day-week.
+elite members receive 20% off on party bookings.
+**Critical Rules:**
+- ALWAYS check closures first for the specific calculated date
+- CALCULATE actual dates for future day requests from 2025-12-08 ( 08 December, 2025 )
+- Special hours override regular hours completely
+- Never mention unavailable programs
+- Always ask about visit purpose
+### End of Hours of Operation Inquiry Process ###
+        """)
         return "\n".join(output_lines)
     
     loop = asyncio.get_event_loop()
@@ -1017,9 +1045,10 @@ async def get_hours_of_operation_info(location_id: int, timezone: str) -> str:
     Main function to get formatted hours of operation information
     """
     schedule_data = await process_comprehensive_schedule(location_id, timezone)
+    if "status" in schedule_data and schedule_data["status"] == "No data available":
+        return "No hours of operation data available for this location."
     formatted_output = await format_schedule_for_display(schedule_data)
     return formatted_output
-
 
 
 

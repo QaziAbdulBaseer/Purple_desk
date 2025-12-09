@@ -147,6 +147,15 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
     summary.append("### Start of Birthday Party Packages Data:")
     summary.append("### Bithday Party Packages Data:")
     
+    if not party_data["packages_by_schedule"]:
+        summary.append("No Birthday Party Packages available for this location.")
+        summary.append("### End of Birthday Party Packages Data")
+        return {
+            "epic_package_section": "",
+            "epic_package_step": "",
+            "other_packages_step": "",
+            "birthday_party_info": "\n".join(summary)
+        }
     # Process packages by schedule type
     for schedule_type, packages in party_data["packages_by_schedule"].items():
         if not packages:
@@ -222,6 +231,11 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
             
             # Additional jumper cost
             package_lines.append(f"- Additional Jumper Cost: $ ${package['each_additional_jumper_price']} each.")
+            package_lines.append("""
+- Additional Hour of Jump Time After Party Room / Party Space / Open Air Party Time(addon): $19.99 per jumper (if a customer adds an extra hour of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.).
+- Additional Half Hour of Jump Time After Party Room /Party Space/Open Air Party Time(addon): $ 8.99 per jumper (if a customer adds an extra 30 minutes of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.) .
+- Get a free basic balloon package or use your $50.0 balloon credit for larger package with code mega-fifty.    
+        """)
             
             # Balloon credit/inclusions
             if package['balloon_package_included']:
@@ -275,6 +289,12 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
     Donot Mention or mention epic party package if already explained
     {other_packages_highlight}
     Which package would you like to hear more details about?"
+
+
+    **When customer asks for details of any specific birthday party package:**
+    - Explain the duration breakdown (jump time + party room time or party space time or open air time depending upon the package)
+    - Focus on explaining minimum jumpers,Food and drinks included in Package, paper goods, skysocks, Desserts and Cakes Policy, Outside Food Fee(Policy), Birthday Package Perks,additional hour if any,Additional Jumper Cost clearly
+    - Reference current birthday party package data for all specifics
     """
     
     return {
@@ -485,6 +505,8 @@ async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Di
     
     # Get location name
     location = await sync_to_async(Location.objects.get)(location_id=location_id)
+
+    print("This is the location data = = " , location)
     
     # Create the complete system message
     system_message = await create_birthday_party_system_message(
@@ -506,26 +528,251 @@ async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Di
         }
     }
 
-async def create_birthday_party_system_message(
-    birthday_info: Dict,
-    balloon_info: Dict,
-    food_info: Dict,
-    location_name: str
-) -> str:
+
+# async def current_time_information(timezone_name):
+#         try:
+#             tz = pytz.timezone(timezone_name)
+#         except Exception:
+#             print(f"Invalid timezone: {timezone_name}")
+#             return
+        
+#         now = datetime.now(tz)
+
+#         today_date_iso = now.strftime("%Y-%m-%d")
+#         today_date_long = now.strftime("%d %B, %Y")
+#         current_time = now.strftime("%I:%M %p")
+#         day_name = now.strftime("%A")
+
+#         text = f"""
+#     Today Date: {today_date_iso} ({today_date_long}, {day_name})
+#     """
+#         print(text)
+#         return text
+
+
+from datetime import datetime
+import pytz
+
+async def current_time_information(timezone_name: str) -> str:
+    try:
+        tz = pytz.timezone(timezone_name)
+    except Exception:
+        print(f"Invalid timezone: {timezone_name}, defaulting to UTC")
+        tz = pytz.UTC  # fallback to UTC instead of returning None
+
+    now = datetime.now(tz)
+    today_date_iso = now.strftime("%Y-%m-%d")
+    today_date_long = now.strftime("%d %B, %Y")
+    current_time = now.strftime("%I:%M %p")
+    day_name = now.strftime("%A")
+
+    text = f"Today Date: {today_date_iso} ({today_date_long}, {day_name})"
+    print(text)
+    return text
+
+
+
+# async def create_birthday_party_system_message( birthday_info: Dict, balloon_info: Dict, food_info: Dict, location_name: str) -> str:
+#     """
+#     Create the complete birthday party flow system message
+#     """
+#     # location =  Location.objects.get(location_id=1)
+
+#     location = await sync_to_async(Location.objects.get)(location_id=1)
+
+#     location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
+#     print("This is the FULL location data inside birthday party system message ==", location_data)
+#     print("This is the location name inside birthday party system message ==", location_data['location_name'] )   
+#     party_booking_days=location_data['party_booking_allowed_days_before_party_date'],
+#     party_reschedule_days=location_data['party_reschedule_allowed_before_party_date_days'],
+
+        
+   
+#     current_time_informations = await current_time_information("Asia/Karachi")
+#     # Base template (you can load this from a template file or keep it as a string)
+#     base_template = """
+# ####### Start of Birthday Party Flow #########
+# *IMPORTANT GUIDELINES:*
+# -Always check schedule availability and location closures in hours of operation for the requested date before recommending party packages
+# - Only book birthday parties scheduled at least {party_booking_days} days from today {current_time_informations}. If the requested date doesn't meet this requirement, proceed to *Short Notice Birthday Party Booking Step*.
+# - Only accept birthday party bookings for dates at least {location_data.party_reschedule_days} days from today date:{current_time_informations} as Birthday Party bookings require at least {party_booking_days} days advance notice. If the requested birthday party booking date is sooner, proceed to *Short Notice Birthday Party Booking Step*.
+# - Never mention package prices during explanation (except for additional jumper price). Only mention price of a package if user explicitly asks for it or while booking the package you are allowed to mention all prices.
+# - Keep conversations personalized and engaging by using the birthday child's name throughout
+# - ALWAYS present the birthday packages, memberships and jump passes detail in conversational language
+# **Critical Date Collection Procedure for Birthday party packages:**
+# MANDATORY STEP: Search through the ENTIRE conversation history for ANY mention of a specific day or date. This includes:
+# - User asking "What are your hours for [specific day]?"
+# - User mentioning "I want to come on [day]"
+# - User asking "Are you open on [day]?"
+# - User saying "tomorrow", "today", "this weekend", "any week days" etc.
+# - ANY reference to when they want to visit
+# If day or date is mentioned in the entire conversation history:
+# - If there is mention of date or today or tomorrow, convert date to day name using this function:
+# - Use function: identify_day_name_from_date_new_booking()
+# -Parameters: booking_date: [YYYY-mm-dd format]
+# - Skip any date collection step in birthday party flow
+# ---
+# ## Short Notice Birthday Party Booking:
+# Bookings require at least {party_booking_days} days advance notice. For shorter notice, location confirmation is needed.
+# Step 1.0: Inform user: "Our party bookings typically require at least 3 days advance notice. Since your [requested date] falls under short notice, we'll need to confirm availability with our location team."
+# Step 1.1: Say exactly: "Regarding your booking request, should I connect you with one of our team members?"
+# Step 1.2: If user confirms (yes/similar), call transfer_call_to_agent()
+# - transfer_reason: "Short notice booking request for [user requested date]"
+# ---
+# ## *ALREADY BOOKED BIRTHDAY PARTY AND WANTS CHANGES IN ALREADY MADE BIRTHDAY PARTY BOOKING*
+# *If customer has already made a party reservation or wants to add-on food or make changes to their already booked birthday party package:*
+# *Examples already reservered party booking scenarios (These scenarios are different from new booking.In new bookings user can make changes because you have the ability to create new birthday bookings):*
+# - "I already have a booking and want to add food"
+# - "I need to make changes to my birthday party booking (already reserved)"
+# - "Can I add more food to my already reserved party package?"
+# - "I want to modify my already reserved birthday party reservation"
+# - "I had a party booked and need to add items"
+# - "I want to upgrade my already booked/reserved birthday party package?
+# Step 1.1: Say exactly: Regarding your [already booked party modification request], Should I connect you with one of our team member
+# Step 1.2: If user says yes or similar confirmation to transfer**
+# Use function: transfer_call_to_agent()
+# - transfer_reason: "Birthday Party Modification"
+# *Skip all other steps and transfer immediately for already booked Party booking modifications.*
+# ---
+# ## Direct Booking Scenario
+# If the user directly asks to book a specific birthday party by name
+# (e.g., "I want to book an Epic Birthday Party Package" or "Book me a Basic Birthday Party Package"):
+# **Step 1: You must say Exactly: Regarding [user booking query] I will connect you to our team member**
+# **Step 2: Confirm and Transfer**
+# Use function: transfer_call_to_agent()
+# - transfer_reason: "Direct Booking Request"
+# **Note:**
+# Skip the full 6-step process for direct booking requests and go straight to agent transfer.
+# ### 6-Step Birthday Party Sales Process
+# If the user says they are interested in booking a birthday party package (e.g., "book a party", "I want to book a birthday party package", "I want to reserve a birthday party package"):
+# **Step 1: Ask user "You want to book a birthday party package or get general information about the packages?"**
+# If the user wants to **book a package**:
+# Step 1.1: Say exactly: Regarding your [booking request], Should I connect you with one of our team member
+# Step 1.2: If user says yes or similar confirmation to transfer**
+# → Use function: `transfer_call_to_agent()`
+# - `transfer_reason`: "Direct Booking Request"
+# - Skip the remaining sales process and go straight to agent transfer.
+# If the user wants **general information**, Go to *Step 2: Identify Date or Day*.
+# ---
+# ## Step 2: Identify Date or Day on which user wants to book the party *Mandatory Step*
+# Ask when the customer wants to celebrate the birthday.
+# At any point, if the user specifies a date like "today", "tomorrow", or "on 2025-06-17",
+# convert it to a day name using:
+# - use function: identify_day_name_from_date_new_booking()
+# - Parameters: booking_date: [YYYY-mm-dd format]
+# **If the message already includes a day/date:**
+# - Acknowledge: "So you're planning to celebrate on [day/date]!"
+# - Check schedule availability.
+# - Move to Step 3.
+# **If not:**
+# - Ask: "When you would like to book the [PACKAGE NAME]?"
+# - Wait for the response, acknowledge it, and check availability.
+# - Don't proceed to Step 3 until the date is confirmed.
+# **Skip the question if user says:**
+# - "Do you have a birthday party package for Saturday?"
+# - "What's available this weekend?"
+# - "Can I book for tomorrow?"
+# - "I want to celebrate on Friday."
+# **Ask the question if user says:**
+# - "Do you have birthday party packages?"
+# - "What birthday party packages are available?"
+# - "I'm interested in your birthday packages."
+# {birthday_epic_step}
+# {birthday_epic_deep_dive}
+# {birthday_other_packages_step}
+# ---
+# ## *STEP 5: Package Selection & Personalization*
+# Help them choose with calmness
+# "What package sounds like the perfect fit for your special celebration?
+# After a birthday party package is chosen move to *STEP 6: Securing the Booking*
+# ---
+# ## *STEP 6: Securing the Booking*
+# Close with care and clear expectations
+# "Great you've chosen [SELECTED PACKAGE]! Now, let me walk you through how we secure this amazing celebration for you.
+# *Deposit for Securing your booking:*
+# - We require a None deposit to hold your party date
+# - You'll have 24 hours to complete this deposit
+# - This secures everything we've discussed today
+# **Package Recap:**
+# Summarize only:
+# - Party Package Name
+# - Price
+# - Additional Jumper Cost
+# **Cancellation Policy (only if asked):**
+# *Our Cancellation Policy* (explained with empathy) [Only Explain Birthday party cancellation policy if user ask for it]:
+# I know life can be unpredictable sometimes, so here's our policy:
+# - Cancel None+ days before: Full refund to your original payment method
+# - Cancel less than None days before: Deposit is non-refundable (we'll have already prepared everything for your party)
+# *Pro Tips for Your Party:*
+# - Arrive 15-30 minutes early (the birthday calmness is contagious!)
+# Ask the user:
+# Are you ready to make this birthday absolutely unforgettable? Should we move forward with securing your booking?"
+# ---
+# ## *BOOKING CONFIRMATION & TRANSFER*
+# When customer confirms booking:
+# Step 1:*Use function: transfer_call_to_agent()*
+# Use function: transfer_call_to_agent()
+# - transfer_reason: "[user selected party package] Reservation ,Date for Booking: [Date for Party Booking]"
+# ---
+# {food_section}
+# ---
+# {birthday_party_data_section}
+# ---
+# {balloon_section}
+# ---
+# ####### End of Birthday Party Flow #########
+# """
+    
+#     # Replace placeholders with actual data
+#     system_message = base_template.format(
+#         birthday_epic_step=birthday_info.get('epic_package_step', ''),
+#         birthday_epic_deep_dive=birthday_info.get('epic_package_section', ''),
+#         birthday_other_packages_step=birthday_info.get('other_packages_step', ''),
+#         birthday_party_data_section=birthday_info.get('birthday_party_info', ''),
+#         balloon_section=balloon_info.get('balloon_section', ''),
+#         food_section=food_info.get('food_section', ''),
+#         party_booking_days=party_booking_days,
+#         party_reschedule_days=party_reschedule_days,
+#         current_time_informations=current_time_informations,
+#         location_data
+#     )
+    
+#     return system_message
+
+
+async def create_birthday_party_system_message(birthday_info: Dict, balloon_info: Dict, food_info: Dict, location_name: str) -> str:
     """
     Create the complete birthday party flow system message
     """
+    location = await sync_to_async(Location.objects.get)(location_id=1)
     
-    # Base template (you can load this from a template file or keep it as a string)
+    location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
+    print("This is the FULL location data inside birthday party system message ==", location_data)
+    print("This is the location name inside birthday party system message ==", location_data['location_name'])   
+    
+    # FIXED: Access dictionary keys correctly (no trailing commas)
+    party_booking_days = location_data['party_booking_allowed_days_before_party_date']
+    party_reschedule_days = location_data['party_reschedule_allowed_before_party_date_days']
+    
+    # Also need to handle timezone properly
+    try:
+        current_time_informations = await current_time_information('Asia/Karachi')
+        print(f"Timezone set to Asia/Karachi, current time info: {current_time_informations}")
+    except Exception as e:
+        print(f"Timezone error: {e}, using default")
+        current_time_informations = await current_time_information("America/New_York")
+    
+    # Base template
     base_template = """
 ####### Start of Birthday Party Flow #########
 *IMPORTANT GUIDELINES:*
--Always check schedule availability and location closures in hours of operation for the requested date before recommending party packages
-- Only book birthday parties scheduled at least 3 days from today (2025-12-02 ( 02 December, 2025 ), Tuesday). If the requested date doesn't meet this requirement, proceed to *Short Notice Birthday Party Booking Step*.
-- Only accept birthday party bookings for dates at least 3 days from today date:(2025-12-02 ( 02 December, 2025 ),today day: Tuesday) as Birthday Party bookings require at least 3 days advance notice. If the requested birthday party booking date is sooner, proceed to *Short Notice Birthday Party Booking Step*.
+- Always check schedule availability and location closures in hours of operation for the requested date before recommending party packages
+- Only book birthday parties scheduled at least {party_booking_days} days from today {current_time_informations}. If the requested date doesn't meet this requirement, proceed to *Short Notice Birthday Party Booking Step*.
+- Only accept birthday party bookings for dates at least {party_reschedule_days} days from today date:{current_time_informations} as Birthday Party bookings require at least {party_booking_days} days advance notice. If the requested birthday party booking date is sooner, proceed to *Short Notice Birthday Party Booking Step*.
 - Never mention package prices during explanation (except for additional jumper price). Only mention price of a package if user explicitly asks for it or while booking the package you are allowed to mention all prices.
 - Keep conversations personalized and engaging by using the birthday child's name throughout
 - ALWAYS present the birthday packages, memberships and jump passes detail in conversational language
+
 **Critical Date Collection Procedure for Birthday party packages:**
 MANDATORY STEP: Search through the ENTIRE conversation history for ANY mention of a specific day or date. This includes:
 - User asking "What are your hours for [specific day]?"
@@ -533,18 +780,21 @@ MANDATORY STEP: Search through the ENTIRE conversation history for ANY mention o
 - User asking "Are you open on [day]?"
 - User saying "tomorrow", "today", "this weekend", "any week days" etc.
 - ANY reference to when they want to visit
+
 If day or date is mentioned in the entire conversation history:
 - If there is mention of date or today or tomorrow, convert date to day name using this function:
 - Use function: identify_day_name_from_date_new_booking()
--Parameters: booking_date: [YYYY-mm-dd format]
+- Parameters: booking_date: [YYYY-mm-dd format]
 - Skip any date collection step in birthday party flow
+
 ---
 ## Short Notice Birthday Party Booking:
-Bookings require at least 3 days advance notice. For shorter notice, location confirmation is needed.
-Step 1.0: Inform user: "Our party bookings typically require at least 3 days advance notice. Since your [requested date] falls under short notice, we'll need to confirm availability with our location team."
+Bookings require at least {party_booking_days} days advance notice. For shorter notice, location confirmation is needed.
+Step 1.0: Inform user: "Our party bookings typically require at least {party_booking_days} days advance notice. Since your [requested date] falls under short notice, we'll need to confirm availability with our location team."
 Step 1.1: Say exactly: "Regarding your booking request, should I connect you with one of our team members?"
 Step 1.2: If user confirms (yes/similar), call transfer_call_to_agent()
 - transfer_reason: "Short notice booking request for [user requested date]"
+
 ---
 ## *ALREADY BOOKED BIRTHDAY PARTY AND WANTS CHANGES IN ALREADY MADE BIRTHDAY PARTY BOOKING*
 *If customer has already made a party reservation or wants to add-on food or make changes to their already booked birthday party package:*
@@ -555,11 +805,13 @@ Step 1.2: If user confirms (yes/similar), call transfer_call_to_agent()
 - "I want to modify my already reserved birthday party reservation"
 - "I had a party booked and need to add items"
 - "I want to upgrade my already booked/reserved birthday party package?
+
 Step 1.1: Say exactly: Regarding your [already booked party modification request], Should I connect you with one of our team member
 Step 1.2: If user says yes or similar confirmation to transfer**
 Use function: transfer_call_to_agent()
 - transfer_reason: "Birthday Party Modification"
 *Skip all other steps and transfer immediately for already booked Party booking modifications.*
+
 ---
 ## Direct Booking Scenario
 If the user directly asks to book a specific birthday party by name
@@ -570,6 +822,7 @@ Use function: transfer_call_to_agent()
 - transfer_reason: "Direct Booking Request"
 **Note:**
 Skip the full 6-step process for direct booking requests and go straight to agent transfer.
+
 ### 6-Step Birthday Party Sales Process
 If the user says they are interested in booking a birthday party package (e.g., "book a party", "I want to book a birthday party package", "I want to reserve a birthday party package"):
 **Step 1: Ask user "You want to book a birthday party package or get general information about the packages?"**
@@ -579,7 +832,9 @@ Step 1.2: If user says yes or similar confirmation to transfer**
 → Use function: `transfer_call_to_agent()`
 - `transfer_reason`: "Direct Booking Request"
 - Skip the remaining sales process and go straight to agent transfer.
+
 If the user wants **general information**, Go to *Step 2: Identify Date or Day*.
+
 ---
 ## Step 2: Identify Date or Day on which user wants to book the party *Mandatory Step*
 Ask when the customer wants to celebrate the birthday.
@@ -587,65 +842,81 @@ At any point, if the user specifies a date like "today", "tomorrow", or "on 2025
 convert it to a day name using:
 - use function: identify_day_name_from_date_new_booking()
 - Parameters: booking_date: [YYYY-mm-dd format]
+
 **If the message already includes a day/date:**
 - Acknowledge: "So you're planning to celebrate on [day/date]!"
 - Check schedule availability.
 - Move to Step 3.
+
 **If not:**
 - Ask: "When you would like to book the [PACKAGE NAME]?"
 - Wait for the response, acknowledge it, and check availability.
 - Don't proceed to Step 3 until the date is confirmed.
+
 **Skip the question if user says:**
 - "Do you have a birthday party package for Saturday?"
 - "What's available this weekend?"
 - "Can I book for tomorrow?"
 - "I want to celebrate on Friday."
+
 **Ask the question if user says:**
 - "Do you have birthday party packages?"
 - "What birthday party packages are available?"
 - "I'm interested in your birthday packages."
+
 {birthday_epic_step}
 {birthday_epic_deep_dive}
 {birthday_other_packages_step}
+
 ---
 ## *STEP 5: Package Selection & Personalization*
 Help them choose with calmness
 "What package sounds like the perfect fit for your special celebration?
 After a birthday party package is chosen move to *STEP 6: Securing the Booking*
+
 ---
 ## *STEP 6: Securing the Booking*
 Close with care and clear expectations
 "Great you've chosen [SELECTED PACKAGE]! Now, let me walk you through how we secure this amazing celebration for you.
+
 *Deposit for Securing your booking:*
 - We require a None deposit to hold your party date
 - You'll have 24 hours to complete this deposit
 - This secures everything we've discussed today
+
 **Package Recap:**
 Summarize only:
 - Party Package Name
 - Price
 - Additional Jumper Cost
+
 **Cancellation Policy (only if asked):**
 *Our Cancellation Policy* (explained with empathy) [Only Explain Birthday party cancellation policy if user ask for it]:
 I know life can be unpredictable sometimes, so here's our policy:
-- Cancel None+ days before: Full refund to your original payment method
-- Cancel less than None days before: Deposit is non-refundable (we'll have already prepared everything for your party)
+- Cancel You will receive a full refund in the form of a Sky Zone Gift Card as long as you cancel at least {party_booking_days} days priors to your booking date.+ days before: Full refund to your original payment method
+- Cancel less than You will receive a full refund in the form of a Sky Zone Gift Card as long as you cancel at least {party_booking_days} days priors to your booking date. days before: Deposit is non-refundable (we'll have already prepared everything for your party)
+
 *Pro Tips for Your Party:*
 - Arrive 15-30 minutes early (the birthday calmness is contagious!)
 Ask the user:
 Are you ready to make this birthday absolutely unforgettable? Should we move forward with securing your booking?"
+
 ---
 ## *BOOKING CONFIRMATION & TRANSFER*
 When customer confirms booking:
 Step 1:*Use function: transfer_call_to_agent()*
 Use function: transfer_call_to_agent()
 - transfer_reason: "[user selected party package] Reservation ,Date for Booking: [Date for Party Booking]"
+
 ---
 {food_section}
+
 ---
 {birthday_party_data_section}
+
 ---
 {balloon_section}
+
 ---
 ####### End of Birthday Party Flow #########
 """
@@ -657,7 +928,10 @@ Use function: transfer_call_to_agent()
         birthday_other_packages_step=birthday_info.get('other_packages_step', ''),
         birthday_party_data_section=birthday_info.get('birthday_party_info', ''),
         balloon_section=balloon_info.get('balloon_section', ''),
-        food_section=food_info.get('food_section', '')
+        food_section=food_info.get('food_section', ''),
+        party_booking_days=party_booking_days,
+        party_reschedule_days=party_reschedule_days,
+        current_time_informations=current_time_informations
     )
     
     return system_message

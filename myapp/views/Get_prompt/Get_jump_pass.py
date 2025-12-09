@@ -66,6 +66,11 @@ async def get_jump_pass_info(location_id: int, timezone: str) -> dict:
     
     # Create DataFrames
     df = pd.DataFrame(jump_pass_data)
+    # print("this is df:", df)
+    # print('test 1')
+    if df.empty:
+        # print('test 2')
+        return {"status": "No data available"}
     hours_df = pd.DataFrame(hours_data)
     
     # Use the existing function with the DataFrames
@@ -300,6 +305,181 @@ async def format_jump_passes_for_display(jump_pass_data: Dict, location_name: st
         return await loop.run_in_executor(executor, _format_output)
 
 
+# async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: pd.DataFrame) -> dict:
+#     """
+#     Process jump pass information and format it for the prompt
+#     This function maintains the exact same logic as the Google Sheet version
+#     """
+#     summary = []
+    
+#     # Get unique schedule_with values - handle both string and list types
+#     schedule_with_values = []
+#     for sched in df['schedule_with']:
+#         if isinstance(sched, str) and sched.strip():
+#             # Split comma-separated values and extend the list
+#             schedule_with_values.extend([x.strip() for x in sched.split(',') if x.strip()])
+#         elif isinstance(sched, list):
+#             # If it's already a list, extend directly
+#             schedule_with_values.extend([x for x in sched if x])
+    
+#     # Remove duplicates and get unique values
+#     schedule_with_values = list(set(schedule_with_values))
+    
+#     # Get unique jump types from hours
+#     hours_jump_type_unique_values = []
+#     for jump_type in hours_df['jump_type']:
+#         if pd.notna(jump_type) and str(jump_type).strip():
+#             hours_jump_type_unique_values.append(str(jump_type).strip())
+#     hours_jump_type_unique_values = list(set(hours_jump_type_unique_values))
+    
+#     most_popular_pass_prompt = ""
+#     other_jump_passes_prompt = "### Other Jump pass options"
+#     other_jump_passes_prompt += "\n Please construct Natural Sentences and only List Passes Names"
+    
+#     other_jump_passes_available_always = ""
+#     other_jump_passes_available_certain_days = ""
+#     other_jump_passes_donot_mention_until_asked = ""
+
+#     ## case birthday package is available for jump type but jump pass is not available
+#     jump_passes_available_for_jumping = []
+    
+#     for sched in schedule_with_values:
+#         # Filter DataFrame for this schedule - check if schedule_with contains the value
+#         df_sched = df[df['schedule_with'].apply(
+#             lambda x: sched in (x.split(',') if isinstance(x, str) else x) if pd.notna(x) else False
+#         )]
+        
+#         if df_sched.empty:
+#             continue
+            
+#         # Create clean section header
+#         clean_sched_name = re.sub(r'[^a-zA-Z0-9\s]', ' ', sched).strip()
+#         clean_sched_name = re.sub(r'\s+', ' ', clean_sched_name)
+#         section_title = clean_sched_name.replace(' ', ' ').title()
+#         section_title = section_title + " Hours (Session)"
+
+#         scheduling_instruction = f"""Schedule Below Jump passes or Jump tickets with {sched.replace('_',' ')} available in hours of operation for requested date or day - only tell user this pass if available for requested date or day"""
+
+#         summary.append(f"#### {section_title} Jump Passes")
+#         summary.append(scheduling_instruction)
+#         summary.append(f"Passes information that schedule with {section_title}:")
+#         summary.append("")
+
+#         if sched not in jump_passes_available_for_jumping:
+#             jump_passes_available_for_jumping.append(sched)
+        
+#         # Group passes by type for better organization
+#         pass_details = []
+#         for _, row in df_sched.iterrows():
+#             pass_name = row['pass_name']
+#             pass_name_temp = pass_name
+#             temp_recommendations = row["recommendations"]
+#             recommendations = ""
+            
+#             if temp_recommendations and pd.notna(temp_recommendations) and str(temp_recommendations).strip() and str(temp_recommendations) != "nan":
+#                 recommendations = f"({temp_recommendations})"
+                
+#             starting_day = row["starting_day_name"]
+#             ending_day = row["ending_day_name"]
+            
+#             starting_day_and_ending_day = ""
+#             if starting_day and ending_day and pd.notna(starting_day) and pd.notna(ending_day):
+#                 if str(starting_day).strip() and str(ending_day).strip() and str(starting_day).lower() != "nan" and str(ending_day).lower() != "nan":
+#                     starting_day_and_ending_day = f"| Available Days : {starting_day} to {ending_day}"
+            
+#             if recommendations.strip():
+#                 pass_name = f" {pass_name}  {recommendations}   " 
+                    
+#             age = row['age_allowed']
+#             jump_time = row['jump_time_allowed']
+#             # price = str(row['price']).strip().replace('.', ' point ')
+#             price = str(row['price']).strip()
+
+#             # Handle the decimal point replacement
+#             if '.' in price:
+#                 # Split into whole and decimal parts
+#                 parts = price.split('.')
+#                 whole_part = parts[0]
+#                 decimal_part = parts[1] if len(parts) > 1 else ''
+                
+#                 # If decimal part is just '0' or empty, use only whole part
+#                 if decimal_part in ('0', '00', ''):
+#                     price = whole_part
+#                 else:
+#                     # For actual decimals, use ' point '
+#                     price = whole_part + ' point ' + decimal_part
+            
+#             # Now use this formatted price
+#             introductory_pitch = row["pitch_introduction"]
+#             priority = row["pitch_priority"]
+#             availability = row["availability_days"]
+            
+#             # Handle priority - ensure it's integer
+#             try:
+#                 priority_int = int(priority)
+#             except (ValueError, TypeError):
+#                 priority_int = 999  # Default to don't pitch if invalid
+                
+#             if priority_int == 1:
+#                 most_popular_pass_prompt = f"""1. **[Always Present The {introductory_pitch} {jump_time} {pass_name_temp} for {age} First]:**
+#                 - Calculate the day from selected date
+#                 - Present the {introductory_pitch} {jump_time} {pass_name_temp} {recommendations} for {age} as the primary option:
+#                     - **Say Exactly:** "For our most popular pass, the {jump_time} {pass_name_temp} for {age}, you get {jump_time} of jump time for $[price of 90-Minute standard pass]."
+#                     - **Say Exactly Do not change any words:** "We have other jump passes as well - would you like to hear about those options or would you like to purchase the standard pass?"
+#                     - **Say Exactly Do not change any words:**"Just to let you know, memberships offer big savings compared to buying individual passes."""
+                    
+#             elif priority_int == 999:
+#                 # Don't add to prompt - don't mention until asked
+#                 pass
+#             else:
+#                 if availability == "always":
+#                     other_jump_passes_available_always += f"""\n - Pass Name:{pass_name_temp} {recommendations} | Introductory Pitch:{introductory_pitch} | jump time:{jump_time} | ages for: {age} """
+#                 else:
+#                     other_jump_passes_available_certain_days += f"""\n - Pass Name:{pass_name_temp}( {pass_name_temp} is available on certain days Please check schedule of hours of operations before mentioning {pass_name_temp}) {recommendations} | Introductory Pitch:{introductory_pitch} | jump time:{jump_time} | ages for: {age} """
+            
+#             if not isinstance(pass_name, str) or pass_name.strip() == "":
+#                 continue
+            
+#             # Create detailed entry
+#             entry = f"- **{pass_name.strip()}** {starting_day_and_ending_day} | Price : ${price} | Ages Allowed: {age.lower()} | Jump Time: {jump_time}"
+#             pass_details.append(entry)
+
+#         # Add all passes for this schedule type
+#         summary.extend(pass_details)
+#         summary.append("")
+    
+
+#     ### Jump passes which are not present in hours of operation
+#     sessions_not_available_for_jump_passes = list(set(hours_jump_type_unique_values) - set(jump_passes_available_for_jumping))
+    
+#     ## case birthday package is available for jump type but jump pass is not available
+#     if len(sessions_not_available_for_jump_passes) > 0:
+#         for not_available_jump_session in sessions_not_available_for_jump_passes:
+#             summary.append("\n")
+#             clean_sched_name = re.sub(r'[^a-zA-Z0-9\s]', ' ', not_available_jump_session).strip()
+#             clean_sched_name = re.sub(r'\s+', ' ', clean_sched_name)
+#             section_title = clean_sched_name.replace(' ', ' ').title()
+           
+#             summary.append(f"### {section_title} Jump Passes are not offered (Only Mention if user explicitly asks for it)")
+    
+    
+#     other_jump_passes_prompt += "\n" + other_jump_passes_available_always
+#     other_jump_passes_prompt += "\n" + other_jump_passes_available_certain_days 
+#     other_jump_passes_prompt += "\n" + other_jump_passes_donot_mention_until_asked
+    
+#     ### end of jump passes which are not present in hours of operation
+#     jump_passes_information = {
+#         "jump_passes_info": "\n".join(summary),
+#         "most_popular_pass_prompt": most_popular_pass_prompt,
+#         "other_jump_passes_prompt": other_jump_passes_prompt,
+#     }
+
+#     # print("This is jump passes information:", jump_passes_information['jump_passes_info'])
+
+#     return jump_passes_information
+
+
+
 async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: pd.DataFrame) -> dict:
     """
     Process jump pass information and format it for the prompt
@@ -337,6 +517,9 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
 
     ## case birthday package is available for jump type but jump pass is not available
     jump_passes_available_for_jumping = []
+    
+    # Store pass names by priority for easy access
+    pass_names_by_priority = {}
     
     for sched in schedule_with_values:
         # Filter DataFrame for this schedule - check if schedule_with contains the value
@@ -387,7 +570,6 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
                     
             age = row['age_allowed']
             jump_time = row['jump_time_allowed']
-            # price = str(row['price']).strip().replace('.', ' point ')
             price = str(row['price']).strip()
 
             # Handle the decimal point replacement
@@ -414,12 +596,15 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
                 priority_int = int(priority)
             except (ValueError, TypeError):
                 priority_int = 999  # Default to don't pitch if invalid
-                
+            
+            # Store pass name by priority
+            pass_names_by_priority[priority_int] = pass_name_temp
+            
             if priority_int == 1:
                 most_popular_pass_prompt = f"""1. **[Always Present The {introductory_pitch} {jump_time} {pass_name_temp} for {age} First]:**
                 - Calculate the day from selected date
                 - Present the {introductory_pitch} {jump_time} {pass_name_temp} {recommendations} for {age} as the primary option:
-                    - **Say Exactly:** "For our most popular pass, the {jump_time} {pass_name_temp} for {age}, you get {jump_time} of jump time for $[price of 90-Minute standard pass]."
+                    - **Say Exactly:** "For our most popular pass, the {jump_time} {pass_name_temp} for {age}, you get {jump_time} of jump time for ${price}."
                     - **Say Exactly Do not change any words:** "We have other jump passes as well - would you like to hear about those options or would you like to purchase the standard pass?"
                     - **Say Exactly Do not change any words:**"Just to let you know, memberships offer big savings compared to buying individual passes."""
                     
@@ -443,7 +628,11 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
         summary.extend(pass_details)
         summary.append("")
     
-
+    # Build other jump passes prompt
+    other_jump_passes_prompt += "\n" + other_jump_passes_available_always
+    other_jump_passes_prompt += "\n" + other_jump_passes_available_certain_days 
+    other_jump_passes_prompt += "\n" + other_jump_passes_donot_mention_until_asked
+    
     ### Jump passes which are not present in hours of operation
     sessions_not_available_for_jump_passes = list(set(hours_jump_type_unique_values) - set(jump_passes_available_for_jumping))
     
@@ -457,22 +646,241 @@ async def jump_pass_info(df: pd.DataFrame, schedule_with_dict: dict, hours_df: p
            
             summary.append(f"### {section_title} Jump Passes are not offered (Only Mention if user explicitly asks for it)")
     
-    
-    other_jump_passes_prompt += "\n" + other_jump_passes_available_always
-    other_jump_passes_prompt += "\n" + other_jump_passes_available_certain_days 
-    other_jump_passes_prompt += "\n" + other_jump_passes_donot_mention_until_asked
-    
-    ### end of jump passes which are not present in hours of operation
     jump_passes_information = {
         "jump_passes_info": "\n".join(summary),
         "most_popular_pass_prompt": most_popular_pass_prompt,
         "other_jump_passes_prompt": other_jump_passes_prompt,
     }
 
-    # print("This is jump passes information:", jump_passes_information['jump_passes_info'])
-
     return jump_passes_information
 
+
+# async def handle_jump_passes(jump_passes_info, location):
+#     """
+#     Generate the system message for jump passes flow
+#     This function maintains the exact same logic as the Google Sheet version
+#     """
+    
+#     System_Message = f"""
+    
+    
+#         ############ Start Of Jump Passes or Jump Tickets Flow #####################
+        
+#         # Jump Passes Inquiry Flow - Step-by-Step Procedure
+
+#             Your task in jump pass inquiry is to follow all 5 steps in exact order. Each step must be completed fully before moving to the next step.
+
+#             ## Steps Overview:
+#             - Step 1: Identify Date or Day (When the customer wants to jump)
+#             - Step 2: Make Specific Jump passes Recommendations
+#             - Step 3: Final Details and Requirements of Jump passes
+#             - Step 4: Close the Sale
+
+#             ** Critical Date Collection Procedure for Jump Passes:**
+#                 MANDATORY STEP: Search through the ENTIRE conversation history for ANY mention of a specific day or date. This includes:
+#                 - User asking "What are your hours for [specific day]?"
+#                 - User mentioning "I want to come on [day]"
+#                 - User asking "Are you open on [day]?"
+#                 - User saying "tomorrow", "today", "this weekend", etc.
+#                 - ANY reference to when they want to visit
+#                 *If day or date is mentioned in the entire conversation history*
+#                  - if there is mention of  date or today or tomorrow convert date to day name using this function `identify_day_name_from_date()` parameters: date : YYYY-mm-dd format** 
+#                  - Skip any date collection step in jump passes flow
+                
+#             **CRITICAL RULE:** Follow each step completely, wait for user responses, and do **not** skip any step or make recommendations before completing Step 2.
+#             ## SPECIAL CASE: Direct Pass Booking Request
+
+#                 **If user directly asks to book a specific jump pass by name (e.g., "I want to book a 90-minute standard pass" or "Book me a Glow pass"):**
+
+#                 1. **Acknowledge with Calmness:** "*[Show Calmness]* Absolutely! I'd be happy to help you book a [pass name they mentioned]!"
+
+#                 2. **Collect the date:**
+#                 **critical date collection check : Search through the ENTIRE conversation history for ANY mention of a specific day or date **
+#                 - if date or specific day is mentioned:
+#                     "*[Show curiosity]* Do you want to book jump passes for [specific day or date]?"
+#                 - if date or specific day is not mentioned:
+#                     "*[Show curiosity]* Would you like to book this for [specfic day or date they mentioned]?"
+#                     - Wait for their response and acknowledge the date 
+#                 - **At any point: where user specifies date or today or tomorrow convert date to day name using this function `identify_day_name_from_date()` parameters: date : YYYY-mm-dd format**
+
+#                 ##Before finalizing the booking do this##
+#                 **- use func: get_promotions_info()**
+#                     parameters: 
+#                         - user_interested_date: [the date in which user is interested for booking the jump pass format: mm-dd-yyyy], 
+#                         - user_interested_event: [the jump pass in which user is interested],
+#                         - filter_with: [*exactly pass this* "jump_pass"]
+#                 ***
+
+#                 3. **Final Booking Process:**
+#                     "*[show calmness ] * Jump passes can be booked on call or purchased directly from the Sky Zone mobile app."
+#                     Ask user do they want to book jump pass now(on call) or would you like me to share the app link with you via text message
+#                     if selected book now(on call):
+                    
+#                     If user selects "Share App Link"
+#                     Step 1: Say exactly:
+#                         "Great, I will now send you the link. Message and data rates may apply. You can find our privacy policy and terms and conditions at purpledesk dot ai."
+#                     Step 1.1: Ask for consent by saying:
+#                         "Do I have your permission to send you the link now?"
+#                     If the user says yes, proceed to Step 2. If the user says no, do not send the link.
+
+#                     Step 2: Use this function to send the link:
+                                        
+#                     share_website_app_link(
+#                         links_to_share="Jump pass website and app link"
+#                     )
+
+#                 **Skip the full 4-step process for direct booking requests and go straight to final booking process.**
+
+
+#             ---
+
+#             ## Step 1: Identify Date or Day (When the customer wants to jump)
+#             **At any point in step 1: where user specifies date or today or tomorrow convert date to day name using this function `identify_day_name_from_date()` parameters: date : YYYY-mm-dd format  **
+#             **Check first:** Does the customer's message already contain a specific day or date?
+            
+#             **If YES (customer already mentioned a day/date):**
+#             - **Acknowledge with calmness:** "Great! I see you're interested in jumping on [day/date they mentioned]!"
+#             - **Move directly to Step 2**
+
+#             **If NO (customer hasn't mentioned a specific day/date):**
+#             - **Ask exactly:** "So! you are planning to bounce with us for [specfic day or date they mentioned]?"
+
+#             **Wait for the response and acknowledge the date or day with genuine calmness.**
+
+#             **Do not proceed to Step 2 until you receive and acknowledge their response.**
+
+#             ---
+
+#             **Examples of when to skip the question:**
+#             - "Do you have jump passes for Saturday?" → Skip question, acknowledge Saturday
+#             - "What's available for this weekend?" → Skip question, acknowledge weekend  
+#             - "Can I book for tomorrow?" → Skip question, acknowledge tomorrow
+#             - "I want to jump on Friday" → Skip question, acknowledge Friday
+
+#             **Examples of when to ask the question:**
+#             - "Do you have jump passes?" → Ask the question
+#             - "What passes are available?" → Ask the question
+#             - "I'm interested in jumping" → Ask the question
+
+#             ---
+
+#             ## Step 2: Make Specific Jump passes Recommendations
+
+#             > **Only proceed after Step 1 is completed**
+
+
+#             **Process:**
+             
+#             {jump_passes_info['most_popular_pass_prompt']}
+#              2. **If Customer Wants More Options, Then Present The Other Available Options:**
+#                 - Do not mention popular pass(If already explained)
+#                 {jump_passes_info['other_jump_passes_prompt']}
+#                 - Present them in a clear, easy-to-read format (e.g., bullet points or numbered list)
+
+            
+
+#             3. **Then, Ask for Selection:**
+#             - *[show curiosity]* Ask user to select one duration option or jump pass from the highlighted list to determine their needs
+#             - Wait for their response
+
+#             4. **Finally, Provide Detailed Recommendation:**
+#             - If user selected a specific pass, provide full details for that pass
+#             - If user didn't select a pass, recommend the best jump pass based on (jump time preference + availability + their responses from previous steps)
+            
+
+#             **Include in your detailed recommendation response:**
+#             - **Jump Duration:** "[pass name] lets you jump for ___ minutes/hours."
+#             - **Jump pass Price:** "The cost is $___."
+#             - **Jump pass Schedule:** "Available during our operating hours: ___."
+#             - **Jump pass Requirements - Sky Socks:** "Sky Socks are required. You can reuse them if in good condition."
+#             - **Glow pass Requirements (Only explain if user selected glow pass):** "If you're visiting during Glow Night, [please refer to the data and if glow shirt is required to jump then say this: Neon T-shirt (for Glow Events only)]."
+#             **- use func: get_promotions_info()**
+#             parameters: 
+#                 - user_interested_date: [the date in which user is interested for booking the jump pass format: mm-dd-yyyy], 
+#                 - user_interested_event: [the jump pass in which user is interested],
+#                 - filter_with: [*exactly pass this* "jump_pass"]
+
+
+#             **Use this variable for jump passes information:**
+#             {jump_passes_info['jump_passes_info']}
+            
+#             ---
+
+#             ##  Step 3: Explain Jumping Policy Clearly (If not already explained)
+
+#             >  **Clearly state the mandatory items for jumping**
+
+#             **Required Items For Jump passes (Not Included in Jump Pass):**
+#             - Sky Zone waiver must be signed
+#             - Sky Socks need to be purchased separately or old socks can be reused if in good condition)  
+#             - (Please refer to data whether glow t-shirt is required to jump or not if glow shirt is required to jump then say this: Neon T-shirt (for Glow Events only))
+
+#             **Important Policy:**  
+#             "Please note that jump sessions won't be allowed without these required items."
+
+#             ---
+
+#             ## Step 4: Close the Sale
+
+#             > **Ask these closing questions in order to guide the user**
+
+#             **Question 1:** "*[show curiosity ] * Would you like to purchase [selected jump pass]"
+#             **Wait for response.**
+
+#             **If they say YES**
+
+#             **Reservation Information:**
+      
+#             "*[show calmness ] * Jump passes can be booked on call or purchased directly from the Sky Zone mobile app."
+#             Ask user do they want to book jump pass now(on call) or would you like me to share the app link with you via text message
+#             if selected book now(on call):
+#             *Step 1:Ask user to hold*
+#                 Say:"*[Show calmness]* Please hold I am connecting you to booking specialist."
+#                 - Wait for step 1 to complete
+#             *Step 2:*Use function: transfer_call_to_agent()**
+#             *Use function: transfer_call_to_agent()*
+#                 - transfer_reason: "[user selected jump pass + their quantity(if user mentioned on their own but never ask this question) + ages of children(if user mentioned on their own but never ask this question)] Reservation , Date for Booking: [Date for Jump pass Booking]"
+            
+#             If user selects "Share App Link"
+#             Step 1: Say exactly:
+#                 "Great, I will now send you the link. Message and data rates may apply. You can find our privacy policy and terms and conditions at purpledesk dot ai."
+#             Step 1.1: Ask for consent by saying:
+#                 "Do I have your permission to send you the link now?"
+#             If the user says yes, proceed to Step 2. If the user says no, do not send the link.
+
+#             Step 2: Use this function to send the link:
+                                
+#             share_website_app_link(
+#                 links_to_share="Jump pass website and app link"
+#             )
+            
+#             ## Waiver Validity Time:
+#             - The waiver remains valid for one year from the signing date
+#             ---
+
+#             ## Important Execution Notes:
+
+#             **Communication Style:**
+#             - Add periods, commas, and natural pauses to every sentence
+#             - Make sure sentences are clearly separated with proper punctuation
+#             - Use commas to indicate pauses where someone would naturally take a breath
+#             - Show genuine calmness when acknowledging jumper details
+#             - Wait for responses before proceeding to the next step
+#             - use emotions like empathy,warmth and curiosity
+#             - All ages refers to 6 months old child to 99 years old (6 months old and above can use both standard pass and all day pass if available)
+
+#             **Step Management:**
+#             - Complete each step fully before moving forward
+#             - Acknowledge user responses before proceeding
+#             - Do not combine steps or skip ahead
+#             - If user asks questions during any step, answer them but return to complete the current step
+    
+    
+#    ############ End Of Jump Passes or Jump Tickets Flow #####################
+#     """
+#     # print("This is jump pass system message", System_Message)
+#     return 
+    
 
 
 async def handle_jump_passes(jump_passes_info, location):
@@ -698,9 +1106,189 @@ async def handle_jump_passes(jump_passes_info, location):
     
    ############ End Of Jump Passes or Jump Tickets Flow #####################
     """
-    # print("This is jump pass system message", System_Message)
-    return 
+    return System_Message
+
+
+async def get_jump_pass_flow_prompt(location_id: int, timezone: str) -> str:
+    """
+    Main function to generate complete jump pass flow prompt
+    Returns the formatted jump pass flow system message
+    """
     
+    try:
+        # Get jump pass info
+        jump_pass_info_dict = await get_jump_pass_info(location_id, timezone)
+        
+        # Generate the jump pass flow system message
+        if jump_pass_info_dict.get('status', None) == 'No data available':
+            return "No jump pass information available."
 
+        system_message = await handle_jump_passes(jump_pass_info_dict, "Unknown Location")
+        
+        # Extract just the jump pass flow section (between the ### Start and ### End markers)
+        start_marker = "############ Start Of Jump Passes or Jump Tickets Flow #####################"
+        end_marker = "############ End Of Jump Passes or Jump Tickets Flow #####################"
+        # most_popular_pass_prompt
+        # Find the start and end positions
+        start_pos = system_message.find(start_marker)
+        end_pos = system_message.find(end_marker)
+        
+        if start_pos != -1 and end_pos != -1:
+            # Extract the flow section
+            flow_section = system_message[start_pos:end_pos + len(end_marker)]
+            
+            # Now reformat it to match the desired structure
+            # Extract key components from the flow section
+            most_popular_pass_prompt = jump_pass_info_dict.get('most_popular_pass_prompt', '')
+            other_jump_passes_prompt = jump_pass_info_dict.get('other_jump_passes_prompt', '')
+            jump_passes_info = jump_pass_info_dict.get('jump_passes_info', '')
+            
+            # Format the jump pass flow according to the example
+            formatted_prompt = f"""### Jump Pass Flow ###
+## Critical Date Check (Do First, Every Time)
+Search ENTIRE conversation for ANY date/day mention (hours question, "tomorrow", "this weekend", etc.)
+- If found: Convert to day name using "identify_day_name_from_date(date: YYYY-mm-dd)"
+- Always check the date in hours of operation to check location closure before recommending any thing
+- Skip date collection in flow
+---
+## Flow Steps
+### Step 1: Get Jump Date
+**If date already mentioned:** Acknowledge and move to Step 2
+**If not:** "So you're planning to bounce with us for [day/date]?"
+Wait for response.
+### Step 2: Recommend Pass
+**A. If user requests specific pass by name:**
+- Acknowledge: "I'd be happy to help you book [pass name]!"
+- Confirm date (if not already collected)
+- Skip to Step 4 (booking)
+**B. If discovering needs:**
+1. Present most popular pass first:
+{most_popular_pass_prompt}
 
+2. If they want more options:
+{other_jump_passes_prompt}
 
+3. Ask them to select a duration/pass
+
+4. Provide full details for selected/recommended pass:
+- Duration, Price, Schedule, Sky Socks requirement
+- Glow shirt requirement (if Glow pass)
+- **Call:** `get_promotions_info(user_interested_date: mm-dd-yyyy, user_interested_event: [pass name], filter_with: "jump_pass")`
+
+**Use:** {jump_passes_info}
+
+### Step 3: State Requirements (if not explained)
+**Not included in pass:**
+- Sky Zone waiver (valid 1 year)
+- Sky Socks (purchase or reuse if good condition)
+- Neon T-shirt (Glow Events only, if required per data)
+"Jump sessions require these items."
+
+### Step 4: Close Sale
+"Would you like to purchase [selected pass]?"
+**If YES:**
+"Jump passes can be booked on call or via Sky Zone mobile app. Would you prefer to book now on call or receive the app link via text?"
+**If "Book Now or similar statement":**
+1. Ask consent:"Regarding [specific jump pass booking] Should I connect with one of our team members?"
+- if user says yes or similar consent:
+**Call:** `transfer_call_to_agent(transfer_reason: "[pass + quantity/ages if mentioned] Reservation, Date: [date]")`
+**If "Share Link":**
+1. "I'll send the link. Message and data rates may apply. Privacy policy at purpledesk dot ai."
+2. "Do I have your permission to send the link?"
+3. If yes: **Call:** `share_website_app_link(links_to_share: "Jump pass website and app link")`
+---
+## Execution Notes
+- Use natural punctuation, pauses, commas
+- Wait for responses between steps
+
+### Start Of Lost Items Flow ####
+## Lost Item Details Collection Procedure:
+*Ask step-by-step question*
+1. Ask full name of customer
+[Customer provides their Full Name]
+2. Ask Lost item name
+[Customer provides Lost Item Name]
+3. Ask description of lost item
+[Customer provides description of Lost Item]
+4. Ask visiting date when he lost his item
+[Customer provides the date of visit]
+5. Ask user to use this phone number: 123 to contact back or he wants to provide an alternate phone number[must be 10 digits] to contact him back
+[Customer provides his personal 10 digits phone number]
+- you have access to save_lost_items function which will save the lost item details
+Function details:
+- Name: save_lost_items
+- Parameters:
+1.full_name
+2.lost_item_name
+3.description_of_lost_item
+4.visiting_date
+5.phone_number
+### End Of Lost Items Flow ####
+
+"""
+            
+            return formatted_prompt
+        
+        # If markers not found, format directly from components
+        return f"""### Jump Pass Flow ###
+## Critical Date Check (Do First, Every Time)
+Search ENTIRE conversation for ANY date/day mention (hours question, "tomorrow", "this weekend", etc.)
+- If found: Convert to day name using "identify_day_name_from_date(date: YYYY-mm-dd)"
+- Always check the date in hours of operation to check location closure before recommending any thing
+- Skip date collection in flow
+---
+## Flow Steps
+### Step 1: Get Jump Date
+**If date already mentioned:** Acknowledge and move to Step 2
+**If not:** "So you're planning to bounce with us for [day/date]?"
+Wait for response.
+### Step 2: Recommend Pass
+**A. If user requests specific pass by name:**
+- Acknowledge: "I'd be happy to help you book [pass name]!"
+- Confirm date (if not already collected)
+- Skip to Step 4 (booking)
+**B. If discovering needs:**
+1. Present most popular pass first:
+{jump_pass_info_dict.get('most_popular_pass_prompt', '')}
+
+2. If they want more options:
+{jump_pass_info_dict.get('other_jump_passes_prompt', '')}
+
+3. Ask them to select a duration/pass
+
+4. Provide full details for selected/recommended pass:
+- Duration, Price, Schedule, Sky Socks requirement
+- Glow shirt requirement (if Glow pass)
+- **Call:** `get_promotions_info(user_interested_date: mm-dd-yyyy, user_interested_event: [pass name], filter_with: "jump_pass")`
+
+**Use:** {jump_pass_info_dict.get('jump_passes_info', '')}
+
+### Step 3: State Requirements (if not explained)
+**Not included in pass:**
+- Sky Zone waiver (valid 1 year)
+- Sky Socks (purchase or reuse if good condition)
+- Neon T-shirt (Glow Events only, if required per data)
+"Jump sessions require these items."
+
+### Step 4: Close Sale
+"Would you like to purchase [selected pass]?"
+**If YES:**
+"Jump passes can be booked on call or via Sky Zone mobile app. Would you prefer to book now on call or receive the app link via text?"
+**If "Book Now or similar statement":**
+1. Ask consent:"Regarding [specific jump pass booking] Should I connect with one of our team members?"
+- if user says yes or similar consent:
+**Call:** `transfer_call_to_agent(transfer_reason: "[pass + quantity/ages if mentioned] Reservation, Date: [date]")`
+**If "Share Link":**
+1. "I'll send the link. Message and data rates may apply. Privacy policy at purpledesk dot ai."
+2. "Do I have your permission to send the link?"
+3. If yes: **Call:** `share_website_app_link(links_to_share: "Jump pass website and app link")`
+---
+## Execution Notes
+- Use natural punctuation, pauses, commas
+- Wait for responses between steps"""
+        
+    except Exception as e:
+        print(f"Error generating jump pass flow prompt: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return f"Error generating jump pass flow: {str(e)}"
