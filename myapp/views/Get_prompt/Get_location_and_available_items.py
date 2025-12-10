@@ -224,3 +224,5 @@ async def create_location_info_prompt(location_id: int) -> Dict[str, str]:
     except Exception as e:
         print(f"Error in create_location_info_prompt: {str(e)}")
         raise
+
+

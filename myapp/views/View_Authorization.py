@@ -35,34 +35,6 @@ def register_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ---------------------------
-# Custom JWT login (with role + username in token)
-# ---------------------------
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def token_obtain_pair_view(request):
-#     from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-#     serializer = TokenObtainPairSerializer(data=request.data)
-#     if serializer.is_valid():
-#         user = User.objects.get(username=request.data['username'])
-#         refresh = RefreshToken.for_user(user)
-#         refresh['role'] = user.role
-#         refresh['username'] = user.username
-
-#         # return Response({
-#         #     'refresh': str(refresh),
-#         #     'access': str(refresh.access_token),
-#         # }, status=status.HTTP_200_OK)
-#         return Response({
-#             'refresh': str(refresh),
-#             'access': str(refresh.access_token),
-#             'username': user.username,
-#             'role': user.role
-#         }, status=status.HTTP_200_OK)
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 # In your token_obtain_pair_view function

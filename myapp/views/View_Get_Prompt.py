@@ -60,48 +60,29 @@ async def get_prompt(request, location_id):
         create_location_info_prompts = await create_location_info_prompt(location_id)
         # Combined prompt with the complete jump pass flow
         combined_prompt = f"""
-
-# start 1
-
 {starting_guidelines_tests}
-
-# start 2
-
 ## Call Context
 {current_time_informations}
-
 ## Birthday Party Packages
 {birthday_party_packages_info['system_message']}
-
-
 ## Start Of Memberships Flow
 {membership_flow_prompt}
-
 ## end Of Memberships Flow
-
 ## Start Of Jump Passes Flow
 {jump_pass_flow_prompt}
 ## end Of Jump Passes Flow
-
 ## Hours of Operation
 {hours_of_operation_info}
-
 ## Location
-
 {create_location_info_prompts['location_prompt']}
-
-
 ## FAQs
 {faqs_info}
-
 ## Policies
 {policies_info['formatted_policies']}
-
 ## Rental Facilities
 {rental_facility_info['formatted_prompt']}
-
-
 """
+
 
         # Save to markdown file
         filename = f"prompt_{location_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"

@@ -941,7 +941,30 @@ async def format_schedule_for_display(schedule_data: Dict) -> str:
     """Format the schedule data for easy reading - async version"""
     def _format_output():
         output_lines = []
-        
+        output_lines.append("""
+#### Step 1: Identify Day
+- Ask: "What day are you hoping to bounce with us?" (if not mentioned)
+- For dates mentioned, convert to day name using `identify_day_name_from_date(YYYY-mm-dd)`
+#### Step 2: Check Closures FIRST
+- **For TODAY:** Check if 2025-12-10 ( 10 December, 2025 ) is closed
+- **For FUTURE:** Calculate actual date from 2025-12-10 ( 10 December, 2025 ), then check closures
+- **If closed:** Express regret, offer alternatives
+- **If open:** Continue
+#### Step 3: Determine Available Programs
+- Only mention programs scheduled for that specific day
+- Check: Open Jump, Glow, Little Leaper
+#### Step 4: Provide Hours (**Special Hours Priority**)
+- **PRIORITY:** Check special hours for the calculated date FIRST
+- **If special hours exist:** Provide ONLY special hours (don't mention regular)
+- **If no special hours:** Provide regular hours
+- Only list programs available that day
+#### Step 5: Present Discounts
+- Check discount data for the day
+- If no day restriction mentioned, apply to all weekdays
+#### Step 6: Discover Purpose
+- Ask: "Are you planning jump passes or celebrating something special like a birthday?"
+- Respond appropriately based on answer
+**Schedule Reference:**""")    
         # Current info
         output_lines.append("=== CURRENT INFORMATION ===")
         current = schedule_data["current_info"]

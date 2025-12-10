@@ -1,42 +1,4 @@
 
-# # hi, first i am looking data from the google sheet. but now i have a database.
-# # so i want to update this function to get data from database instead of google sheet.
-# # but keep the data processing logic same as before.
-# # just change the data fetching part. now fetch data from FAQ model in database.
-
-# # i also give you an example code for the Membership info fetching from database.
-
-
-# import asyncio
-# import pandas as pd
-# from datetime import datetime, timedelta, date
-# from typing import List, Tuple, Dict, Optional
-# from concurrent.futures import ThreadPoolExecutor
-# import pytz
-
-# # Import your Django models
-# from myapp.model.hours_of_operations_model import HoursOfOperation
-# from asgiref.sync import sync_to_async
-# from myapp.model.faqs_model import FAQ
-
-
-# async def extract_faqs_for_llm(df: pd.DataFrame) -> str:
-#     summary = []
-    
-#     grouped = df.groupby('question_type')
-
-#     for category, group in grouped:
-#         summary.append(f"### {category.title()} FAQs:\n")
-#         for _, row in group.iterrows():
-#             question = row.get("question", "").strip()
-#             answer = row.get("answer", "").strip()
-
-#             if question and answer:
-#                 summary.append(f"*Question:* {question}\n*Answer:* {answer}.\n")
-
-#     return "\n".join(summary)
-
-
 
 
 import asyncio
@@ -102,3 +64,5 @@ async def extract_faqs_for_llm(location_id: int) -> str:
                 summary.append(f"*Question:* {question}\n*Answer:* {answer}.\n")
 
     return "\n".join(summary)
+
+

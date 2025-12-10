@@ -85,6 +85,14 @@ async def balloon_party_info(balloon_data: Dict) -> Dict[str, str]:
     # Add header
     balloon_section_lines.append("### Start of Party Balloon Booking Flow ###")
     balloon_section_lines.append("- Present Balloon Packages in in a conversational way")
+    balloon_section_lines.append("""
+*Step 1:*check If user wants to add decorational Balloons to [child name Birthday Party**
+-Ask:"We have some amazing Balloon options that you can add to decorate your [child name] birthday celebration.Do you want to hear about Balloon Packages?"
+- If user says "yes" then proceed to *Step 2*
+*Step 1: Determine whether the user wants to add decorative balloons to [child name]'s birthday party*
+-Ask: "We have some amazing balloon options that can add a festive touch to [child name]'s birthday celebration. Would you like to hear about our Balloon Packages?"
+-If the user responds "yes", proceed to *Step 2*.    
+""")
     
     # Most popular balloon package section
     if balloon_data["most_popular_package"]:
