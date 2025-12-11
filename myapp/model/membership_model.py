@@ -15,7 +15,7 @@ class Membership(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='memberships')
     
     # Required fields
-    title = models.CharField(max_length=255, blank=False, null=False , unique=True)
+    title = models.CharField(max_length=255, blank=False, null=False , unique=False)
     schedule_with = models.JSONField(default=list, null=False, blank=False)
     pitch_priority = models.IntegerField(null=False, blank=False)
     
