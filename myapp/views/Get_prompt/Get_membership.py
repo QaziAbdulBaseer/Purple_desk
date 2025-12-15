@@ -581,7 +581,7 @@ async def get_membership_flow_prompt(location_id: int, timezone: str) -> str:
             # You might need to fetch location name from Location model
             # For now, use the structured data or get it from db
             try:
-                location_obj = await sync_to_async(Location.objects.get)(id=location_id)
+                location_obj = await sync_to_async(Location.objects.get)(location_id=location_id)
                 location_name = location_obj.location_name
             except:
                 # Fallback to getting from membership data

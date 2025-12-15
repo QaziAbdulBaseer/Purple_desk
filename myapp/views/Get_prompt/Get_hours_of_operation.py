@@ -1041,8 +1041,9 @@ async def format_schedule_for_display(schedule_data: Dict) -> str:
             for late in schedule_data["future_late_openings"]:
                 output_lines.append(f"  {late['date']}: Opening late at {late['time']} - {late['reason']}")
         
-
+        output_lines.append("""### End of Hours of Operation Inquiry Process ###""")
         output_lines.append("""
+
 **Discounts:**
 - a 15% discount is available for military personnel and first responders, valid on tickets and parties only..
 - get 15% off when booking a party through the app from monday to thursday using the code 10-b-day-week.
@@ -1053,7 +1054,7 @@ elite members receive 20% off on party bookings.
 - Special hours override regular hours completely
 - Never mention unavailable programs
 - Always ask about visit purpose
-### End of Hours of Operation Inquiry Process ###
+
         """)
         return "\n".join(output_lines)
     

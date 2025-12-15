@@ -2,6 +2,8 @@
 
 
 
+
+
 import pandas as pd
 import re
 import asyncio
@@ -134,7 +136,187 @@ async def format_birthday_party_for_display(party_data: Dict, location_name: str
     with ThreadPoolExecutor() as executor:
         return await loop.run_in_executor(executor, _format_output)
 
-async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
+# async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
+#     """
+#     Process birthday party information and format it for the prompt
+#     This function maintains the exact same logic as the Google Sheet version
+#     """
+#     summary = []
+#     epic_package_section = ""
+#     other_packages_highlight = ""
+    
+#     # Add header
+#     summary.append("### Start of Birthday Party Packages Data:")
+#     summary.append("### Bithday Party Packages Data:")
+    
+#     if not party_data["packages_by_schedule"]:
+#         summary.append("No Birthday Party Packages available for this location.")
+#         summary.append("### End of Birthday Party Packages Data")
+#         return {
+#             "epic_package_section": "",
+#             "epic_package_step": "",
+#             "other_packages_step": "",
+#             "birthday_party_info": "\n".join(summary)
+#         }
+#     # Process packages by schedule type
+#     for schedule_type, packages in party_data["packages_by_schedule"].items():
+#         if not packages:
+#             continue
+            
+#         # Format schedule type for display
+#         clean_sched_name = re.sub(r'[^a-zA-Z0-9\s]', ' ', schedule_type).strip()
+#         clean_sched_name = re.sub(r'\s+', ' ', clean_sched_name)
+#         formatted_schedule_type = clean_sched_name.replace(' ', ' ').title()
+        
+#         # Add schedule type header
+#         summary.append(f"### {formatted_schedule_type} (Session) Birthday Party Packages")
+#         summary.append(f"- Schedule Below Birthday party packages with {schedule_type.lower()} available in hours of operation for requested date or day - only tell user below Birthday Party Packages if available for requested date or day:")
+#         summary.append(f"Birthday Party Pacakges that schedule with {formatted_schedule_type} (Session) :")
+        
+#         for package in packages:
+#             package_name = package['package_name'].upper()
+            
+#             # Build package details
+#             package_lines = []
+#             package_lines.append(f"** {package['package_name']} **")
+#             package_lines.append("- Construct Natural Sentences")
+#             package_lines.append(f"- Minimum Jumpers: minimum of {package['minimum_jumpers']} jumpers jumpers included.")
+#             package_lines.append(f"- Jump Time: {package['jump_time']} of jump time.")
+#             package_lines.append(f"- Party Room Time: {package['party_room_time']} mins of party room (after jump time).")
+            
+#             # Food and drinks
+#             if package['food_and_drinks']:
+#                 package_lines.append(f"- Food and drinks included in Package: {package['food_and_drinks']}")
+#             else:
+#                 package_lines.append(f"- Food and drinks included in Package: no food and drinks included in the {package['package_name']} package.")
+            
+#             # Paper goods
+#             if package['paper_goods']:
+#                 package_lines.append(f"- Paper Goods: {package['paper_goods']}")
+#             else:
+#                 package_lines.append("- Paper Goods: plates, napkins, cups, utensils, cake cutter and lighter are included.")
+            
+#             # Skysocks
+#             if package['skysocks']:
+#                 package_lines.append(f"- Skysocks: {package['skysocks']}.")
+#             else:
+#                 package_lines.append("- Skysocks: included.")
+            
+#             # Dessert policy
+#             if package['dessert_policy']:
+#                 package_lines.append(f"- Desserts and Cakes Policy : {package['dessert_policy']}")
+#             else:
+#                 package_lines.append("- Desserts and Cakes Policy : bring in your own dessert (cupcakes, cake, etc. for ice cream cake the freezer will not be provided).")
+            
+#             # Guest of honor t-shirt
+#             if package['perks_for_guest_of_honor']:
+#                 package_lines.append(f"- *Birthday Child T-shirt*: {package['perks_for_guest_of_honor']}.")
+#             elif 't-shirt' in package.get('other_perks', '').lower():
+#                 package_lines.append("- *Birthday Child T-shirt*: t-shirt for the guest of honor.")
+#             else:
+#                 package_lines.append("- *Birthday Child T-shirt*: no t-shirt for the guest of honor.")
+            
+#             # Outside food fee
+#             if package['outside_food_drinks_fee']:
+#                 package_lines.append(f"- Outside Food Fee(Policy): {package['outside_food_drinks_fee']}")
+#             else:
+#                 package_lines.append("- Outside Food Fee(Policy): no fee for outside food or drinks (you can bring ice cream cake but we will not provide for that).")
+            
+#             # Other perks
+#             if package['other_perks']:
+#                 package_lines.append(f"- Birthday Package Perks: - {package['other_perks']}")
+#             else:
+#                 package_lines.append("- Birthday Package Perks: no perks are included.")
+            
+#             # Price (with instruction)
+#             package_lines.append(f"- Price (Donot mention Birthday Party Package Price until user explicitly ask for it) : $ {package['price']}.")
+            
+#             # Additional jumper cost
+#             package_lines.append(f"- Additional Jumper Cost: $ ${package['each_additional_jumper_price']} each.")
+#             package_lines.append("""
+# - Additional Hour of Jump Time After Party Room / Party Space / Open Air Party Time(addon): $19.99 per jumper (if a customer adds an extra hour of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.).
+# - Additional Half Hour of Jump Time After Party Room /Party Space/Open Air Party Time(addon): $ 8.99 per jumper (if a customer adds an extra 30 minutes of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.) .
+# - Get a free basic balloon package or use your $50.0 balloon credit for larger package with code mega-fifty.    
+#         """)
+            
+#             # Balloon credit/inclusions
+#             if package['balloon_package_included']:
+#                 if package['is_any_balloon_package_is_free'] and package['balloon_party_package']:
+#                     package_lines.append(f"- Get a free {package['balloon_party_package']} balloon package or use your ${package['credit']} balloon credit for larger package with code {package['promotion_code']}.")
+#                 elif package['credit']:
+#                     package_lines.append(f"- ${package['credit']} credit for balloon packages only.")
+            
+#             package_lines.append(".")
+            
+#             # Add to summary
+#             summary.extend(package_lines)
+            
+#             # Check if this is the epic package (priority 1)
+#             if package['birthday_party_priority'] == 1:
+#                 epic_package_section = await _create_epic_package_section(package)
+#             else:
+#                 if other_packages_highlight == "":
+#                     other_packages_highlight = f"*{package['package_name']}*"
+#                 else:
+#                     other_packages_highlight += f", *{package['package_name']}*"
+        
+#         summary.append("")
+    
+#     # see i need all that dymanic. i donot need that hardcoded
+#     # i want you chech the unique schedule types from hours of operations data and then match it with birthday party packages schedule with field
+#     # if a schedule type is present but the schedule type is not present in birthday party packages data then only mention that schedule type is not offered
+#     # then you show that in the text 
+#     # i also give you have example code. you can follow that logic
+
+#     # Add closing
+#     summary.append("### Nan Birthday Party Package is not offered (Only Mention if user explicitly asks for it)")
+#     summary.append("### Sensory Hour Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
+#     summary.append("### Members Only Night Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
+#     summary.append("### Glow Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
+#     summary.append("**only tell the birthday party package if it is present in Birthday Party Packages Data and is available in hours of operations data**")
+#     summary.append("Use hours of operations schedule for checking available Birthday party packages for the calculated day:")
+#     summary.append("### End of Birthday Party Packages Data")
+#     # Create the epic package section
+#     epic_package_step = f"""
+#     ### *STEP 3: [Always Highlight the Most Popular Birthday epic party package First]*
+#     "Perfect! Let me tell you about our most popular *epic party package*!
+#     - Construct Natural Sentences
+#     - minimum of {party_data['epic_package_details']['minimum_jumpers']} jumpers included
+#     - {party_data['epic_package_details']['jump_time']} of jump time
+#     - {party_data['epic_package_details']['party_room_time']} of party room (after jump time)
+#     - Includes everything to make it seamless!
+#     Would you like to learn more about the epic party package or hear about other options?"
+#     """
+    
+#     # Create other packages highlight
+#     other_packages_step = f"""
+#     ### *STEP 4: Present Other Amazing Options*
+#     Only if they ask about other packages Check Availability of Party packages from Schedule for the Calculated Day from Date
+#     - Only mention those Birthday Party packages that are available for the calculated day
+#     "Great question! Based on your date, here are your other options:
+#     ### Other Birthday Party Packages options
+#     Please construct Natural Sentences and only List Down Other Pacakages Names
+#     Donot Mention or mention epic party package if already explained
+#     {other_packages_highlight}
+#     Which package would you like to hear more details about?"
+
+
+#     **When customer asks for details of any specific birthday party package:**
+#     - Explain the duration breakdown (jump time + party room time or party space time or open air time depending upon the package)
+#     - Focus on explaining minimum jumpers,Food and drinks included in Package, paper goods, skysocks, Desserts and Cakes Policy, Outside Food Fee(Policy), Birthday Package Perks,additional hour if any,Additional Jumper Cost clearly
+#     - Reference current birthday party package data for all specifics
+#     """
+    
+#     return {
+#         "epic_package_section": epic_package_section,
+#         "epic_package_step": epic_package_step,
+#         "other_packages_step": other_packages_step,
+#         "birthday_party_info": "\n".join(summary)
+#     }
+
+
+
+async def birthday_party_info(party_data: Dict, hours_of_operation_schedule_types: List[str]) -> Dict[str, str]:
     """
     Process birthday party information and format it for the prompt
     This function maintains the exact same logic as the Google Sheet version
@@ -145,7 +327,7 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
     
     # Add header
     summary.append("### Start of Birthday Party Packages Data:")
-    summary.append("### Bithday Party Packages Data:")
+    summary.append("### Birthday Party Packages Data:")
     
     if not party_data["packages_by_schedule"]:
         summary.append("No Birthday Party Packages available for this location.")
@@ -156,6 +338,7 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
             "other_packages_step": "",
             "birthday_party_info": "\n".join(summary)
         }
+    
     # Process packages by schedule type
     for schedule_type, packages in party_data["packages_by_schedule"].items():
         if not packages:
@@ -169,8 +352,8 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
         # Add schedule type header
         summary.append(f"### {formatted_schedule_type} (Session) Birthday Party Packages")
         summary.append(f"- Schedule Below Birthday party packages with {schedule_type.lower()} available in hours of operation for requested date or day - only tell user below Birthday Party Packages if available for requested date or day:")
-        summary.append(f"Birthday Party Pacakges that schedule with {formatted_schedule_type} (Session) :")
-        
+        summary.append(f"Birthday Party Packages that schedule with {formatted_schedule_type} (Session) :")
+        # print("This is schedule type being processed == " , packages)
         for package in packages:
             package_name = package['package_name'].upper()
             
@@ -178,9 +361,9 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
             package_lines = []
             package_lines.append(f"** {package['package_name']} **")
             package_lines.append("- Construct Natural Sentences")
-            package_lines.append(f"- Minimum Jumpers: minimum of {package['minimum_jumpers']} jumpers jumpers included.")
+            package_lines.append(f"- Minimum Jumpers: minimum of {package['minimum_jumpers']} jumpers included.")
             package_lines.append(f"- Jump Time: {package['jump_time']} of jump time.")
-            package_lines.append(f"- Party Room Time: {package['party_room_time']} mins of party room (after jump time).")
+            package_lines.append(f"- {package['party_environment_name']} Time: {package['party_room_time']} mins of party room (after jump time).")
             
             # Food and drinks
             if package['food_and_drinks']:
@@ -227,13 +410,13 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
                 package_lines.append("- Birthday Package Perks: no perks are included.")
             
             # Price (with instruction)
-            package_lines.append(f"- Price (Donot mention Birthday Party Package Price until user explicitly ask for it) : $ {package['price']}.")
+            package_lines.append(f"- Price (Do not mention Birthday Party Package Price until user explicitly ask for it) : $ {package['price']}.")
             
             # Additional jumper cost
-            package_lines.append(f"- Additional Jumper Cost: $ ${package['each_additional_jumper_price']} each.")
+            package_lines.append(f"- Additional Jumper Cost: $ {package['each_additional_jumper_price']} each.")
             package_lines.append("""
-- Additional Hour of Jump Time After Party Room / Party Space / Open Air Party Time(addon): $19.99 per jumper (if a customer adds an extra hour of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.).
-- Additional Half Hour of Jump Time After Party Room /Party Space/Open Air Party Time(addon): $ 8.99 per jumper (if a customer adds an extra 30 minutes of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.) .
+- Additional Hour of Jump Time After Party Room / Party Space / Open Air Party Time(addon): $19.99 per jumper (if a customer adds an extra hour of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.).
+- Additional Half Hour of Jump Time After Party Room /Party Space/Open Air Party Time(addon): $ 8.99 per jumper (if a customer adds an extra 30 minutes of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.) .
 - Get a free basic balloon package or use your $50.0 balloon credit for larger package with code mega-fifty.    
         """)
             
@@ -260,14 +443,43 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
         
         summary.append("")
     
-    # Add closing
-    summary.append("### Nan Birthday Party Package is not offered (Only Mention if user explicitly asks for it)")
-    summary.append("### Sensory Hour Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
-    summary.append("### Members Only Night Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
-    summary.append("### Glow Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
+    # DYNAMIC CHECK: Find schedule types that exist in hours of operations but NOT in birthday party packages
+    # Get unique schedule types from birthday party packages
+    # print("This is party data == " , party_data)
+    all_packages = []
+    for schedule, packages in party_data.get('packages_by_schedule', {}).items():
+        all_packages.extend(packages)
+
+    # Extract unique 'schedule_with' values
+    unique_schedule_with = set(pkg['schedule_with'] for pkg in all_packages)
+ 
+    # print(unique_schedule_with)
+    birthday_package_schedule_types = set(party_data["packages_by_schedule"].keys())
+    # print("This is birthday package schedule types == " , unique_schedule_with)
+    
+    # Get unique schedule types from hours of operation (passed as parameter)
+    hours_schedule_types = set(hours_of_operation_schedule_types)
+    
+    # Find schedule types that are in hours but NOT in birthday packages
+    schedule_types_not_offered = list(hours_schedule_types - unique_schedule_with)
+    # print("This is schedule types not offered == " , schedule_types_not_offered)
+    
+    # Add sections for schedule types not offered
+    if len(schedule_types_not_offered) > 0:
+        for not_available_schedule in schedule_types_not_offered:
+            # print("This is not available schedule == " , not_available_schedule)
+            # Clean the schedule name for display
+            clean_sched_name = re.sub(r'[^a-zA-Z0-9\s]', ' ', not_available_schedule).strip()
+            clean_sched_name = re.sub(r'\s+', ' ', clean_sched_name)
+            section_title = clean_sched_name.replace(' ', ' ').title()
+            
+            summary.append(f"### {section_title} Birthday Party Package is not offered (Only Mention if user explicitly asks for it)")
+    
+    # Add closing instructions
     summary.append("**only tell the birthday party package if it is present in Birthday Party Packages Data and is available in hours of operations data**")
     summary.append("Use hours of operations schedule for checking available Birthday party packages for the calculated day:")
     summary.append("### End of Birthday Party Packages Data")
+    
     # Create the epic package section
     epic_package_step = f"""
     ### *STEP 3: [Always Highlight the Most Popular Birthday epic party package First]*
@@ -287,8 +499,8 @@ async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
     - Only mention those Birthday Party packages that are available for the calculated day
     "Great question! Based on your date, here are your other options:
     ### Other Birthday Party Packages options
-    Please construct Natural Sentences and only List Down Other Pacakages Names
-    Donot Mention or mention epic party package if already explained
+    Please construct Natural Sentences and only List Down Other Packages Names
+    Do not Mention or mention epic party package if already explained
     {other_packages_highlight}
     Which package would you like to hear more details about?"
 
@@ -357,6 +569,52 @@ from myapp.model.locations_model import Location
 from asgiref.sync import sync_to_async
 from django.db.models import Q
 
+# async def get_birthday_party_packages_info(location_id: int, timezone: str) -> Dict[str, Any]:
+#     """
+#     Main function to get formatted birthday party package information from database
+#     Returns the same structure as the Google Sheet version
+#     """
+    
+#     # Use sync_to_async for database operations
+#     get_location = sync_to_async(lambda: Location.objects.get(location_id=location_id))
+    
+#     @sync_to_async
+#     def get_birthday_packages():
+#         return list(
+#             BirthdayPartyPackage.objects.filter(
+#                 location_id=location_id,
+#                 is_available=True
+#             ).select_related('location', 'balloon_party_package').order_by('birthday_party_priority')
+#         )
+    
+#     @sync_to_async
+#     def get_hours_of_operation():
+#         return list(HoursOfOperation.objects.filter(location_id=location_id))
+    
+#     try:
+#         # Fetch data asynchronously
+#         location = await get_location()
+#         birthday_packages = await get_birthday_packages()
+#         hours_of_operation = await get_hours_of_operation()
+        
+#         # Convert to structured data
+#         structured_data = await get_structured_birthday_party_data(location_id, timezone, birthday_packages, hours_of_operation)
+#         formatted_display = await format_birthday_party_for_display(structured_data, location.location_name)
+        
+#         # Create the prompt sections
+#         party_info_dict = await birthday_party_info(structured_data)
+        
+#         return {
+#             'structured_data': structured_data,
+#             'formatted_display': formatted_display,
+#             'party_info_dict': party_info_dict
+#         }
+#     except Exception as e:
+#         print(f"Error in get_birthday_party_packages_info: {str(e)}")
+#         raise
+
+
+
 async def get_birthday_party_packages_info(location_id: int, timezone: str) -> Dict[str, Any]:
     """
     Main function to get formatted birthday party package information from database
@@ -390,7 +648,8 @@ async def get_birthday_party_packages_info(location_id: int, timezone: str) -> D
         formatted_display = await format_birthday_party_for_display(structured_data, location.location_name)
         
         # Create the prompt sections
-        party_info_dict = await birthday_party_info(structured_data)
+        # Pass hours_schedule_types to birthday_party_info function
+        party_info_dict = await birthday_party_info(structured_data, structured_data["hours_schedule_types"])
         
         return {
             'structured_data': structured_data,
@@ -400,6 +659,99 @@ async def get_birthday_party_packages_info(location_id: int, timezone: str) -> D
     except Exception as e:
         print(f"Error in get_birthday_party_packages_info: {str(e)}")
         raise
+
+
+# async def get_structured_birthday_party_data(
+#     location_id: int, 
+#     timezone: str,
+#     birthday_packages: List[BirthdayPartyPackage],
+#     hours_of_operation: List[HoursOfOperation]
+# ) -> Dict[str, Any]:
+#     """
+#     Get structured birthday party data for formatting
+#     """
+#     # Get location name
+#     get_location = sync_to_async(lambda: Location.objects.get(location_id=location_id))
+#     location = await get_location()
+    
+#     # Get unique schedule types from hours
+#     hours_schedule_types = set()
+#     for hour_obj in hours_of_operation:
+#         if hour_obj.schedule_with and hour_obj.schedule_with != 'closed':
+#             hours_schedule_types.add(hour_obj.schedule_with)
+    
+#     # Organize data
+#     structured_data = {
+#         "total_packages": len(birthday_packages),
+#         "most_popular_package": None,
+#         "packages_by_schedule": {},
+#         "other_available_packages": [],
+#         "do_not_pitch_packages": [],
+#         "available_schedules": list(hours_schedule_types),
+#         "location_name": location.location_name,
+#         "epic_package_details": None
+#     }
+    
+#     # Initialize schedules dictionary
+#     for schedule_type in hours_schedule_types:
+#         structured_data["packages_by_schedule"][schedule_type] = []
+    
+#     # Process each birthday package
+#     for package_obj in birthday_packages:
+#         # Get balloon package name safely
+#         balloon_package_name = ""
+#         if package_obj.balloon_party_package:
+#             balloon_package_name = package_obj.balloon_party_package.package_name
+        
+#         package_data = {
+#             "package_name": package_obj.package_name,
+#             "birthday_party_priority": package_obj.birthday_party_priority,
+#             "availability_days": package_obj.availability_days,
+#             "schedule_with": package_obj.schedule_with,
+#             "minimum_jumpers": package_obj.minimum_jumpers,
+#             "jump_time": package_obj.jump_time,
+#             "party_room_time": package_obj.party_room_time,
+#             "food_and_drinks": package_obj.food_and_drinks,
+#             "paper_goods": package_obj.paper_goods,
+#             "skysocks": package_obj.skysocks,
+#             "dessert_policy": package_obj.dessert_policy,
+#             "other_perks": package_obj.other_perks,
+#             "outside_food_drinks_fee": package_obj.outside_food_drinks_fee,
+#             "price": str(package_obj.price),
+#             "guest_of_honour_included": package_obj.guest_of_honour_included_in_total_jumpers,
+#             "tax_included": package_obj.tax_included,
+#             "each_additional_jumper_price": str(package_obj.each_additional_jumper_price),
+#             "balloon_package_included": package_obj.balloon_package_included,
+#             "promotion_code": package_obj.promotion_code or "",
+#             "credit": str(package_obj.credit) if package_obj.credit else "",
+#             "is_any_balloon_package_is_free": package_obj.is_any_balloon_package_is_free,
+#             "balloon_party_package": balloon_package_name,
+#             "party_environment_name": package_obj.party_environment_name or "",
+#             "food_included_count": package_obj.food_included_count,
+#             "drinks_included_count": package_obj.drinks_included_count,
+#             "perks_for_guest_of_honor": package_obj.perks_for_guest_of_honor or "",
+#             "birthday_party_pitch": package_obj.birthday_party_pitch or "",
+#             "additional_jumpers_allowed": package_obj.Is_additional_jumpers_allowed,
+#             "additional_instructions": package_obj.additional_instructions or ""
+#         }
+        
+#         # Categorize by priority
+#         if package_obj.birthday_party_priority == 1:
+#             structured_data["most_popular_package"] = package_data
+#             structured_data["epic_package_details"] = package_data
+#         elif package_obj.birthday_party_priority == 999:
+#             structured_data["do_not_pitch_packages"].append(package_data)
+#         else:
+#             structured_data["other_available_packages"].append(package_data)
+        
+#         # Add to schedule types
+#         schedule_with = package_obj.schedule_with
+#         if schedule_with and schedule_with != 'closed' and schedule_with in structured_data["packages_by_schedule"]:
+#             structured_data["packages_by_schedule"][schedule_with].append(package_data)
+    
+#     return structured_data
+
+
 
 async def get_structured_birthday_party_data(
     location_id: int, 
@@ -429,7 +781,8 @@ async def get_structured_birthday_party_data(
         "do_not_pitch_packages": [],
         "available_schedules": list(hours_schedule_types),
         "location_name": location.location_name,
-        "epic_package_details": None
+        "epic_package_details": None,
+        "hours_schedule_types": list(hours_schedule_types)  # Add this line
     }
     
     # Initialize schedules dictionary
@@ -493,10 +846,6 @@ async def get_structured_birthday_party_data(
 
 
 
-
-
-
-
 async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Dict[str, Any]:
     """
     Main function to load all birthday party related data and create the complete prompt
@@ -510,7 +859,7 @@ async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Di
     # Get location name
     location = await sync_to_async(Location.objects.get)(location_id=location_id)
 
-    print("This is the location data = = " , location)
+    # print("This is the location data = = " , location)
     location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
 
     if location_data['is_booking_bot']:
@@ -595,7 +944,7 @@ async def current_time_information(timezone_name: str) -> str:
     day_name = now.strftime("%A")
 
     text = f"Today Date: {today_date_iso} ({today_date_long}, {day_name})"
-    print(text)
+    # print(text)
     return text
 
 
@@ -606,8 +955,8 @@ async def create_birthday_party_system_message(birthday_info: Dict, balloon_info
     location = await sync_to_async(Location.objects.get)(location_id=1)
     
     location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
-    print("This is the FULL location data inside birthday party system message ==", location_data)
-    print("This is the location name inside birthday party system message ==", location_data['location_name'])   
+    # print("This is the FULL location data inside birthday party system message ==", location_data)
+    # print("This is the location name inside birthday party system message ==", location_data['location_name'])   
     
     # FIXED: Access dictionary keys correctly (no trailing commas)
     party_booking_days = location_data['party_booking_allowed_days_before_party_date']
@@ -783,7 +1132,7 @@ async def create_birthday_booking_party_system_message(birthday_info: Dict, ball
     location = await sync_to_async(Location.objects.get)(location_id=1)
     
     location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
-    print("This is the FULL location data inside birthday party system message ==", location_data)
+    # print("This is the FULL location data inside birthday party system message ==", location_data)
     # Get party booking days from location data
     party_booking_days = location_data.get('party_booking_allowed_days_before_party_date', 3)
     party_reschedule_days = location_data.get('party_reschedule_allowed_before_party_date_days', 3)
@@ -1080,8 +1429,8 @@ Bot: [If available] "Yes, 2 PM is available! Perfect choice."
 - Answer their question completely and clearly
 - Then IMMEDIATELY return to this step: "Thanks for asking! Now, how many jumpers will be joining [child's name]?"
 - If user is unsure or says "decide later":
-- Use minimum jumpers: 10
-- Say: "No problem! I'll set it to our minimum of 10 jumpers for now, and you can adjust it later."
+- Use minimum jumpers: {minimum_jumpers}
+- Say: "No problem! I'll set it to our minimum of {minimum_jumpers} jumpers for now, and you can adjust it later."
 - **When user specifies number of jumpers:**
 Use function: save_number_of_jumpers_new_booking()
 Parameters: number_of_jumpers: [user specified number or minimum_jumpers:{minimum_jumpers}]
