@@ -2,8 +2,6 @@
 
 
 
-
-
 import pandas as pd
 import re
 import asyncio
@@ -17,9 +15,12 @@ from myapp.model.locations_model import Location
 from asgiref.sync import sync_to_async
 from django.db.models import Q
 
+from datetime import datetime
+import pytz
+
 
 from myapp.views.Get_prompt.Get_balloon_party_packages import get_balloon_party_packages_info
-
+from myapp.views.Get_prompt.Get_roller_id_data import search_roller_customer
 
 from myapp.views.Get_prompt.Get_food_drink import get_food_drinks_info
 
@@ -89,7 +90,7 @@ async def format_birthday_party_for_display(party_data: Dict, location_name: str
             if not packages:
                 output_lines.append("  No packages available for this schedule")
                 continue
-                
+            
             for package in packages:
                 output_lines.append(f"  - {package['package_name']}")
                 output_lines.append(f"    Priority: {package['birthday_party_priority']}")
@@ -135,184 +136,6 @@ async def format_birthday_party_for_display(party_data: Dict, location_name: str
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as executor:
         return await loop.run_in_executor(executor, _format_output)
-
-# async def birthday_party_info(party_data: Dict) -> Dict[str, str]:
-#     """
-#     Process birthday party information and format it for the prompt
-#     This function maintains the exact same logic as the Google Sheet version
-#     """
-#     summary = []
-#     epic_package_section = ""
-#     other_packages_highlight = ""
-    
-#     # Add header
-#     summary.append("### Start of Birthday Party Packages Data:")
-#     summary.append("### Bithday Party Packages Data:")
-    
-#     if not party_data["packages_by_schedule"]:
-#         summary.append("No Birthday Party Packages available for this location.")
-#         summary.append("### End of Birthday Party Packages Data")
-#         return {
-#             "epic_package_section": "",
-#             "epic_package_step": "",
-#             "other_packages_step": "",
-#             "birthday_party_info": "\n".join(summary)
-#         }
-#     # Process packages by schedule type
-#     for schedule_type, packages in party_data["packages_by_schedule"].items():
-#         if not packages:
-#             continue
-            
-#         # Format schedule type for display
-#         clean_sched_name = re.sub(r'[^a-zA-Z0-9\s]', ' ', schedule_type).strip()
-#         clean_sched_name = re.sub(r'\s+', ' ', clean_sched_name)
-#         formatted_schedule_type = clean_sched_name.replace(' ', ' ').title()
-        
-#         # Add schedule type header
-#         summary.append(f"### {formatted_schedule_type} (Session) Birthday Party Packages")
-#         summary.append(f"- Schedule Below Birthday party packages with {schedule_type.lower()} available in hours of operation for requested date or day - only tell user below Birthday Party Packages if available for requested date or day:")
-#         summary.append(f"Birthday Party Pacakges that schedule with {formatted_schedule_type} (Session) :")
-        
-#         for package in packages:
-#             package_name = package['package_name'].upper()
-            
-#             # Build package details
-#             package_lines = []
-#             package_lines.append(f"** {package['package_name']} **")
-#             package_lines.append("- Construct Natural Sentences")
-#             package_lines.append(f"- Minimum Jumpers: minimum of {package['minimum_jumpers']} jumpers jumpers included.")
-#             package_lines.append(f"- Jump Time: {package['jump_time']} of jump time.")
-#             package_lines.append(f"- Party Room Time: {package['party_room_time']} mins of party room (after jump time).")
-            
-#             # Food and drinks
-#             if package['food_and_drinks']:
-#                 package_lines.append(f"- Food and drinks included in Package: {package['food_and_drinks']}")
-#             else:
-#                 package_lines.append(f"- Food and drinks included in Package: no food and drinks included in the {package['package_name']} package.")
-            
-#             # Paper goods
-#             if package['paper_goods']:
-#                 package_lines.append(f"- Paper Goods: {package['paper_goods']}")
-#             else:
-#                 package_lines.append("- Paper Goods: plates, napkins, cups, utensils, cake cutter and lighter are included.")
-            
-#             # Skysocks
-#             if package['skysocks']:
-#                 package_lines.append(f"- Skysocks: {package['skysocks']}.")
-#             else:
-#                 package_lines.append("- Skysocks: included.")
-            
-#             # Dessert policy
-#             if package['dessert_policy']:
-#                 package_lines.append(f"- Desserts and Cakes Policy : {package['dessert_policy']}")
-#             else:
-#                 package_lines.append("- Desserts and Cakes Policy : bring in your own dessert (cupcakes, cake, etc. for ice cream cake the freezer will not be provided).")
-            
-#             # Guest of honor t-shirt
-#             if package['perks_for_guest_of_honor']:
-#                 package_lines.append(f"- *Birthday Child T-shirt*: {package['perks_for_guest_of_honor']}.")
-#             elif 't-shirt' in package.get('other_perks', '').lower():
-#                 package_lines.append("- *Birthday Child T-shirt*: t-shirt for the guest of honor.")
-#             else:
-#                 package_lines.append("- *Birthday Child T-shirt*: no t-shirt for the guest of honor.")
-            
-#             # Outside food fee
-#             if package['outside_food_drinks_fee']:
-#                 package_lines.append(f"- Outside Food Fee(Policy): {package['outside_food_drinks_fee']}")
-#             else:
-#                 package_lines.append("- Outside Food Fee(Policy): no fee for outside food or drinks (you can bring ice cream cake but we will not provide for that).")
-            
-#             # Other perks
-#             if package['other_perks']:
-#                 package_lines.append(f"- Birthday Package Perks: - {package['other_perks']}")
-#             else:
-#                 package_lines.append("- Birthday Package Perks: no perks are included.")
-            
-#             # Price (with instruction)
-#             package_lines.append(f"- Price (Donot mention Birthday Party Package Price until user explicitly ask for it) : $ {package['price']}.")
-            
-#             # Additional jumper cost
-#             package_lines.append(f"- Additional Jumper Cost: $ ${package['each_additional_jumper_price']} each.")
-#             package_lines.append("""
-# - Additional Hour of Jump Time After Party Room / Party Space / Open Air Party Time(addon): $19.99 per jumper (if a customer adds an extra hour of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.).
-# - Additional Half Hour of Jump Time After Party Room /Party Space/Open Air Party Time(addon): $ 8.99 per jumper (if a customer adds an extra 30 minutes of jump time addon to the party booking, the fee and extra hour will apply to every jumper who checked in.) .
-# - Get a free basic balloon package or use your $50.0 balloon credit for larger package with code mega-fifty.    
-#         """)
-            
-#             # Balloon credit/inclusions
-#             if package['balloon_package_included']:
-#                 if package['is_any_balloon_package_is_free'] and package['balloon_party_package']:
-#                     package_lines.append(f"- Get a free {package['balloon_party_package']} balloon package or use your ${package['credit']} balloon credit for larger package with code {package['promotion_code']}.")
-#                 elif package['credit']:
-#                     package_lines.append(f"- ${package['credit']} credit for balloon packages only.")
-            
-#             package_lines.append(".")
-            
-#             # Add to summary
-#             summary.extend(package_lines)
-            
-#             # Check if this is the epic package (priority 1)
-#             if package['birthday_party_priority'] == 1:
-#                 epic_package_section = await _create_epic_package_section(package)
-#             else:
-#                 if other_packages_highlight == "":
-#                     other_packages_highlight = f"*{package['package_name']}*"
-#                 else:
-#                     other_packages_highlight += f", *{package['package_name']}*"
-        
-#         summary.append("")
-    
-#     # see i need all that dymanic. i donot need that hardcoded
-#     # i want you chech the unique schedule types from hours of operations data and then match it with birthday party packages schedule with field
-#     # if a schedule type is present but the schedule type is not present in birthday party packages data then only mention that schedule type is not offered
-#     # then you show that in the text 
-#     # i also give you have example code. you can follow that logic
-
-#     # Add closing
-#     summary.append("### Nan Birthday Party Package is not offered (Only Mention if user explicitly asks for it)")
-#     summary.append("### Sensory Hour Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
-#     summary.append("### Members Only Night Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
-#     summary.append("### Glow Birthday Party Package is not offered (Only Mention if user explicitly asks for it")
-#     summary.append("**only tell the birthday party package if it is present in Birthday Party Packages Data and is available in hours of operations data**")
-#     summary.append("Use hours of operations schedule for checking available Birthday party packages for the calculated day:")
-#     summary.append("### End of Birthday Party Packages Data")
-#     # Create the epic package section
-#     epic_package_step = f"""
-#     ### *STEP 3: [Always Highlight the Most Popular Birthday epic party package First]*
-#     "Perfect! Let me tell you about our most popular *epic party package*!
-#     - Construct Natural Sentences
-#     - minimum of {party_data['epic_package_details']['minimum_jumpers']} jumpers included
-#     - {party_data['epic_package_details']['jump_time']} of jump time
-#     - {party_data['epic_package_details']['party_room_time']} of party room (after jump time)
-#     - Includes everything to make it seamless!
-#     Would you like to learn more about the epic party package or hear about other options?"
-#     """
-    
-#     # Create other packages highlight
-#     other_packages_step = f"""
-#     ### *STEP 4: Present Other Amazing Options*
-#     Only if they ask about other packages Check Availability of Party packages from Schedule for the Calculated Day from Date
-#     - Only mention those Birthday Party packages that are available for the calculated day
-#     "Great question! Based on your date, here are your other options:
-#     ### Other Birthday Party Packages options
-#     Please construct Natural Sentences and only List Down Other Pacakages Names
-#     Donot Mention or mention epic party package if already explained
-#     {other_packages_highlight}
-#     Which package would you like to hear more details about?"
-
-
-#     **When customer asks for details of any specific birthday party package:**
-#     - Explain the duration breakdown (jump time + party room time or party space time or open air time depending upon the package)
-#     - Focus on explaining minimum jumpers,Food and drinks included in Package, paper goods, skysocks, Desserts and Cakes Policy, Outside Food Fee(Policy), Birthday Package Perks,additional hour if any,Additional Jumper Cost clearly
-#     - Reference current birthday party package data for all specifics
-#     """
-    
-#     return {
-#         "epic_package_section": epic_package_section,
-#         "epic_package_step": epic_package_step,
-#         "other_packages_step": other_packages_step,
-#         "birthday_party_info": "\n".join(summary)
-#     }
 
 
 
@@ -556,64 +379,6 @@ async def _create_epic_package_section(package: Dict) -> str:
 
 
 
-import pandas as pd
-import re
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, Any, Optional
-from myapp.model.birthday_party_packages_model import BirthdayPartyPackage
-from myapp.model.balloon_party_packages_model import BalloonPartyPackage
-from myapp.model.items_food_drinks_model import ItemsFoodDrinks
-from myapp.model.hours_of_operations_model import HoursOfOperation
-from myapp.model.locations_model import Location
-from asgiref.sync import sync_to_async
-from django.db.models import Q
-
-# async def get_birthday_party_packages_info(location_id: int, timezone: str) -> Dict[str, Any]:
-#     """
-#     Main function to get formatted birthday party package information from database
-#     Returns the same structure as the Google Sheet version
-#     """
-    
-#     # Use sync_to_async for database operations
-#     get_location = sync_to_async(lambda: Location.objects.get(location_id=location_id))
-    
-#     @sync_to_async
-#     def get_birthday_packages():
-#         return list(
-#             BirthdayPartyPackage.objects.filter(
-#                 location_id=location_id,
-#                 is_available=True
-#             ).select_related('location', 'balloon_party_package').order_by('birthday_party_priority')
-#         )
-    
-#     @sync_to_async
-#     def get_hours_of_operation():
-#         return list(HoursOfOperation.objects.filter(location_id=location_id))
-    
-#     try:
-#         # Fetch data asynchronously
-#         location = await get_location()
-#         birthday_packages = await get_birthday_packages()
-#         hours_of_operation = await get_hours_of_operation()
-        
-#         # Convert to structured data
-#         structured_data = await get_structured_birthday_party_data(location_id, timezone, birthday_packages, hours_of_operation)
-#         formatted_display = await format_birthday_party_for_display(structured_data, location.location_name)
-        
-#         # Create the prompt sections
-#         party_info_dict = await birthday_party_info(structured_data)
-        
-#         return {
-#             'structured_data': structured_data,
-#             'formatted_display': formatted_display,
-#             'party_info_dict': party_info_dict
-#         }
-#     except Exception as e:
-#         print(f"Error in get_birthday_party_packages_info: {str(e)}")
-#         raise
-
-
 
 async def get_birthday_party_packages_info(location_id: int, timezone: str) -> Dict[str, Any]:
     """
@@ -659,97 +424,6 @@ async def get_birthday_party_packages_info(location_id: int, timezone: str) -> D
     except Exception as e:
         print(f"Error in get_birthday_party_packages_info: {str(e)}")
         raise
-
-
-# async def get_structured_birthday_party_data(
-#     location_id: int, 
-#     timezone: str,
-#     birthday_packages: List[BirthdayPartyPackage],
-#     hours_of_operation: List[HoursOfOperation]
-# ) -> Dict[str, Any]:
-#     """
-#     Get structured birthday party data for formatting
-#     """
-#     # Get location name
-#     get_location = sync_to_async(lambda: Location.objects.get(location_id=location_id))
-#     location = await get_location()
-    
-#     # Get unique schedule types from hours
-#     hours_schedule_types = set()
-#     for hour_obj in hours_of_operation:
-#         if hour_obj.schedule_with and hour_obj.schedule_with != 'closed':
-#             hours_schedule_types.add(hour_obj.schedule_with)
-    
-#     # Organize data
-#     structured_data = {
-#         "total_packages": len(birthday_packages),
-#         "most_popular_package": None,
-#         "packages_by_schedule": {},
-#         "other_available_packages": [],
-#         "do_not_pitch_packages": [],
-#         "available_schedules": list(hours_schedule_types),
-#         "location_name": location.location_name,
-#         "epic_package_details": None
-#     }
-    
-#     # Initialize schedules dictionary
-#     for schedule_type in hours_schedule_types:
-#         structured_data["packages_by_schedule"][schedule_type] = []
-    
-#     # Process each birthday package
-#     for package_obj in birthday_packages:
-#         # Get balloon package name safely
-#         balloon_package_name = ""
-#         if package_obj.balloon_party_package:
-#             balloon_package_name = package_obj.balloon_party_package.package_name
-        
-#         package_data = {
-#             "package_name": package_obj.package_name,
-#             "birthday_party_priority": package_obj.birthday_party_priority,
-#             "availability_days": package_obj.availability_days,
-#             "schedule_with": package_obj.schedule_with,
-#             "minimum_jumpers": package_obj.minimum_jumpers,
-#             "jump_time": package_obj.jump_time,
-#             "party_room_time": package_obj.party_room_time,
-#             "food_and_drinks": package_obj.food_and_drinks,
-#             "paper_goods": package_obj.paper_goods,
-#             "skysocks": package_obj.skysocks,
-#             "dessert_policy": package_obj.dessert_policy,
-#             "other_perks": package_obj.other_perks,
-#             "outside_food_drinks_fee": package_obj.outside_food_drinks_fee,
-#             "price": str(package_obj.price),
-#             "guest_of_honour_included": package_obj.guest_of_honour_included_in_total_jumpers,
-#             "tax_included": package_obj.tax_included,
-#             "each_additional_jumper_price": str(package_obj.each_additional_jumper_price),
-#             "balloon_package_included": package_obj.balloon_package_included,
-#             "promotion_code": package_obj.promotion_code or "",
-#             "credit": str(package_obj.credit) if package_obj.credit else "",
-#             "is_any_balloon_package_is_free": package_obj.is_any_balloon_package_is_free,
-#             "balloon_party_package": balloon_package_name,
-#             "party_environment_name": package_obj.party_environment_name or "",
-#             "food_included_count": package_obj.food_included_count,
-#             "drinks_included_count": package_obj.drinks_included_count,
-#             "perks_for_guest_of_honor": package_obj.perks_for_guest_of_honor or "",
-#             "birthday_party_pitch": package_obj.birthday_party_pitch or "",
-#             "additional_jumpers_allowed": package_obj.Is_additional_jumpers_allowed,
-#             "additional_instructions": package_obj.additional_instructions or ""
-#         }
-        
-#         # Categorize by priority
-#         if package_obj.birthday_party_priority == 1:
-#             structured_data["most_popular_package"] = package_data
-#             structured_data["epic_package_details"] = package_data
-#         elif package_obj.birthday_party_priority == 999:
-#             structured_data["do_not_pitch_packages"].append(package_data)
-#         else:
-#             structured_data["other_available_packages"].append(package_data)
-        
-#         # Add to schedule types
-#         schedule_with = package_obj.schedule_with
-#         if schedule_with and schedule_with != 'closed' and schedule_with in structured_data["packages_by_schedule"]:
-#             structured_data["packages_by_schedule"][schedule_with].append(package_data)
-    
-#     return structured_data
 
 
 
@@ -846,7 +520,7 @@ async def get_structured_birthday_party_data(
 
 
 
-async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Dict[str, Any]:
+async def load_birthday_party_flow_prompt(location_id: int, timezone: str ,search_number , client_id ) -> Dict[str, Any]:
     """
     Main function to load all birthday party related data and create the complete prompt
     """
@@ -865,15 +539,18 @@ async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Di
     if location_data['is_booking_bot']:
         print("Booking bot is enabled for this location.")
 
-        system_message = await create_birthday_booking_party_system_message(
+        system_message, customer_information = await create_birthday_booking_party_system_message(
             birthday_data['party_info_dict'],
             balloon_data['balloon_info_dict'],
             food_data['food_info_dict'],
-            location.location_name
+            location.location_name,
+            search_number,
+            client_id
         )
         
         return {
             'system_message': system_message,
+            'customer_information': customer_information,
             'birthday_data': birthday_data,
             'balloon_data': balloon_data,
             'food_data': food_data,
@@ -906,29 +583,6 @@ async def load_birthday_party_flow_prompt(location_id: int, timezone: str) -> Di
         }
 
 
-# async def current_time_information(timezone_name):
-#         try:
-#             tz = pytz.timezone(timezone_name)
-#         except Exception:
-#             print(f"Invalid timezone: {timezone_name}")
-#             return
-        
-#         now = datetime.now(tz)
-
-#         today_date_iso = now.strftime("%Y-%m-%d")
-#         today_date_long = now.strftime("%d %B, %Y")
-#         current_time = now.strftime("%I:%M %p")
-#         day_name = now.strftime("%A")
-
-#         text = f"""
-#     Today Date: {today_date_iso} ({today_date_long}, {day_name})
-#     """
-#         print(text)
-#         return text
-
-
-from datetime import datetime
-import pytz
 
 async def current_time_information(timezone_name: str) -> str:
     try:
@@ -1123,32 +777,280 @@ Use function: transfer_call_to_agent()
 
 
 
-
-
-async def create_birthday_booking_party_system_message(birthday_info: Dict, balloon_info: Dict, food_info: Dict, location_name: str) -> str:
+async def create_birthday_booking_party_system_message(birthday_info: Dict, balloon_info: Dict, food_info: Dict, location_name: str , search_number , client_id) -> str:
     """
     Create the complete birthday party flow system message
     """
+    # Get location data
     location = await sync_to_async(Location.objects.get)(location_id=1)
-    
     location_data = {k: v for k, v in location.__dict__.items() if not k.startswith('_')}
-    # print("This is the FULL location data inside birthday party system message ==", location_data)
-    # Get party booking days from location data
+    
     party_booking_days = location_data.get('party_booking_allowed_days_before_party_date', 3)
     party_reschedule_days = location_data.get('party_reschedule_allowed_before_party_date_days', 3)
-
-
-    # minimum_jumpers = location_data['minimum_jumpers_party']
-    # print("This is the  minimum jumpers  data inside birthday party system message ==", minimum_jumpers)
     minimum_jumpers = location_data.get('minimum_jumpers_party', 10)
-    # print("This is the  minimum jumpers  data inside birthday party system message ==", minimum_jumpers)
+
     # Get current time information
     try:
         current_time_informations = await current_time_information('Asia/Karachi')
     except Exception as e:
         print(f"Timezone error: {e}, using default")
         current_time_informations = await current_time_information("America/New_York")
+
+    # Try to get customer information
+    customer_information = {}
+    try:
+        customer_information = await search_roller_customer(search_number, client_id)
+        # print("This is customer information ==", customer_information)
+    except Exception as e:
+        print(f"Error fetching customer information: {e}")
+
+    # Define constants for customer data collection
+    data_collection_next_step = "Step 10: BOOKING COMPLETION"
+    data_collection_first_step = """
+    Step 1: ACKNOWLEDGE BIRTHDAY CHILD
+        - Say:"I already have [child's name] as our birthday star! Now I need some details from you to complete the booking."
+    """
     
+    first_name_collection_additional_instruction = """
+    - Donot Proceed to *LAST NAME COLLECTION Step* Until user has confirmed their first name*
+    """
+    
+    last_name_collection_additional_instruction = """
+    - Donot Proceed to *EMAIL COLLECTION Step* Until user has confirmed their last name*
+    """
+    
+    email_collection_additional_instruction = """
+    - Donot Proceed to *PHONE NUMBER COLLECTION Step* Until user has confirmed their email*
+    """
+    
+    phone_number_collection_additional_instruction = """
+    - Donot Proceed to *EMAIL VERIFICATION FOR BOOKING Step* Until phone number collection is complete*
+    """
+
+    # Build customer data collection section based on whether customer info exists
+    if customer_information:
+        # Customer exists - use verification flow
+        customer_first_name = customer_information.get('first_name', '')
+        customer_last_name = customer_information.get('last_name', '')
+        customer_email = customer_information.get('email', '')
+        
+        # Convert email to phonetic representation
+        try:
+            customer_email_phonetic_representation = await email_to_nato(customer_email)
+        except:
+            customer_email_phonetic_representation = customer_email
+        
+        customer_data_section = f"""
+            {data_collection_first_step}
+            ---
+            *STEP 2: FIRST NAME COLLECTION:*
+
+                   - Say exactly:"Is {customer_first_name} your first name?"
+                    *step 2.1: Confirm the first name from user*
+                    *step 2.2: If user confirms their first name move to 'step 2.3'*
+                    *step 2.3: use function : save_first_name()*
+                            parameters : first_name:[user first name]
+                    *step 2.4: If user does not confirm their first name ->
+                        Step 2.4.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+                        Step 2.4.2: LISTEN for response
+                        Step 2.4.3: IMMEDIATE REPEAT BACK: "I heard [name]. Is that correct?"
+                        Step 2.4.4: If NO or if name sounds unclear:
+                                "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+                        Step 2.4.5: SPELL BACK using NATO: 
+                                "So that's [Alpha-Bravo-Charlie]. Is that correct?"
+                        Step 2.4.6: LISTEN for user response
+                                - If user says "correct", "yes", "right", "that's right" →
+                                Execute function: save_first_name(first_name: [confirmed_name])
+                                Say: "Perfect! I've got your first name."
+                        Step 2.4.7: LISTEN for user response  
+                                - If user says "incorrect", "no", "wrong", "that's not right" → 
+                                Return to Step 2.4.4
+                        {first_name_collection_additional_instruction}
+            ---            
+            * STEP 3: LAST NAME COLLECTION *
+                   - Say:"Is {customer_last_name} your last name?"
+                    *step 3.1: Confirm the last name from user*
+                    *step 3.2: If user confirms their last name move to 'step 3.3'*
+                    *step 3.3: use function : save_last_name()*
+                            parameters : last_name:[user last name]
+                    *step 3.4: If user does not confirm their fist name ->
+                        Step 3.4.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+                        Step 3.4.2: LISTEN for response
+                        Step 3.4.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
+                        Step 3.4.4: If NO or if name sounds unclear:
+                                "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+                        Step 3.4.5: SPELL BACK using NATO:
+                                "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
+                        Step 3.4.6: LISTEN for user response
+                                - If user says "correct", "yes", "right", "that's right" → 
+                                Execute function: save_last_name(last_name: [confirmed_name])
+                                Say: "Great! your Last name is confirmed."
+                        Step 3.4.7: LISTEN for user response  
+                                - If user says "incorrect", "no", "wrong", "that's not right" → 
+                                Return to Step 3.4.4
+                        {last_name_collection_additional_instruction}
+            ---
+            *Step 4: Email Collection for booking*
+
+                *Step 4.1: "Read the email address {customer_email_phonetic_representation} Ask: 'Should I use this email address to send [child's name]'s party confirmation?'"*
+                - If user says "correct", "yes", "right", "that's right" → 
+                        Execute: save_existing_user_email(user_email: {customer_email})
+                        → PROCEED TO STEP 5
+                    
+                - If user says "incorrect", "no", "wrong", "that's not right" →
+                - Ask for alternate email address
+
+                Step 4.2: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
+
+                Step 4.3: LISTEN and CAPTURE each character that user spells out
+
+                Step 4.4: Execute function:
+                    Execute: save_user_email(user_email: [confirmed_email])
+                
+                {email_collection_additional_instruction}
+                ---
+
+
+            *Step 5: PHONE NUMBER COLLECTION*
+                ### Instruction
+                - ALWAYS verify the ALTERNATE NUMBER
+
+                Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
+
+                SCENARIO A - ALTERNATE NUMBER:
+                Step 5.2: "Please give me the 10-digit phone number, including area code."
+                Step 5.3: REPEAT BACK IN GROUPS: 
+                        "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
+                Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
+                Step 5.5: If NO → "Let me get those digits again, please say them slowly."
+
+                SCENARIO B - CURRENT NUMBER:
+                Step 5.6: "Perfect! We'll use your current number for the party details."
+                → PROCEED TO STEP 6
+
+            {phone_number_collection_additional_instruction}
+                        
+            ---
+            
+            * Step 6: EMAIL VERIFICATION FOR BOOKING *
+                Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
+                    - Execute function: send_sms_for_email()
+                
+                Step 6.2: LISTEN for user response
+                    - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
+                        → Say: "Great! Your email is confirmed."
+                        → Execute function: handle_email_confirmation_from_sms_voice()
+                        → SKIP remaining email verification steps
+                        → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+                    
+                    - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
+                        → Execute function: check_sms_received_containing_user_email()
+                        → Say: "Thank you! I've received your email address."
+                        → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+            ---
+        """
+    else:
+        # No customer exists - use full collection flow
+        customer_data_section = f"""
+            {data_collection_first_step}
+            ---
+            *STEP 2: FIRST NAME COLLECTION*
+                *INSTRUCTION*
+                - ALWAYS repeat back user first name
+                
+                
+
+                Step 2.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+                Step 2.2: LISTEN for user response
+                Step 2.3: IMMEDIATE REPEAT BACK: "I heard [first name]. Is that correct?"
+                Step 2.4: If user says no or similar statement or if first name sounds unclear:
+                        "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+                Step 2.5: SPELL BACK using NATO Mandatory Step: 
+                        "So that's [Alpha-Bravo-Charlie]. Is that correct?"
+                Step 2.6: Check for User Response:
+                        - If user says correct or similar confirmation then:
+                            Execute function: save_first_name(first_name: [confirmed_name])
+                            Say: "Perfect! I've got your first name."
+                        - If user says incorrect or similar statement then: 
+                            Return to Step *2.4 Re collection of First name* 
+                         
+                        
+                {first_name_collection_additional_instruction}
+            ---
+            * STEP 3: LAST NAME COLLECTION *
+                *INSTRUCTION*
+                - ALWAYS repeat back user last name
+
+                Step 3.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+                Step 3.2: LISTEN for response
+                Step 3.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
+                Step 3.4: If user says no or similar statement or if last name sounds unclear:
+                        "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+                Step 3.5: SPELL BACK using NATO Mandatory Step:
+                        "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
+
+                Step 3.6: Check for User Response:
+                        - If user says correct or similar confirmation then:
+                            Execute function: save_last_name(last_name: [confirmed_name])
+                            Say: "Great! your Last name is confirmed."
+                        - If user says incorrect or similar statement then: 
+                            Return to Step *3.4 Re collection of Last name* 
+                          
+                {last_name_collection_additional_instruction}
+            ---
+            *Step 4: Email Collection for booking* 
+                Step 4.1: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
+
+                Step 4.2: LISTEN and CAPTURE each character that user spells out
+
+                Step 4.3: Execute function:
+                    Execute: save_user_email(user_email: [confirmed_email])
+                
+                {email_collection_additional_instruction}
+                
+                ---
+
+                        
+            *Step 5: PHONE NUMBER COLLECTION*
+                ### Instruction
+                - ALWAYS verify the ALTERNATE NUMBER
+
+                Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
+
+                SCENARIO A - ALTERNATE NUMBER:
+                Step 5.2: "Please give me the 10-digit phone number, including area code."
+                Step 5.3: REPEAT BACK IN GROUPS: 
+                        "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
+                Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
+                Step 5.5: If NO → "Let me get those digits again, please say them slowly."
+                
+                SCENARIO B - CURRENT NUMBER:
+                Step 5.6: "Perfect! We'll use your current number for the party details."
+                → PROCEED TO STEP 6
+            {phone_number_collection_additional_instruction}
+
+            ---
+                    
+
+        
+            *Step 6: EMAIL VERIFICATION FOR BOOKING*
+                Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
+                    - Execute function: send_sms_for_email()
+                
+                Step 6.2: LISTEN for user response
+                    - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
+                        → Say: "Great! Your email is confirmed."
+                        → SKIP remaining email verification steps
+                        → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+                    
+                    - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
+                        → Execute function: check_sms_received_containing_user_email()
+                        → Say: "Thank you! I've received your email address."
+                        → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+
+            ---
+        """
+
     # Base template with your specified prompt structure
     base_template = """####### Start of Birthday Party Flow #########
 *IMPORTANT GUIDELINES:*
@@ -1466,135 +1368,7 @@ Ask user if he wants to go ahead with final booking:
 "Move to *Data Collection for New Booking* "
 ---
 ### *Step 9: Customer Data Collection For New Booking*
-*CRITICAL INSTRUCTIONS Customer Data Collection For New Booking:*
-- ALWAYS use double confirmation (say back + get yes/no)
-- ALWAYS execute this step: IMMEDIATE REPEAT BACK: "I heard [First name/Last name/Email address]. Is that correct?"
-- ALWAYS spell out names and emails using NATO phonetic alphabet
-- PAUSE between each confirmation step
-- If name sounds wrong, immediately ask to spell it out
-- Always follow email verification step
-- Use SMS fallback for email after first failed attempt
-Step 1: ACKNOWLEDGE BIRTHDAY CHILD
-- Say:"I already have [child's name] as our birthday star! Now I need some details from you to complete the booking."
----
-*STEP 2: FIRST NAME COLLECTION:*
-- Say exactly:"Is Saqib your first name?"
-*step 2.1: Confirm the first name from user*
-*step 2.2: If user confirms their first name move to 'step 2.3'*
-*step 2.3: use function : save_first_name()*
-parameters : first_name:[user first name]
-*step 2.4: If user does not confirm their first name ->
-Step 2.4.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-Step 2.4.2: LISTEN for response
-Step 2.4.3: IMMEDIATE REPEAT BACK: "I heard [name]. Is that correct?"
-Step 2.4.4: If NO or if name sounds unclear:
-"Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-Step 2.4.5: SPELL BACK using NATO:
-"So that's [Alpha-Bravo-Charlie]. Is that correct?"
-Step 2.4.6: LISTEN for user response
-- If user says "correct", "yes", "right", "that's right" →
-Execute function: save_first_name(first_name: [confirmed_name])
-Say: "Perfect! I've got your first name."
-Step 2.4.7: LISTEN for user response
-- If user says "incorrect", "no", "wrong", "that's not right" →
-Return to Step 2.4.4
-- Donot Proceed to *LAST NAME COLLECTION Step* Until user has confirmed their first name*
----
-* STEP 3: LAST NAME COLLECTION *
-- Say:"Is Zia your last name?"
-*step 3.1: Confirm the last name from user*
-*step 3.2: If user confirms their last name move to 'step 3.3'*
-*step 3.3: use function : save_last_name()*
-parameters : last_name:[user last name]
-*step 3.4: If user does not confirm their fist name ->
-Step 3.4.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-Step 3.4.2: LISTEN for response
-Step 3.4.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
-Step 3.4.4: If NO or if name sounds unclear:
-"Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-Step 3.4.5: SPELL BACK using NATO:
-"So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
-Step 3.4.6: LISTEN for user response
-- If user says "correct", "yes", "right", "that's right" →
-Execute function: save_last_name(last_name: [confirmed_name])
-Say: "Great! your Last name is confirmed."
-Step 3.4.7: LISTEN for user response
-- If user says "incorrect", "no", "wrong", "that's not right" →
-Return to Step 3.4.4
-- Donot Proceed to *EMAIL COLLECTION Step* Until user has confirmed their last name*
----
-*Step 4: Email Collection for booking*
-*Step 4.1: "Read the email address saqib.zia@sybrid.com very slowly character by character when confirming. Break down the email like this: For 'john.doe@example.com' say 'j o h n dot d o e at e x a m p l e dot c o m'. Ask: 'Should I use this email address to send [child's name]'s party confirmation?'"*
-- If user says "correct", "yes", "right", "that's right" →
-Execute: save_user_email(user_email: [confirmed_email])
-→ PROCEED TO STEP 5
-- If user says "incorrect", "no", "wrong", "that's not right" →
-- Ask for alternate email address
-Step 4.2: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
-Step 4.3: LISTEN and CAPTURE each character that user spells out
-Step 4.4: IMMEDIATE REPEAT BACK using NATO phonetic alphabet + symbols:
-Say: "Let me confirm that email address: [Alpha-Bravo-Charlie at Delta-Echo-Foxtrot dot Charlie-Oscar-Mike]. Is that correct?"
-MANDATORY SYMBOL PRONUNCIATIONS:
-- @ = *Say exactly* "at"
-- . = "dot"
-- . = "period"
-- _ = "underscore"
-- - = "dash"
-Step 4.5: LISTEN for user response
-- If user says "correct", "yes", "right", "that's right" →
-- Convert the confirmed spoken email into a valid email format by replacing words with symbols:
-- Replace " at " → "@"
-- Replace " dot " or " period " → "."
-- Remove extra spaces between characters
-- Combine letters and numbers into a single word (e.g., "j o h n" → "john")
-- Validate the final format:
-- It must contain one @ symbol and a valid domain ending such as .com, .net, .org, etc.
-- If invalid, politely ask the user to repeat it.
-- Once valid, execute:
-Execute: save_user_email(user_email: [confirmed_email])
-Say: "Perfect! Email address saved."
-→ PROCEED TO STEP 5
-- If user says "incorrect", "no", "wrong", "that's not right" →
-Say exactly: "Would you like me to send you a text message where you can reply with your email address?"
-Step 4.6: LISTEN for user response
-- If user agrees to SMS (says "yes", "sure", "okay", "send text") →
-Say exactly: "Great, I'll send a text to your current number. Please reply with your email address. Once you have sent the SMS, let me know. Message and data rates may apply. You can find our privacy policy and terms and conditions at purpledesk.ai."
-Execute function: send_sms_for_email()
-Step 4.7: WAIT for user to say "I have sent you the text message" OR "I replied to your text" OR similar confirmation
-THEN Execute function: check_sms_received_containing_user_email()
-Say: "Thank you! I've received your email address."
-→ PROCEED TO STEP 5
-- Donot Proceed to *PHONE NUMBER COLLECTION Step* Until user has confirmed their email*
----
-*Step 5: PHONE NUMBER COLLECTION*
-### Instruction
-- ALWAYS verify the ALTERNATE NUMBER
-Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
-SCENARIO A - ALTERNATE NUMBER:
-Step 5.2: "Please give me the 10-digit phone number, including area code."
-Step 5.3: REPEAT BACK IN GROUPS:
-"I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
-Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
-Step 5.5: If NO → "Let me get those digits again, please say them slowly."
-SCENARIO B - CURRENT NUMBER:
-Step 5.6: "Perfect! We'll use your current number for the party details."
-→ PROCEED TO STEP 6
-- Donot Proceed to *EMAIL VERIFICATION FOR BOOKING Step* Until phone number collection is complete*
----
-* Step 6: EMAIL VERIFICATION FOR BOOKING *
-Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
-- Execute function: send_sms_for_email()
-Step 6.2: LISTEN for user response
-- If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
-→ Say: "Great! Your email is confirmed."
-→ Execute function: handle_email_confirmation_from_sms_voice()
-→ SKIP remaining email verification steps
-→ Go directly to *Package Recap for [child's name]:* and then proceed to *Step 10: BOOKING COMPLETION*
-- If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
-→ Execute function: check_sms_received_containing_user_email()
-→ Say: "Thank you! I've received your email address."
-→ Go to *Package Recap for [child's name]:* and then proceed to *Step 10: BOOKING COMPLETION*
----
+{customer_data_section}
 ---
 ### *Step 10: BOOKING COMPLETION*
 - Instruction
@@ -1634,7 +1408,8 @@ Step 10.3
 - Your 50% deposit secures the date and time
 Day of Party Reminders:
 - Arrive 15-30 minutes early to get [child's name] ready for their specialcelebration!
-Thank you for choosing us for [child's name]'s special celebration! We can't wait to make it unforgettable!"####### Start of Birthday Party Flow #########
+Thank you for choosing us for [child's name]'s special celebration! We can't wait to make it unforgettable!"
+####### Start of Birthday Party Flow #########
 ---
 {food_section}
 ---
@@ -1648,10 +1423,12 @@ Thank you for choosing us for [child's name]'s special celebration! We can't wai
         party_booking_days=party_booking_days,
         party_reschedule_days=party_reschedule_days,
         current_time_informations=current_time_informations,
+        minimum_jumpers=minimum_jumpers,
+        customer_data_section=customer_data_section,
         food_section=food_info.get('food_section', ''),
         birthday_party_data_section=birthday_info.get('birthday_party_info', ''),
-        balloon_section=balloon_info.get('balloon_section', ''),
-        minimum_jumpers=minimum_jumpers
+        balloon_section=balloon_info.get('balloon_section', '')
     )
     
-    return system_message
+    return system_message , customer_information
+

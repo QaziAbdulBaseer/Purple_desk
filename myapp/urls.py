@@ -260,5 +260,5 @@ urlpatterns = [
 
 
     ## Get Prompt
-    path("get-prompt/<int:location_id>/", View_Get_Prompt.get_prompt, name="View_Get_Prompt"),
-]
+    path("get-prompt/<int:location_id>/<int:search_number>/<int:client_id>", View_Get_Prompt.get_prompt, name="View_Get_Prompt"),
+] 
