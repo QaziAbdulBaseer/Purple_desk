@@ -1,7 +1,28 @@
 
 
+# hi, see now i want you to create differet apis
 
-# birthday_party_packages_prompt,promotions_dict, prompt_variables,current_date,current_time =  await load_data(caller_number,bot_variables["sheet_id"],skip_customer_details_in_prompt,customer_first_name,customer_last_name,customer_email,is_edit_details,edit_booking_details_tuple,roller_product_ids)
+# like i want i have 1 api what just create a birthday party package prompt and create its markdown file
+# same an other api that just create jump pass prompt and create its markdown file
+# same for membership
+# same for hours of operation
+# same for rental facility  mean for every section create a different api that just create that section prompt and save it to markdown file
+
+
+# but that all files should be saved in same folder that folder name contain the (location id , location name and current date time when the foler or file is created)
+# and then in every folder there should be different markdown file for every section prompt
+# like birthday party package prompt should be saved in birthday_party_package_prompt.md
+# jump pass prompt should be saved in jump_pass_prompt.md
+# membership prompt should be saved in membership_prompt.md
+# hours of operation prompt should be saved in hours_of_operation_prompt.md  for every one
+
+
+# then i want you create an other api that will just reture the all the prompt in one markdown file that contain all the section prompt in one file and that file should be saved in the same folder as above  but that api will not save any file its jsut return that file and prompt data 
+
+
+# and there is one more api will will create all the files and folder in once for give locatoin id. 
+
+
 
 import os
 from datetime import datetime

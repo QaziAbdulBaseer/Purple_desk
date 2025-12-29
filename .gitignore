@@ -15,3 +15,5 @@ __pycache__/
 # (optional) Ignore virtual environment folders
 venv/
 .env/
+
+generated_prompts/

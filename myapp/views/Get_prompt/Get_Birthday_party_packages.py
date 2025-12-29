@@ -842,212 +842,190 @@ async def create_birthday_booking_party_system_message(birthday_info: Dict, ball
         
         customer_data_section = f"""
             {data_collection_first_step}
-            ---
-            *STEP 2: FIRST NAME COLLECTION:*
+*STEP 2: FIRST NAME COLLECTION:*
 
-                   - Say exactly:"Is {customer_first_name} your first name?"
-                    *step 2.1: Confirm the first name from user*
-                    *step 2.2: If user confirms their first name move to 'step 2.3'*
-                    *step 2.3: use function : save_first_name()*
-                            parameters : first_name:[user first name]
-                    *step 2.4: If user does not confirm their first name ->
-                        Step 2.4.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-                        Step 2.4.2: LISTEN for response
-                        Step 2.4.3: IMMEDIATE REPEAT BACK: "I heard [name]. Is that correct?"
-                        Step 2.4.4: If NO or if name sounds unclear:
-                                "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-                        Step 2.4.5: SPELL BACK using NATO: 
-                                "So that's [Alpha-Bravo-Charlie]. Is that correct?"
-                        Step 2.4.6: LISTEN for user response
-                                - If user says "correct", "yes", "right", "that's right" →
-                                Execute function: save_first_name(first_name: [confirmed_name])
-                                Say: "Perfect! I've got your first name."
-                        Step 2.4.7: LISTEN for user response  
-                                - If user says "incorrect", "no", "wrong", "that's not right" → 
-                                Return to Step 2.4.4
-                        {first_name_collection_additional_instruction}
-            ---            
-            * STEP 3: LAST NAME COLLECTION *
-                   - Say:"Is {customer_last_name} your last name?"
-                    *step 3.1: Confirm the last name from user*
-                    *step 3.2: If user confirms their last name move to 'step 3.3'*
-                    *step 3.3: use function : save_last_name()*
-                            parameters : last_name:[user last name]
-                    *step 3.4: If user does not confirm their fist name ->
-                        Step 3.4.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-                        Step 3.4.2: LISTEN for response
-                        Step 3.4.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
-                        Step 3.4.4: If NO or if name sounds unclear:
-                                "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-                        Step 3.4.5: SPELL BACK using NATO:
-                                "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
-                        Step 3.4.6: LISTEN for user response
-                                - If user says "correct", "yes", "right", "that's right" → 
-                                Execute function: save_last_name(last_name: [confirmed_name])
-                                Say: "Great! your Last name is confirmed."
-                        Step 3.4.7: LISTEN for user response  
-                                - If user says "incorrect", "no", "wrong", "that's not right" → 
-                                Return to Step 3.4.4
-                        {last_name_collection_additional_instruction}
-            ---
-            *Step 4: Email Collection for booking*
-
-                *Step 4.1: "Read the email address {customer_email_phonetic_representation} Ask: 'Should I use this email address to send [child's name]'s party confirmation?'"*
-                - If user says "correct", "yes", "right", "that's right" → 
-                        Execute: save_existing_user_email(user_email: {customer_email})
-                        → PROCEED TO STEP 5
-                    
-                - If user says "incorrect", "no", "wrong", "that's not right" →
-                - Ask for alternate email address
-
-                Step 4.2: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
-
-                Step 4.3: LISTEN and CAPTURE each character that user spells out
-
-                Step 4.4: Execute function:
-                    Execute: save_user_email(user_email: [confirmed_email])
-                
-                {email_collection_additional_instruction}
-                ---
-
-
-            *Step 5: PHONE NUMBER COLLECTION*
-                ### Instruction
-                - ALWAYS verify the ALTERNATE NUMBER
-
-                Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
-
-                SCENARIO A - ALTERNATE NUMBER:
-                Step 5.2: "Please give me the 10-digit phone number, including area code."
-                Step 5.3: REPEAT BACK IN GROUPS: 
-                        "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
-                Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
-                Step 5.5: If NO → "Let me get those digits again, please say them slowly."
-
-                SCENARIO B - CURRENT NUMBER:
-                Step 5.6: "Perfect! We'll use your current number for the party details."
-                → PROCEED TO STEP 6
-
-            {phone_number_collection_additional_instruction}
-                        
-            ---
+- Say exactly:"Is {customer_first_name} your first name?"
+*step 2.1: Confirm the first name from user*
+*step 2.2: If user confirms their first name move to 'step 2.3'*
+*step 2.3: use function : save_first_name()*
+        parameters : first_name:[user first name]
+*step 2.4: If user does not confirm their first name ->
+    Step 2.4.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+    Step 2.4.2: LISTEN for response
+    Step 2.4.3: IMMEDIATE REPEAT BACK: "I heard [name]. Is that correct?"
+    Step 2.4.4: If NO or if name sounds unclear:
+            "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+    Step 2.4.5: SPELL BACK using NATO: 
+            "So that's [Alpha-Bravo-Charlie]. Is that correct?"
+    Step 2.4.6: LISTEN for user response
+            - If user says "correct", "yes", "right", "that's right" →
+            Execute function: save_first_name(first_name: [confirmed_name])
+            Say: "Perfect! I've got your first name."
+    Step 2.4.7: LISTEN for user response  
+            - If user says "incorrect", "no", "wrong", "that's not right" → 
+            Return to Step 2.4.4
+    {first_name_collection_additional_instruction}
+---            
+* STEP 3: LAST NAME COLLECTION *
+- Say:"Is {customer_last_name} your last name?"
+*step 3.1: Confirm the last name from user*
+*step 3.2: If user confirms their last name move to 'step 3.3'*
+*step 3.3: use function : save_last_name()*
+        parameters : last_name:[user last name]
+*step 3.4: If user does not confirm their fist name ->
+    Step 3.4.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+    Step 3.4.2: LISTEN for response
+    Step 3.4.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
+    Step 3.4.4: If NO or if name sounds unclear:
+            "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+    Step 3.4.5: SPELL BACK using NATO:
+            "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
+    Step 3.4.6: LISTEN for user response
+            - If user says "correct", "yes", "right", "that's right" → 
+            Execute function: save_last_name(last_name: [confirmed_name])
+            Say: "Great! your Last name is confirmed."
+    Step 3.4.7: LISTEN for user response  
+            - If user says "incorrect", "no", "wrong", "that's not right" → 
+            Return to Step 3.4.4
+    {last_name_collection_additional_instruction}
+---
+*Step 4: Email Collection for booking*
+    *Step 4.1: "Read the email address {customer_email_phonetic_representation} Ask: 'Should I use this email address to send [child's name]'s party confirmation?'"*
+    - If user says "correct", "yes", "right", "that's right" → 
+            Execute: save_existing_user_email(user_email: {customer_email})
+            → PROCEED TO STEP 5
+        
+    - If user says "incorrect", "no", "wrong", "that's not right" →
+    - Ask for alternate email address
+    Step 4.2: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
+    Step 4.3: LISTEN and CAPTURE each character that user spells out
+    Step 4.4: Execute function:
+        Execute: save_user_email(user_email: [confirmed_email])
+    
+    {email_collection_additional_instruction}
+    ---
+*Step 5: PHONE NUMBER COLLECTION*
+    ### Instruction
+    - ALWAYS verify the ALTERNATE NUMBER
+    Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
+    SCENARIO A - ALTERNATE NUMBER:
+    Step 5.2: "Please give me the 10-digit phone number, including area code."
+    Step 5.3: REPEAT BACK IN GROUPS: 
+            "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
+    Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
+    Step 5.5: If NO → "Let me get those digits again, please say them slowly."
+    SCENARIO B - CURRENT NUMBER:
+    Step 5.6: "Perfect! We'll use your current number for the party details."
+    → PROCEED TO STEP 6
+{phone_number_collection_additional_instruction}
             
-            * Step 6: EMAIL VERIFICATION FOR BOOKING *
-                Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
-                    - Execute function: send_sms_for_email()
-                
-                Step 6.2: LISTEN for user response
-                    - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
-                        → Say: "Great! Your email is confirmed."
-                        → Execute function: handle_email_confirmation_from_sms_voice()
-                        → SKIP remaining email verification steps
-                        → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
-                    
-                    - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
-                        → Execute function: check_sms_received_containing_user_email()
-                        → Say: "Thank you! I've received your email address."
-                        → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
-            ---
+---
+
+* Step 6: EMAIL VERIFICATION FOR BOOKING *
+    Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
+        - Execute function: send_sms_for_email()
+    
+    Step 6.2: LISTEN for user response
+        - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
+            → Say: "Great! Your email is confirmed."
+            → Execute function: handle_email_confirmation_from_sms_voice()
+            → SKIP remaining email verification steps
+            → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+        
+        - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
+            → Execute function: check_sms_received_containing_user_email()
+            → Say: "Thank you! I've received your email address."
+            → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+---
         """
     else:
         # No customer exists - use full collection flow
         customer_data_section = f"""
-            {data_collection_first_step}
-            ---
-            *STEP 2: FIRST NAME COLLECTION*
-                *INSTRUCTION*
-                - ALWAYS repeat back user first name
-                
-                
-
-                Step 2.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-                Step 2.2: LISTEN for user response
-                Step 2.3: IMMEDIATE REPEAT BACK: "I heard [first name]. Is that correct?"
-                Step 2.4: If user says no or similar statement or if first name sounds unclear:
-                        "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-                Step 2.5: SPELL BACK using NATO Mandatory Step: 
-                        "So that's [Alpha-Bravo-Charlie]. Is that correct?"
-                Step 2.6: Check for User Response:
-                        - If user says correct or similar confirmation then:
-                            Execute function: save_first_name(first_name: [confirmed_name])
-                            Say: "Perfect! I've got your first name."
-                        - If user says incorrect or similar statement then: 
-                            Return to Step *2.4 Re collection of First name* 
-                         
-                        
-                {first_name_collection_additional_instruction}
-            ---
-            * STEP 3: LAST NAME COLLECTION *
-                *INSTRUCTION*
-                - ALWAYS repeat back user last name
-
-                Step 3.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
-                Step 3.2: LISTEN for response
-                Step 3.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
-                Step 3.4: If user says no or similar statement or if last name sounds unclear:
-                        "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
-                Step 3.5: SPELL BACK using NATO Mandatory Step:
-                        "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
-
-                Step 3.6: Check for User Response:
-                        - If user says correct or similar confirmation then:
-                            Execute function: save_last_name(last_name: [confirmed_name])
-                            Say: "Great! your Last name is confirmed."
-                        - If user says incorrect or similar statement then: 
-                            Return to Step *3.4 Re collection of Last name* 
-                          
-                {last_name_collection_additional_instruction}
-            ---
-            *Step 4: Email Collection for booking* 
-                Step 4.1: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
-
-                Step 4.2: LISTEN and CAPTURE each character that user spells out
-
-                Step 4.3: Execute function:
-                    Execute: save_user_email(user_email: [confirmed_email])
-                
-                {email_collection_additional_instruction}
-                
-                ---
-
-                        
-            *Step 5: PHONE NUMBER COLLECTION*
-                ### Instruction
-                - ALWAYS verify the ALTERNATE NUMBER
-
-                Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
-
-                SCENARIO A - ALTERNATE NUMBER:
-                Step 5.2: "Please give me the 10-digit phone number, including area code."
-                Step 5.3: REPEAT BACK IN GROUPS: 
-                        "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
-                Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
-                Step 5.5: If NO → "Let me get those digits again, please say them slowly."
-                
-                SCENARIO B - CURRENT NUMBER:
-                Step 5.6: "Perfect! We'll use your current number for the party details."
-                → PROCEED TO STEP 6
-            {phone_number_collection_additional_instruction}
-
-            ---
-                    
-
+{data_collection_first_step}
+---
+*STEP 2: FIRST NAME COLLECTION*
+    *INSTRUCTION*
+    - ALWAYS repeat back user first name
+    
+    
+    Step 2.1: *Say exactly* "What's your first name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+    Step 2.2: LISTEN for user response
+    Step 2.3: IMMEDIATE REPEAT BACK: "I heard [first name]. Is that correct?"
+    Step 2.4: If user says no or similar statement or if first name sounds unclear:
+            "Let me get that right. Can you spell your first name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+    Step 2.5: SPELL BACK using NATO Mandatory Step: 
+            "So that's [Alpha-Bravo-Charlie]. Is that correct?"
+    Step 2.6: Check for User Response:
+            - If user says correct or similar confirmation then:
+                Execute function: save_first_name(first_name: [confirmed_name])
+                Say: "Perfect! I've got your first name."
+            - If user says incorrect or similar statement then: 
+                Return to Step *2.4 Re collection of First name* 
+             
+            
+    {first_name_collection_additional_instruction}
+---
+* STEP 3: LAST NAME COLLECTION *
+    *INSTRUCTION*
+    - ALWAYS repeat back user last name
+    Step 3.1: *Say exactly* "And what's your last name? Please spell it very slowly, letter by letter. For example, A for Alpha, B for Bravo, and so on."
+    Step 3.2: LISTEN for response
+    Step 3.3: IMMEDIATE REPEAT BACK: "I heard [last name]. Is that correct?"
+    Step 3.4: If user says no or similar statement or if last name sounds unclear:
+            "Let me make sure I get this right. Can you spell your last name for me, letter by letter? For example, A for Alpha, B for Bravo, and so on."
+    Step 3.5: SPELL BACK using NATO Mandatory Step:
+            "So that's [Alpha-Bravo-Charlie-Delta]. Is that correct?"
+    Step 3.6: Check for User Response:
+            - If user says correct or similar confirmation then:
+                Execute function: save_last_name(last_name: [confirmed_name])
+                Say: "Great! your Last name is confirmed."
+            - If user says incorrect or similar statement then: 
+                Return to Step *3.4 Re collection of Last name* 
+              
+    {last_name_collection_additional_instruction}
+---
+*Step 4: Email Collection for booking* 
+    Step 4.1: Say exactly: "What's the best email address to send [child's name]'s party confirmation to? Please spell it out letter by letter for me. For example, A for Alpha, B for Bravo, and so on."
+    Step 4.2: LISTEN and CAPTURE each character that user spells out
+    Step 4.3: Execute function:
+        Execute: save_user_email(user_email: [confirmed_email])
+    
+    {email_collection_additional_instruction}
+    
+    ---
+            
+*Step 5: PHONE NUMBER COLLECTION*
+    ### Instruction
+    - ALWAYS verify the ALTERNATE NUMBER
+    Step 5.1: "For contact purposes, should we use your current phone number, or would you prefer to give me a different number?"
+    SCENARIO A - ALTERNATE NUMBER:
+    Step 5.2: "Please give me the 10-digit phone number, including area code."
+    Step 5.3: REPEAT BACK IN GROUPS: 
+            "I have [Five-Five-Five] [One-Two-Three] [Four-Five-Six-Seven]. Is that correct?"
+    Step 5.4: If YES → Execute: save_user_phone_number(phone_number: [confirmed_number])
+    Step 5.5: If NO → "Let me get those digits again, please say them slowly."
+    
+    SCENARIO B - CURRENT NUMBER:
+    Step 5.6: "Perfect! We'll use your current number for the party details."
+    → PROCEED TO STEP 6
+{phone_number_collection_additional_instruction}
+---
         
-            *Step 6: EMAIL VERIFICATION FOR BOOKING*
-                Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
-                    - Execute function: send_sms_for_email()
-                
-                Step 6.2: LISTEN for user response
-                    - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
-                        → Say: "Great! Your email is confirmed."
-                        → SKIP remaining email verification steps
-                        → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
-                    
-                    - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
-                        → Execute function: check_sms_received_containing_user_email()
-                        → Say: "Thank you! I've received your email address."
-                        → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
 
+*Step 6: EMAIL VERIFICATION FOR BOOKING*
+    Step 6.1: Say exactly: "Now, I'll send a text to your current phone number with your email address for verification. If the email address is incorrect, please reply with the correct one."
+        - Execute function: send_sms_for_email()
+    
+    Step 6.2: LISTEN for user response
+        - If user confirms email is correct (e.g., "yes it's correct", "my email is correct", "that's right", or similar confirmation):
+            → Say: "Great! Your email is confirmed."
+            → SKIP remaining email verification steps
+            → Go directly to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
+        
+        - If user says "I have sent you the text message" OR "I replied to your text" OR "I have sent my email to you" OR similar:
+            → Execute function: check_sms_received_containing_user_email()
+            → Say: "Thank you! I've received your email address."
+            → Go to *Package Recap for [child's name]:* and then proceed to {data_collection_next_step}
             ---
         """
 
