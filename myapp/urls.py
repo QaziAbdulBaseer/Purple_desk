@@ -38,6 +38,11 @@ from myapp.views.Individual_Prompts.create_individual_prompts import (
 )
 # from myapp.utils.prompt_file_utils import combine_all_prompts
 
+
+# from myapp.views.View_Roller_API.View_Product_Availability import ProductAvailabilityAPIView
+from myapp.views.View_Roller_API.View_Product_Availability import ProductAvailabilityAPIView
+
+
 urlpatterns = [
     ## Authorization Paths
     path('signup/', View_Authorization.register_view, name='signup'),
@@ -176,6 +181,7 @@ urlpatterns = [
     path("create-all-prompts/<int:location_id>/<int:search_number>/<int:client_id>", create_all_prompts_at_once, name="create_all_prompts"),
     path("get-folder-info/<int:location_id>", get_location_folder_info, name="get_folder_info"),
 
+    path('product_availability/', ProductAvailabilityAPIView.as_view(), name='product_availability'),
 
 
     ## Get Prompt

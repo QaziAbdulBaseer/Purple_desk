@@ -114,18 +114,18 @@ WSGI_APPLICATION = 'purple_desk.wsgi.application'
 #     }
 # }
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
-import dj_database_url
+# import dj_database_url
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+# DATABASES = {
+#     "default": dj_database_url.config(
+#         default=os.environ.get("DATABASE_URL"),
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
+# }
 
 # # Render deployment database (PostgreSQL)
 # if os.environ.get("DATABASE_URL"):
@@ -134,6 +134,16 @@ DATABASES = {
 #         conn_max_age=600,
 #         ssl_require=True
 #     )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'purple_desk_db',
+        'USER': 'root',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
 
 
 # -------------------------
