@@ -246,7 +246,7 @@ class Location(models.Model):
         if not self.roller_token_created_at or not self.roller_access_token:
             return True
         time_difference = timezone.now() - self.roller_token_created_at
-        return time_difference.total_seconds() > (23 * 3600)  # 23 hours in seconds
+        return time_difference.total_seconds() > (22 * 3600)  # 23 hours in seconds
 
     def __str__(self):
         return self.location_name
@@ -254,3 +254,4 @@ class Location(models.Model):
     class Meta:
         verbose_name = "Location"
         verbose_name_plural = "Locations"
+

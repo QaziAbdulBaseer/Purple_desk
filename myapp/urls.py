@@ -41,8 +41,20 @@ from myapp.views.Individual_Prompts.create_individual_prompts import (
 
 # from myapp.views.View_Roller_API.View_Product_Availability import ProductAvailabilityAPIView
 from myapp.views.View_Roller_API.View_Product_Availability import ProductAvailabilityAPIView
+from .views.View_Roller_API.View_customer_details import CustomerDetailsAPI, CustomerDetailByID
 
+from .views.View_Roller_API.View_roller_booking import (
+    RollerBookingAPI, 
+    RollerBookingDetailAPI,
+    RollerBookingSearchAPI
+)
+from .views.View_Roller_API.View_combined_booking_customer import CombinedBookingCustomerAPI
 
+from .views.View_Roller_API.View_get_roller_products_by_location import (
+    RollerProductsAPI, 
+    RollerProductCategoriesAPI,
+    RollerProductDetailAPI
+)
 urlpatterns = [
     ## Authorization Paths
     path('signup/', View_Authorization.register_view, name='signup'),
@@ -183,6 +195,20 @@ urlpatterns = [
 
     path('product_availability/', ProductAvailabilityAPIView.as_view(), name='product_availability'),
 
+    path('customers/', CustomerDetailsAPI.as_view(), name='customer-list-create'),
+    path('customers/<int:customer_id>/', CustomerDetailByID.as_view(), name='customer-detail'),
+
+
+    path('roller-bookings/', RollerBookingAPI.as_view(), name='roller-booking-list'),
+    path('roller-bookings/<int:booking_id>/', RollerBookingDetailAPI.as_view(), name='roller-booking-detail'),
+    path('roller-bookings/search/', RollerBookingSearchAPI.as_view(), name='roller-booking-search'),
+
+    path('combined-booking/', CombinedBookingCustomerAPI.as_view(), name='combined-booking'),
+
+    # Roller products endpoints
+    path('roller-products/', RollerProductsAPI.as_view(), name='roller-products'),
+    path('roller-product-categories/', RollerProductCategoriesAPI.as_view(), name='roller-product-categories'),
+    path('roller-product-detail/', RollerProductDetailAPI.as_view(), name='roller-product-detail'),
 
     ## Get Prompt
     # path("get-prompt/<int:location_id>/<int:search_number>/<int:client_id>", View_Get_Prompt.get_prompt, name="View_Get_Prompt"),

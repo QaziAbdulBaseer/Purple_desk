@@ -511,3 +511,23 @@ class GroupBookingSerializer(serializers.ModelSerializer):
                 })
         
         return data
+
+
+
+
+from rest_framework import serializers
+from myapp.model.customer_details_model import CustomerDetails
+
+class CustomerDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerDetails
+        fields = '__all__'
+
+
+from rest_framework import serializers
+from myapp.model.roller_booking_model import RollerBookingDetails
+
+class RollerBookingDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RollerBookingDetails
+        fields = '__all__'
