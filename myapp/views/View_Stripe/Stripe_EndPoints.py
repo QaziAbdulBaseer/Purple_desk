@@ -1,15 +1,8 @@
 
 
 
-####views
-### Stripe webhooks events subscribe
-#checkout.session.completed
-#checkout.session.expired
 
 
-# import stripe
-# import time
-# from django.views.decorators.csrf import csrf_exempt
 
 
 import stripe
@@ -22,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+import os
 from dotenv import load_dotenv
 load_dotenv()
 

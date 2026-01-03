@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from dotenv import load_dotenv
 load_dotenv()
+import os
 
 logger = logging.getLogger(__name__)
 
