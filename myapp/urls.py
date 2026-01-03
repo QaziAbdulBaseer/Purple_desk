@@ -55,6 +55,10 @@ from .views.View_Roller_API.View_get_roller_products_by_location import (
     RollerProductCategoriesAPI,
     RollerProductDetailAPI
 )
+
+# from myapp.views.View_Stripe.Stripe_EndPoints import stripe_webhook , PaymentSuccess
+
+
 urlpatterns = [
     ## Authorization Paths
     path('signup/', View_Authorization.register_view, name='signup'),
@@ -209,6 +213,15 @@ urlpatterns = [
     path('roller-products/', RollerProductsAPI.as_view(), name='roller-products'),
     path('roller-product-categories/', RollerProductCategoriesAPI.as_view(), name='roller-product-categories'),
     path('roller-product-detail/', RollerProductDetailAPI.as_view(), name='roller-product-detail'),
+
+
+
+
+    ## Stripe Endpoints 
+    # path("stripe/webhook/", stripe_webhook),
+
+    # # Frontend redirects
+    # path("payment/success/", PaymentSuccess.as_view()),
 
     ## Get Prompt
     # path("get-prompt/<int:location_id>/<int:search_number>/<int:client_id>", View_Get_Prompt.get_prompt, name="View_Get_Prompt"),

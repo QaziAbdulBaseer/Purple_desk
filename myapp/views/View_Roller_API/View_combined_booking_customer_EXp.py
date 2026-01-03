@@ -1,4 +1,5 @@
 
+
 # # myapp/views/View_Roller_API/View_combined_booking_customer.py
 
 # import json
@@ -54,42 +55,106 @@
 #         }
 #         """
 #         try:
+#             # Step 1: Validate request
+#             complete_payload = request.data
+#             logger.info(f"Complete payload received for combined booking")
+            
+#             customer_detail = complete_payload.get('customer', {})
+            
+#             if not customer_detail:
+#                 return Response({
+#                     'success': False,
+#                     'message': 'customer is required in payload'
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+#             # Map the incoming fields to your model fields
+#             customer_email = customer_detail.get('Email')
+#             if not customer_email:
+#                 return Response({
+#                     'success': False,
+#                     'message': 'Email is required in customer'
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+#             # Step 2: Prepare customer data (but don't save yet)
+#             customer_data_for_serializer = {
+#                 'customer_email': customer_email,
+#                 'phone_number': customer_detail.get('Phone', ''),
+#                 'first_name': customer_detail.get('first_name', ''),
+#                 'last_name': customer_detail.get('LastName', '')
+#             }
+            
+#             # Step 3: Get Roller API token
+#             client_id = complete_payload.get('client_id')
+#             if not client_id:
+#                 return Response({
+#                     'success': False,
+#                     'message': 'client_id is required for Roller booking'
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+#             try:
+#                 logger.info(f"Fetching location for client_id: {client_id}")
+#                 location = Location.objects.get(location_id=client_id)
+#                 logger.info(f"Location found: {location.location_name} (ID: {location.location_id})")
+#             except Location.DoesNotExist:
+#                 logger.error(f"Location with ID {client_id} not found")
+#                 return Response({
+#                     'success': False,
+#                     'message': f'Location with ID {client_id} not found'
+#                 }, status=status.HTTP_404_NOT_FOUND)
+            
+#             # Get Roller token with retry logic
+#             roller_token = None
+#             retry_count = 0
+#             max_retries = 2
+            
+#             while not roller_token and retry_count < max_retries:
+#                 roller_token = get_or_refresh_roller_token(location)
+#                 if not roller_token:
+#                     logger.warning(f"Attempt {retry_count + 1} failed to get Roller token for location {location.location_name}")
+#                     retry_count += 1
+#                     # Force token refresh by invalidating current token
+#                     if retry_count < max_retries:
+#                         location.roller_access_token = None
+#                         location.save(update_fields=['roller_access_token'])
+            
+#             if not roller_token:
+#                 logger.error(f"Failed to get Roller API token for location {location.location_name} after {max_retries} attempts")
+#                 return Response({
+#                     'success': False,
+#                     'message': 'Failed to get Roller API token'
+#                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+#             logger.info(f"Successfully obtained Roller token for location {location.location_name}")
+            
+#             # Generate a unique booking ID (we'll use this later if Roller booking is successful)
+#             booking_unique_id = f"BK{datetime.now().strftime('%Y%m%d')}_{str(uuid.uuid4())[:8].upper()}"
+            
+#             # Step 4: Create booking in Roller system FIRST
+#             roller_booking_response = self._create_roller_booking_with_retry(
+#                 complete_payload, roller_token, location
+#             )
+            
+#             # Check if Roller booking was successful
+#             roller_success = roller_booking_response is not None and 'error' not in roller_booking_response
+            
+#             if not roller_success:
+#                 logger.error(f"Roller booking failed: {roller_booking_response}")
+#                 return Response({
+#                     'success': False,
+#                     'message': 'Failed to create booking in Roller system',
+#                     'roller_error': roller_booking_response
+#                 }, status=status.HTTP_424_FAILED_DEPENDENCY)  # 424 Failed Dependency
+            
+#             # Step 5: If Roller booking successful, create local booking and customer
+#             logger.info(f"Roller booking successful, proceeding with local storage")
+            
 #             with transaction.atomic():
-#                 # Get the complete payload from request
-#                 complete_payload = request.data
-                
-#                 # Extract customer details from payload
-#                 logger.info(f"Complete payload received for combined booking")
-                
-#                 customer_detail = complete_payload.get('customer', {})
-                
-#                 if not customer_detail:
-#                     return Response({
-#                         'success': False,
-#                         'message': 'customer is required in payload'
-#                     }, status=status.HTTP_400_BAD_REQUEST)
-                
-#                 # Map the incoming fields to your model fields
-#                 customer_email = customer_detail.get('Email')
-#                 if not customer_email:
-#                     return Response({
-#                         'success': False,
-#                         'message': 'Email is required in customer'
-#                     }, status=status.HTTP_400_BAD_REQUEST)
-                
 #                 # Check if customer already exists - using customer_email field
 #                 existing_customer = CustomerDetails.objects.filter(
 #                     customer_email=customer_email
 #                 ).first()
                 
-#                 # Prepare data for serializer (map incoming fields to model fields)
-#                 customer_data_for_serializer = {
-#                     'customer_email': customer_email,
-#                     'phone_number': customer_detail.get('Phone', ''),
-#                     'first_name': customer_detail.get('first_name', ''),
-#                     'last_name': customer_detail.get('LastName', '')
-#                 }
-                
+#                 # Create or update customer
 #                 if existing_customer:
 #                     # Update existing customer
 #                     customer_serializer = CustomerDetailsSerializer(
@@ -121,54 +186,7 @@
 #                             'errors': customer_serializer.errors
 #                         }, status=status.HTTP_400_BAD_REQUEST)
                 
-#                 # Generate a unique booking ID
-#                 booking_unique_id = f"BK{datetime.now().strftime('%Y%m%d')}_{str(uuid.uuid4())[:8].upper()}"
-                
-#                 # Get client_id (location_id) for getting Roller token
-#                 client_id = complete_payload.get('client_id')
-#                 if not client_id:
-#                     return Response({
-#                         'success': False,
-#                         'message': 'client_id is required for Roller booking'
-#                     }, status=status.HTTP_400_BAD_REQUEST)
-                
-#                 # Get Roller API token
-#                 try:
-#                     logger.info(f"Fetching location for client_id: {client_id}")
-#                     location = Location.objects.get(location_id=client_id)
-#                     logger.info(f"Location found: {location.location_name} (ID: {location.location_id})")
-#                 except Location.DoesNotExist:
-#                     logger.error(f"Location with ID {client_id} not found")
-#                     return Response({
-#                         'success': False,
-#                         'message': f'Location with ID {client_id} not found'
-#                     }, status=status.HTTP_404_NOT_FOUND)
-                
-#                 # Get Roller token with retry logic
-#                 roller_token = None
-#                 retry_count = 0
-#                 max_retries = 2
-                
-#                 while not roller_token and retry_count < max_retries:
-#                     roller_token = get_or_refresh_roller_token(location)
-#                     if not roller_token:
-#                         logger.warning(f"Attempt {retry_count + 1} failed to get Roller token for location {location.location_name}")
-#                         retry_count += 1
-#                         # Force token refresh by invalidating current token
-#                         if retry_count < max_retries:
-#                             location.roller_access_token = None
-#                             location.save(update_fields=['roller_access_token'])
-                
-#                 if not roller_token:
-#                     logger.error(f"Failed to get Roller API token for location {location.location_name} after {max_retries} attempts")
-#                     return Response({
-#                         'success': False,
-#                         'message': 'Failed to get Roller API token'
-#                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                
-#                 logger.info(f"Successfully obtained Roller token for location {location.location_name}")
-                
-#                 # Prepare booking data for our database
+#                 # Step 6: Create local booking
 #                 booking_data = {
 #                     'customer': customer.customer_id,
 #                     'roller_id': str(client_id),
@@ -180,6 +198,11 @@
 #                     'payload': json.dumps(complete_payload)  # Store entire payload as JSON string
 #                 }
                 
+#                 # Add Roller response to payload before saving
+#                 current_payload = json.loads(complete_payload) if isinstance(complete_payload, str) else complete_payload
+#                 current_payload['roller_response'] = roller_booking_response
+#                 booking_data['payload'] = json.dumps(current_payload)
+                
 #                 # Create booking in our database
 #                 booking_serializer = RollerBookingDetailsSerializer(data=booking_data)
                 
@@ -187,20 +210,7 @@
 #                     booking = booking_serializer.save()
 #                     logger.info(f"Booking created in local database: {booking_unique_id}")
                     
-#                     # Create booking in Roller system (synchronously)
-#                     roller_booking_response = self._create_roller_booking_with_retry(
-#                         complete_payload, roller_token, location
-#                     )
-                    
-#                     # Update our booking with Roller response if available
-#                     if roller_booking_response:
-#                         current_payload = json.loads(booking.payload) if booking.payload else {}
-#                         current_payload['roller_response'] = roller_booking_response
-#                         booking.payload = json.dumps(current_payload)
-#                         booking.save()
-#                         logger.info(f"Roller booking response saved for booking {booking_unique_id}")
-                    
-#                     # Prepare response
+#                     # Step 7: Prepare response
 #                     response_data = {
 #                         'success': True,
 #                         'message': 'Customer and booking processed successfully',
@@ -220,8 +230,10 @@
 #                             'creation_date': booking.creation_date.strftime('%Y-%m-%d %H:%M:%S') if booking.creation_date else None
 #                         },
 #                         'roller_booking': {
-#                             'success': roller_booking_response is not None and 'error' not in roller_booking_response,
-#                             'response': roller_booking_response
+#                             'success': True,
+#                             'response': roller_booking_response,
+#                             'roller_booking_id': roller_booking_response.get('id'),
+#                             'roller_external_id': roller_booking_response.get('externalId')
 #                         },
 #                         'payload_summary': {
 #                             'total_products': len(complete_payload.get('products', [])),
@@ -229,17 +241,23 @@
 #                             'booking_date': complete_payload.get('bookingDate'),
 #                             'comments': complete_payload.get('comments'),
 #                             'client_id': client_id
+#                         },
+#                         'workflow': {
+#                             'roller_first': True,
+#                             'roller_success': True,
+#                             'local_stored': True
 #                         }
 #                     }
                     
 #                     return Response(response_data, status=status.HTTP_201_CREATED)
                 
-#                 logger.error(f"Error creating booking: {booking_serializer.errors}")
+#                 logger.error(f"Error creating local booking after Roller success: {booking_serializer.errors}")
 #                 return Response({
 #                     'success': False,
-#                     'message': 'Error creating booking',
-#                     'errors': booking_serializer.errors
-#                 }, status=status.HTTP_400_BAD_REQUEST)
+#                     'message': 'Roller booking successful but failed to create local booking',
+#                     'errors': booking_serializer.errors,
+#                     'roller_booking_id': roller_booking_response.get('id')
+#                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
 #         except Exception as e:
 #             logger.error(f"Error processing combined booking request: {str(e)}", exc_info=True)
@@ -566,9 +584,6 @@
 
 
 
-
-# myapp/views/View_Roller_API/View_combined_booking_customer.py
-
 import json
 import asyncio
 import aiohttp
@@ -587,8 +602,8 @@ from myapp.model.roller_booking_model import RollerBookingDetails
 from myapp.model.locations_model import Location
 from myapp.serializers import CustomerDetailsSerializer, RollerBookingDetailsSerializer
 from myapp.utils.roller_token_manager import get_or_refresh_roller_token
+from myapp.utils.stripe_utils import StripePaymentUtils  # NEW IMPORT
 import logging
-from myapp.utils.stripe_utils_test import create_deposit_payment_link
 
 logger = logging.getLogger(__name__)
 
@@ -596,14 +611,14 @@ class CombinedBookingCustomerAPI(APIView):
     """
     Combined API to handle customer and booking creation in one request
     Accepts complete payload and automatically creates/updates customer and booking
-    Also creates booking in Roller system
+    Also creates booking in Roller system and generates Stripe payment link
     """
     permission_classes = [AllowAny]
     
     def post(self, request):
         """
         Create/Update customer and booking in one API call
-        Also creates booking in Roller system
+        Also creates booking in Roller system and generates payment link
         
         Request Body (example):
         {
@@ -677,6 +692,7 @@ class CombinedBookingCustomerAPI(APIView):
             
             while not roller_token and retry_count < max_retries:
                 roller_token = get_or_refresh_roller_token(location)
+                print("This is the roller token" , roller_token)
                 if not roller_token:
                     logger.warning(f"Attempt {retry_count + 1} failed to get Roller token for location {location.location_name}")
                     retry_count += 1
@@ -770,18 +786,7 @@ class CombinedBookingCustomerAPI(APIView):
                 current_payload = json.loads(complete_payload) if isinstance(complete_payload, str) else complete_payload
                 current_payload['roller_response'] = roller_booking_response
                 booking_data['payload'] = json.dumps(current_payload)
-                print("this is the payload === " ,  current_payload)
-                print("This is hte = packageDetails" , current_payload["packageDetails"])
-                print("This is The package Name" , current_payload["packageDetails"]["name"])
-                total_amount_dollars = current_payload["total_amount_dollars"]
-                booking_id = current_payload["externalId"]
-                deposit_percentage = current_payload["depositPercentage"]
-                minimum_deposit_amount_dollars = current_payload["minimum_deposit_amount_dollars"]
-                product_data = current_payload["packageDetails"]
-
-                payment_url = create_deposit_payment_link(total_amount_dollars  ,booking_id , deposit_percentage, minimum_deposit_amount_dollars, product_data )
-                print("This is the payment Url == " , payment_url)
-                # return payment_url
+                
                 # Create booking in our database
                 booking_serializer = RollerBookingDetailsSerializer(data=booking_data)
                 
@@ -789,7 +794,57 @@ class CombinedBookingCustomerAPI(APIView):
                     booking = booking_serializer.save()
                     logger.info(f"Booking created in local database: {booking_unique_id}")
                     
-                    # Step 7: Prepare response
+                    # Step 7: Generate Stripe payment link (NEW)
+                    stripe_response = None
+                    try:
+                        # Extract total amount from Roller response or calculate from payload
+                        total_amount = self._calculate_total_amount(roller_booking_response, complete_payload)
+                        
+                        # Get deposit parameters from payload
+                        full_pay = complete_payload.get('fullPay', False)
+                        deposit_percentage = complete_payload.get('depositPercentage')
+                        deposit_amount = complete_payload.get('depositAmount')
+                        print("Total Amount" , total_amount)
+                        
+                        # If fullPay is true, set deposit to 100%
+                        if full_pay:
+                            deposit_percentage = 100.0
+                            deposit_amount = None
+                        
+                        # Generate product description from items
+                        product_description = self._generate_product_description(complete_payload)
+                        
+                        # Create Stripe payment session
+                        stripe_response = StripePaymentUtils.create_payment_session(
+                            booking_id=booking.booking_id,
+                            booking_unique_id=booking_unique_id,
+                            total_amount_dollars=total_amount,
+                            customer_email=customer_email,
+                            customer_name=f"{customer_detail.get('first_name', '')} {customer_detail.get('LastName', '')}",
+                            deposit_percentage=deposit_percentage,
+                            minimum_deposit_amount_dollars=deposit_amount,
+                            product_name=f"Booking #{booking_unique_id}",
+                            product_description=product_description,
+                            success_url=f"http://localhost:3000/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+                            cancel_url="http://localhost:3000/payment/cancel",
+                            metadata={
+                                "location_id": str(client_id),
+                                "location_name": location.location_name,
+                                "booking_date": complete_payload.get('bookingDate', ''),
+                                "booking_time": booking_data['booking_time']
+                            }
+                        )
+                        
+                        logger.info(f"Stripe payment link generated: {stripe_response.get('payment_url') if stripe_response else 'Failed'}")
+                        
+                    except Exception as stripe_error:
+                        logger.error(f"Error generating Stripe payment link: {str(stripe_error)}")
+                        stripe_response = {
+                            "success": False,
+                            "error": str(stripe_error)
+                        }
+                    
+                    # Step 8: Prepare response
                     response_data = {
                         'success': True,
                         'message': 'Customer and booking processed successfully',
@@ -814,16 +869,21 @@ class CombinedBookingCustomerAPI(APIView):
                             'roller_booking_id': roller_booking_response.get('id'),
                             'roller_external_id': roller_booking_response.get('externalId')
                         },
+                        'stripe_payment': stripe_response,  # NEW: Add Stripe response
                         'payload_summary': {
                             'total_products': len(complete_payload.get('products', [])),
                             'total_items': len(complete_payload.get('items', [])),
                             'booking_date': complete_payload.get('bookingDate'),
                             'comments': complete_payload.get('comments'),
-                            'client_id': client_id
+                            'client_id': client_id,
+                            'total_amount': total_amount
                         },
-                        'stripe':{
-                            "payment_url" :payment_url
-                        },
+                        'workflow': {
+                            'roller_first': True,
+                            'roller_success': True,
+                            'local_stored': True,
+                            'stripe_link_generated': stripe_response.get('success', False) if stripe_response else False
+                        }
                     }
                     
                     return Response(response_data, status=status.HTTP_201_CREATED)
@@ -843,7 +903,9 @@ class CombinedBookingCustomerAPI(APIView):
                 'message': 'Error processing combined booking request',
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
+
+
     def _create_roller_booking_with_retry(self, payload, api_token, location):
         """
         Create booking in Roller system with retry logic for token expiration
@@ -903,6 +965,173 @@ class CombinedBookingCustomerAPI(APIView):
             'message': 'Failed to create booking in Roller after maximum retries',
             'retry_count': retry_count
         }
+    
+
+    
+    def _create_roller_booking_sync(self, payload, api_token):
+        """
+        Create booking in Roller system synchronously
+        """
+        if not api_token:
+            logger.error("No Roller API token provided")
+            return {
+                'error': True,
+                'message': 'No Roller API token provided'
+            }
+        
+        url = "https://api.haveablast.roller.app/bookings"
+        
+        # Prepare the payload for Roller
+        roller_payload = self._prepare_roller_payload(payload)
+        if not roller_payload:
+            return {
+                'error': True,
+                'message': 'Failed to prepare Roller payload'
+            }
+        
+        logger.info(f"Prepared Roller payload with {len(roller_payload.get('items', []))} items")
+        
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_token}"
+        }
+        
+        try:
+            logger.info(f"Sending booking to Roller API")
+            response = requests.post(
+                url,
+                headers=headers,
+                json=roller_payload,
+                timeout=30
+            )
+            
+            logger.info(f"Roller booking response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                logger.info(f"Roller booking created successfully: {response_data.get('id', 'Unknown ID')}")
+                return response_data
+            elif response.status_code == 201:
+                response_data = response.json()
+                logger.info(f"Roller booking created successfully (201): {response_data.get('id', 'Unknown ID')}")
+                return response_data
+            else:
+                # Try to parse error response
+                try:
+                    error_data = response.json()
+                    logger.error(f"Roller API Error: {response.status_code} - {json.dumps(error_data)}")
+                    return error_data
+                except:
+                    logger.error(f"Roller API Error: {response.status_code} - {response.text}")
+                    return {
+                        'error': True,
+                        'status_code': response.status_code,
+                        'message': response.text
+                    }
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error calling Roller API: {str(e)}")
+            return {
+                'error': True,
+                'message': str(e)
+            }
+        except Exception as e:
+            logger.error(f"Unexpected error calling Roller API: {str(e)}")
+            return {
+                'error': True,
+                'message': str(e)
+            }
+    
+    
+    def _prepare_roller_payload(self, payload):
+        """
+        Prepare payload for Roller API from our payload format
+        """
+        # Extract customer details
+        customer_detail = payload.get('customer', {})
+        booking_date = payload.get('bookingDate', '')
+        
+        # Validate booking date
+        if not booking_date:
+            logger.error("No bookingDate found in payload")
+            return None
+        
+        # Check if payload has 'items' or 'products' key
+        if 'items' in payload:
+            # Payload already has items in Roller format
+            items = payload.get('items', [])
+            logger.info(f"Found {len(items)} items in payload")
+            
+            # Ensure all productIds are integers
+            for item in items:
+                if 'productId' in item:
+                    try:
+                        item['productId'] = int(item['productId'])
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Cannot convert productId {item.get('productId')} to integer: {e}")
+                
+                # Ensure partyPackageInclusions have integer productIds if they exist
+                if 'partyPackageInclusions' in item:
+                    for inclusion in item['partyPackageInclusions']:
+                        if 'productId' in inclusion:
+                            try:
+                                inclusion['productId'] = int(inclusion['productId'])
+                            except (ValueError, TypeError) as e:
+                                logger.warning(f"Cannot convert inclusion productId {inclusion.get('productId')} to integer: {e}")
+            
+        elif 'products' in payload:
+            # Legacy format with 'products' - convert to Roller format
+            items = self._convert_products_to_items(payload)
+            logger.info(f"Converted {len(payload.get('products', []))} products to {len(items)} items")
+        else:
+            logger.error("Payload must contain either 'items' or 'products'")
+            return None
+        
+        # Validate items
+        if not items:
+            logger.error("No items found in payload")
+            return None
+        
+        # Check if first item has bookingDate, if not add it
+        for item in items:
+            if 'bookingDate' not in item:
+                item['bookingDate'] = booking_date
+        
+        # Create Roller payload
+        roller_payload = {
+            "externalId": payload.get('externalId', f"PD-{datetime.now().strftime('%Y%m%d%H%M%S')}-{payload.get('client_id', '1')}"),
+            "bookingDate": booking_date,
+            "items": items,
+            "customer": {
+                "email": customer_detail.get('Email', ''),
+                "phone": customer_detail.get('Phone', ''),
+                "firstName": customer_detail.get('first_name', ''),
+                "lastName": customer_detail.get('LastName', '')
+            },
+            "comments": payload.get('comments', ''),
+            "sendConfirmations": False
+        }
+        
+        # Optional fields
+        if 'name' in payload:
+            roller_payload['name'] = payload['name']
+        
+        if 'purchaseDate' in payload:
+            roller_payload['purchaseDate'] = payload['purchaseDate']
+        
+        if 'capacityReservationId' in payload:
+            roller_payload['capacityReservationId'] = payload['capacityReservationId']
+        
+        if 'companyId' in payload:
+            try:
+                roller_payload['companyId'] = int(payload['companyId'])
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Cannot convert companyId {payload.get('companyId')} to integer: {e}")
+        
+        logger.debug(f"Final Roller payload prepared")
+        return roller_payload
+    
     
     def _is_token_expired_error(self, roller_response):
         """
@@ -998,146 +1227,7 @@ class CombinedBookingCustomerAPI(APIView):
                 'message': str(e)
             }
     
-    def _prepare_roller_payload(self, payload):
-        """
-        Prepare payload for Roller API from our payload format
-        """
-        # Extract customer details
-        customer_detail = payload.get('customer', {})
-        booking_date = payload.get('bookingDate', '')
-        
-        # Validate booking date
-        if not booking_date:
-            logger.error("No bookingDate found in payload")
-            return None
-        
-        # Check if payload has 'items' or 'products' key
-        if 'items' in payload:
-            # Payload already has items in Roller format
-            items = payload.get('items', [])
-            logger.info(f"Found {len(items)} items in payload")
-            
-            # Ensure all productIds are integers
-            for item in items:
-                if 'productId' in item:
-                    try:
-                        item['productId'] = int(item['productId'])
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Cannot convert productId {item.get('productId')} to integer: {e}")
-                
-                # Ensure partyPackageInclusions have integer productIds if they exist
-                if 'partyPackageInclusions' in item:
-                    for inclusion in item['partyPackageInclusions']:
-                        if 'productId' in inclusion:
-                            try:
-                                inclusion['productId'] = int(inclusion['productId'])
-                            except (ValueError, TypeError) as e:
-                                logger.warning(f"Cannot convert inclusion productId {inclusion.get('productId')} to integer: {e}")
-            
-        elif 'products' in payload:
-            # Legacy format with 'products' - convert to Roller format
-            items = self._convert_products_to_items(payload)
-            logger.info(f"Converted {len(payload.get('products', []))} products to {len(items)} items")
-        else:
-            logger.error("Payload must contain either 'items' or 'products'")
-            return None
-        
-        # Validate items
-        if not items:
-            logger.error("No items found in payload")
-            return None
-        
-        # Check if first item has bookingDate, if not add it
-        for item in items:
-            if 'bookingDate' not in item:
-                item['bookingDate'] = booking_date
-        
-        # Create Roller payload
-        roller_payload = {
-            "externalId": payload.get('externalId', f"PD-{datetime.now().strftime('%Y%m%d%H%M%S')}-{payload.get('client_id', '1')}"),
-            "bookingDate": booking_date,
-            "items": items,
-            "customer": {
-                "email": customer_detail.get('Email', ''),
-                "phone": customer_detail.get('Phone', ''),
-                "firstName": customer_detail.get('first_name', ''),
-                "lastName": customer_detail.get('LastName', '')
-            },
-            "comments": payload.get('comments', ''),
-            "sendConfirmations": False
-        }
-        
-        # Optional fields
-        if 'name' in payload:
-            roller_payload['name'] = payload['name']
-        
-        if 'purchaseDate' in payload:
-            roller_payload['purchaseDate'] = payload['purchaseDate']
-        
-        if 'capacityReservationId' in payload:
-            roller_payload['capacityReservationId'] = payload['capacityReservationId']
-        
-        if 'companyId' in payload:
-            try:
-                roller_payload['companyId'] = int(payload['companyId'])
-            except (ValueError, TypeError) as e:
-                logger.warning(f"Cannot convert companyId {payload.get('companyId')} to integer: {e}")
-        
-        logger.debug(f"Final Roller payload prepared")
-        return roller_payload
     
-    def _convert_products_to_items(self, payload):
-        """
-        Convert legacy 'products' format to Roller 'items' format
-        """
-        products = payload.get('products', [])
-        booking_date = payload.get('bookingDate', '')
-        items = []
-        
-        for product in products:
-            try:
-                product_id = int(product.get('productId', 0))
-            except (ValueError, TypeError):
-                logger.warning(f"Invalid productId: {product.get('productId')}")
-                continue
-                
-            item = {
-                "productId": product_id,
-                "quantity": product.get('quantity', 1),
-                "bookingDate": product.get('bookingDate', booking_date),
-                "startTime": product.get('startTime', '14:00')
-            }
-            
-            # Add priceOverride if present
-            if 'priceOverride' in product:
-                item['priceOverride'] = product['priceOverride']
-            
-            # Check if this is a main package with inclusions
-            if product.get('packageProductId', 0) > 0:
-                # This is a main package - we need to find its inclusions
-                package_product_id = product.get('packageProductId')
-                
-                # Find all products marked as inclusions for this package
-                inclusion_products = []
-                for other_product in products:
-                    if other_product.get('inclusion', False) and other_product.get('packageProductId') == package_product_id:
-                        try:
-                            inclusion_product_id = int(other_product.get('productId', 0))
-                            inclusion_item = {
-                                "productId": inclusion_product_id,
-                                "quantity": other_product.get('quantity', 1)
-                            }
-                            inclusion_products.append(inclusion_item)
-                        except (ValueError, TypeError):
-                            logger.warning(f"Invalid inclusion productId: {other_product.get('productId')}")
-                            continue
-                
-                if inclusion_products:
-                    item["partyPackageInclusions"] = inclusion_products
-            
-            items.append(item)
-        
-        return items
     
     def _extract_booking_time(self, payload):
         """Extract booking time from products or items array"""
@@ -1157,4 +1247,87 @@ class CombinedBookingCustomerAPI(APIView):
         """Generate capacity reservation ID"""
         return f"CAP{datetime.now().strftime('%Y%m%d%H%M%S')}_{str(uuid.uuid4())[:6].upper()}"
 
+    # ... (keep all existing helper methods: _create_roller_booking_with_retry, 
+    # _is_token_expired_error, _create_roller_booking_sync, _prepare_roller_payload, 
+    # _convert_products_to_items, _extract_booking_time, _generate_capacity_id)
+    
+    # ADD THESE NEW HELPER METHODS:
+    
+    def _calculate_total_amount(self, roller_response, payload):
+        """
+        Calculate total booking amount from Roller response or payload
+        
+        Args:
+            roller_response: Roller API response
+            payload: Original booking payload
+            
+        Returns:
+            Total amount in dollars
+        """
+        try:
+            # Try to get total from Roller response first
+            if roller_response and isinstance(roller_response, dict):
+                # Check for total in various possible fields
+                total = roller_response.get('totalAmount')
+                if total is None:
+                    total = roller_response.get('total')
+                if total is None:
+                    total = roller_response.get('amount')
+                
+                if total is not None:
+                    # Check if amount is in cents or dollars
+                    if total > 1000:  # If it's a large number, assume cents
+                        return total / 100
+                    return float(total)
+            
+            # If not in Roller response, calculate from payload
+            # This is a simplified calculation - adjust based on your actual payload structure
+            items = payload.get('items', [])
+            print("This is the items == " , items)
+            if not items:
+                items = payload.get('products', [])
+            
+            total = 0.0
+            for item in items:
+                # This assumes you have price information in items
+                # Adjust based on your actual data structure
+                quantity = item.get('quantity', 1)
+                price = item.get('price', 0) or item.get('priceOverride', 0)
+                total += quantity * price
+                print("this is the toal 1 == " , total)
+            
+            return total
+            
+        except Exception as e:
+            logger.warning(f"Could not calculate total amount: {str(e)}")
+            return 0.0  # Default to 0 if can't calculate
+    
+    def _generate_product_description(self, payload):
+        """
+        Generate product description from booking items
+        
+        Args:
+            payload: Booking payload
+            
+        Returns:
+            Formatted description string
+        """
+        try:
+            items = payload.get('items', [])
+            if not items:
+                items = payload.get('products', [])
+            
+            descriptions = []
+            for item in items:
+                product_id = item.get('productId')
+                quantity = item.get('quantity', 1)
+                descriptions.append(f"Product {product_id} (Qty: {quantity})")
+            
+            if descriptions:
+                return " | ".join(descriptions)
+            return f"Booking for {payload.get('customer', {}).get('first_name', 'Customer')}"
+            
+        except Exception as e:
+            logger.warning(f"Could not generate product description: {str(e)}")
+            return "Booking items"
 

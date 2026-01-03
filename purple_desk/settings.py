@@ -17,9 +17,19 @@ SECRET_KEY = 'django-insecure-s95!^dpdmk5hg4)l++fd2rc$8c(16q9-i!w+n0r($twc0dmz%x
 DEBUG = True  # Debug False on Render 
 
 ALLOWED_HOSTS = [
+    "*",
     "localhost",
     "127.0.0.1",
+    "6747e429af5e.ngrok-free.app",
+    "81a9832a2b3c.ngrok-free.app"
 ]
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET_key")
 
 # Render automatically injects this
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
@@ -189,3 +199,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'generated_md')
 
 
+
+
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')  # Your test key
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_...')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_...')
