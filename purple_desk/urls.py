@@ -18,7 +18,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from myapp.views.View_Stripe.Stripe_EndPoints import stripe_webhook , PaymentSuccess
+# from myapp.views.View_Stripe.Stripe_EndPoints import stripe_webhook , PaymentSuccess
+from myapp.views.View_Stripe.Stripe_EndPoints import stripe_webhook, PaymentSuccess, PaymentExpired
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,7 +28,9 @@ urlpatterns = [
     path("stripe/webhook/", stripe_webhook),
 
     # Frontend redirects
-    path("payment/success/", PaymentSuccess.as_view()),
+    # path("payment/success/", PaymentSuccess.as_view()),
+    path("payment/success/", PaymentSuccess.as_view(), name="payment_success"),
+    path("payment/expired/", PaymentExpired.as_view(), name="payment_expired"),
 ]
 
 if settings.DEBUG:

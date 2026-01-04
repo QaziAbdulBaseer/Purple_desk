@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Link Expired</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .expired-icon {
+            font-size: 80px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        .steps {
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+        }
+        
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 20px 0;
+        }
+        
+        .contact-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .contact-info a {
+            color: #f5576c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="expired-icon">⌛</div>
+        <h1>Payment Link Expired</h1>
+        <p>The payment link you're trying to access has expired.</p>
+        
+        <div class="warning-box">
+            <h3>⚠️ Please Note</h3>
+            <p>Your booking has been cancelled because the payment was not completed within the time limit.</p>
+        </div>
+        
+        <div class="timer">00:00</div>
+        <p>Time limit for payment has elapsed</p>
+        
+        <div class="steps">
+            <h3>What to do next:</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div>Contact our support team to check if the booking is still available</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div>Request a new payment link if the slot is still open</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div>Complete the payment immediately after receiving the new link</div>
+            </div>
+        </div>
+        
+        <div class="contact-info">
+            <p>Need help? Contact us at <a href="mailto:support@example.com">support@example.com</a></p>
+            <p>or call: <strong>1-800-123-4567</strong></p>
+        </div>
+        
+        <a href="/" class="btn">Return to Home</a>
+        <a href="/contact" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-left: 10px;">Contact Support</a>
+    </div>
+    
+    <script>
+        // Timer animation
+        let seconds = 0;
+        const timerElement = document.querySelector('.timer');
+        
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>

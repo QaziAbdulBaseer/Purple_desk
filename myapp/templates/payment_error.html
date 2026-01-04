@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Error</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .error-icon {
+            font-size: 80px;
+            color: #ff5858;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .error-box {
+            background: #ffe6e6;
+            border: 1px solid #ffcccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .error-box h3 {
+            color: #d63031;
+            margin-top: 0;
+        }
+        
+        .error-message {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            margin-top: 10px;
+            border-left: 4px solid #ff5858;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        <h1>Payment Error</h1>
+        <p>An error occurred while processing your payment.</p>
+        
+        {% if error_message %}
+        <div class="error-box">
+            <h3>Error Details:</h3>
+            <div class="error-message">{{ error_message }}</div>
+        </div>
+        {% endif %}
+        
+        <p>Please try again or contact support if the problem persists.</p>
+        
+        <a href="/" class="btn" style="background: linear-gradient(135deg, #ff5858 0%, #f09819 100%); 
+                                      color: white; padding: 15px 40px; border-radius: 50px; 
+                                      text-decoration: none; font-weight: bold; 
+                                      margin-top: 20px; display: inline-block;">
+            Return to Home
+        </a>
+    </div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 
-# -*- coding: utf-8 -*-
+
+
 
 import stripe
 import time
@@ -121,14 +122,15 @@ def create_stripe_checkout_session(payload: dict):
 # =====================================================
 # CONVENIENCE FUNCTION
 # =====================================================
-def create_deposit_payment_link(
-    total_amount_dollars: float,
-    booking_id: str,
-    deposit_percentage: Optional[float] = None,
-    minimum_deposit_amount_dollars: Optional[float] = None,
-    product_data: Optional[dict] = None,
-) -> str:
-
+# def create_deposit_payment_link(
+#     total_amount_dollars: float,
+#     booking_id: str,
+#     deposit_percentage: Optional[float] = None,
+#     minimum_deposit_amount_dollars: Optional[float] = None,
+#     product_data: Optional[dict] = None,
+# ) -> str:
+def create_deposit_payment_link(total_amount_dollars, booking_id, deposit_percentage, minimum_deposit_amount_dollars, product_data):
+    print("This s th booking_id" , booking_id)
     payload = {
         "total_amount_dollars": total_amount_dollars,
         "booking_id": booking_id,

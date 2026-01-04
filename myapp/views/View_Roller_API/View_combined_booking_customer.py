@@ -59,6 +59,8 @@ from myapp.serializers import CustomerDetailsSerializer, RollerBookingDetailsSer
 from myapp.utils.roller_token_manager import get_or_refresh_roller_token
 import logging
 from myapp.utils.stripe_utils_test import create_deposit_payment_link
+from myapp.utils.send_email import send_booking_details_email
+
 
 logger = logging.getLogger(__name__)
 
@@ -69,28 +71,11 @@ class CombinedBookingCustomerAPI(APIView):
     Also creates booking in Roller system
     """
     permission_classes = [AllowAny]
-    
+
     # def post(self, request):
     #     """
     #     Create/Update customer and booking in one API call
-    #     Also creates booking in Roller system
-        
-    #     Request Body (example):
-    #     {
-    #         "products": [...],
-    #         "customer": {
-    #             "Email": "test@example.com",
-    #             "Phone": "1234567890",
-    #             "first_name": "John",
-    #             "LastName": "Doe"
-    #         },
-    #         "client_id": 1,
-    #         "bookingDate": "2024-01-15",
-    #         "comments": "Guest of honor: James",
-    #         "fullPay": false,
-    #         "depositPercentage": 50.0,
-    #         "depositAmount": null
-    #     }
+    #     First creates booking in Roller system, then saves locally if successful
     #     """
     #     try:
     #         # Step 1: Validate request
@@ -113,15 +98,7 @@ class CombinedBookingCustomerAPI(APIView):
     #                 'message': 'Email is required in customer'
     #             }, status=status.HTTP_400_BAD_REQUEST)
             
-    #         # Step 2: Prepare customer data (but don't save yet)
-    #         customer_data_for_serializer = {
-    #             'customer_email': customer_email,
-    #             'phone_number': customer_detail.get('Phone', ''),
-    #             'first_name': customer_detail.get('first_name', ''),
-    #             'last_name': customer_detail.get('LastName', '')
-    #         }
-            
-    #         # Step 3: Get Roller API token
+    #         # Step 2: Get location from client_id
     #         client_id = complete_payload.get('client_id')
     #         if not client_id:
     #             return Response({
@@ -140,7 +117,7 @@ class CombinedBookingCustomerAPI(APIView):
     #                 'message': f'Location with ID {client_id} not found'
     #             }, status=status.HTTP_404_NOT_FOUND)
             
-    #         # Get Roller token with retry logic
+    #         # Step 3: Get Roller API token
     #         roller_token = None
     #         retry_count = 0
     #         max_retries = 2
@@ -163,38 +140,41 @@ class CombinedBookingCustomerAPI(APIView):
     #             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
     #         logger.info(f"Successfully obtained Roller token for location {location.location_name}")
-            
-    #         # Generate a unique booking ID (we'll use this later if Roller booking is successful)
-    #         booking_unique_id = f"BK{datetime.now().strftime('%Y%m%d')}_{str(uuid.uuid4())[:8].upper()}"
-            
+    #         print("This is the compleate _payload = " , complete_payload)
     #         # Step 4: Create booking in Roller system FIRST
     #         roller_booking_response = self._create_roller_booking_with_retry(
     #             complete_payload, roller_token, location
     #         )
+    #         print("this is the boooking  response = " , roller_booking_response)
             
-    #         # Check if Roller booking was successful
-    #         roller_success = roller_booking_response is not None and 'error' not in roller_booking_response
-            
-    #         if not roller_success:
+    #         # Step 5: Check if Roller booking was successful
+    #         if not self._is_roller_booking_successful(roller_booking_response):
     #             logger.error(f"Roller booking failed: {roller_booking_response}")
     #             return Response({
     #                 'success': False,
     #                 'message': 'Failed to create booking in Roller system',
     #                 'roller_error': roller_booking_response
-    #             }, status=status.HTTP_424_FAILED_DEPENDENCY)  # 424 Failed Dependency
+    #             }, status=status.HTTP_424_FAILED_DEPENDENCY)
             
-    #         # Step 5: If Roller booking successful, create local booking and customer
+    #         # Step 6: Only if Roller booking is successful, proceed with local storage
     #         logger.info(f"Roller booking successful, proceeding with local storage")
             
+    #         # Prepare customer data
+    #         customer_data_for_serializer = {
+    #             'customer_email': customer_email,
+    #             'phone_number': customer_detail.get('Phone', ''),
+    #             'first_name': customer_detail.get('first_name', ''),
+    #             'last_name': customer_detail.get('LastName', '')
+    #         }
+            
     #         with transaction.atomic():
-    #             # Check if customer already exists - using customer_email field
+    #             # Check if customer already exists
     #             existing_customer = CustomerDetails.objects.filter(
     #                 customer_email=customer_email
     #             ).first()
                 
     #             # Create or update customer
     #             if existing_customer:
-    #                 # Update existing customer
     #                 customer_serializer = CustomerDetailsSerializer(
     #                     existing_customer, 
     #                     data=customer_data_for_serializer, 
@@ -211,7 +191,6 @@ class CombinedBookingCustomerAPI(APIView):
     #                         'errors': customer_serializer.errors
     #                     }, status=status.HTTP_400_BAD_REQUEST)
     #             else:
-    #                 # Create new customer
     #                 customer_serializer = CustomerDetailsSerializer(data=customer_data_for_serializer)
     #                 if customer_serializer.is_valid():
     #                     customer = customer_serializer.save()
@@ -224,34 +203,47 @@ class CombinedBookingCustomerAPI(APIView):
     #                         'errors': customer_serializer.errors
     #                     }, status=status.HTTP_400_BAD_REQUEST)
                 
-    #             # Step 6: Create local booking
+    #             # Generate a unique booking ID
+    #             booking_unique_id = f"BK{datetime.now().strftime('%Y%m%d')}_{str(uuid.uuid4())[:8].upper()}"
+
+    #             roller_booking_id = None
+    #             if roller_booking_response.get('uniqueId'):
+    #                 roller_booking_id = roller_booking_response.get('uniqueId')
+    #             elif roller_booking_response.get('id'):
+    #                 roller_booking_id = roller_booking_response.get('id')
+                
+
+                                
+    #             # Step 7: Create local booking with new fields
     #             booking_data = {
     #                 'customer': customer.customer_id,
+    #                 'location_id': location.location_id,  # New field from client_id
     #                 'roller_id': str(client_id),
     #                 'booking_unique_id': booking_unique_id,
     #                 'booking_date': complete_payload.get('bookingDate', ''),
     #                 'booking_time': self._extract_booking_time(complete_payload),
-    #                 'capacity_reservation_id': self._generate_capacity_id(),
     #                 'payment_made': complete_payload.get('fullPay', False),
-    #                 'payload': json.dumps(complete_payload)  # Store entire payload as JSON string
+    #                 'booking_status': 'live',  # Default value
+    #                 'is_booking_paid': False,  # Default value
+    #                 'deposit_made_in_doller': complete_payload.get('depositAmount', None),  # Renamed field
+    #                 'external_id': complete_payload.get("externalId"),
+    #                 'roller_booking_id': roller_booking_id,  # Store Roller's booking ID
+    #                 'payload': json.dumps(complete_payload)
     #             }
-                
+
     #             # Add Roller response to payload before saving
     #             current_payload = json.loads(complete_payload) if isinstance(complete_payload, str) else complete_payload
     #             current_payload['roller_response'] = roller_booking_response
     #             booking_data['payload'] = json.dumps(current_payload)
-    #             print("this is the payload === " ,  current_payload)
-    #             print("This is hte = packageDetails" , current_payload["packageDetails"])
-    #             print("This is The package Name" , current_payload["packageDetails"]["name"])
-    #             total_amount_dollars = current_payload["total_amount_dollars"]
-    #             booking_id = current_payload["externalId"]
-    #             deposit_percentage = current_payload["depositPercentage"]
-    #             minimum_deposit_amount_dollars = current_payload["minimum_deposit_amount_dollars"]
-    #             product_data = current_payload["packageDetails"]
 
-    #             payment_url = create_deposit_payment_link(total_amount_dollars  ,booking_id , deposit_percentage, minimum_deposit_amount_dollars, product_data )
-    #             print("This is the payment Url == " , payment_url)
-    #             # return payment_url
+                
+    #             # Extract data for Stripe
+    #             total_amount_dollars = current_payload.get("total_amount_dollars", 0)
+    #             booking_id = current_payload.get("externalId", booking_unique_id)
+    #             deposit_percentage = current_payload.get("depositPercentage", 0)
+    #             minimum_deposit_amount_dollars = current_payload.get("minimum_deposit_amount_dollars", 0)
+    #             product_data = current_payload.get("packageDetails", {})
+                
     #             # Create booking in our database
     #             booking_serializer = RollerBookingDetailsSerializer(data=booking_data)
                 
@@ -259,7 +251,17 @@ class CombinedBookingCustomerAPI(APIView):
     #                 booking = booking_serializer.save()
     #                 logger.info(f"Booking created in local database: {booking_unique_id}")
                     
-    #                 # Step 7: Prepare response
+    #                 # Step 8: Generate Stripe payment link
+    #                 payment_url = create_deposit_payment_link(
+    #                     total_amount_dollars,
+    #                     booking_id,
+    #                     deposit_percentage,
+    #                     minimum_deposit_amount_dollars,
+    #                     product_data
+    #                 )
+    #                 logger.info(f"Stripe payment URL generated: {payment_url}")
+                    
+    #                 # Step 9: Prepare response
     #                 response_data = {
     #                     'success': True,
     #                     'message': 'Customer and booking processed successfully',
@@ -275,6 +277,9 @@ class CombinedBookingCustomerAPI(APIView):
     #                         'booking_id': booking.booking_id,
     #                         'booking_unique_id': booking.booking_unique_id,
     #                         'booking_date': booking.booking_date,
+    #                         'booking_status': booking.booking_status,
+    #                         'is_booking_paid': booking.is_booking_paid,
+    #                         'location_id': booking.location_id.location_id if booking.location_id else None,
     #                         'payment_made': booking.payment_made,
     #                         'creation_date': booking.creation_date.strftime('%Y-%m-%d %H:%M:%S') if booking.creation_date else None
     #                     },
@@ -284,15 +289,8 @@ class CombinedBookingCustomerAPI(APIView):
     #                         'roller_booking_id': roller_booking_response.get('id'),
     #                         'roller_external_id': roller_booking_response.get('externalId')
     #                     },
-    #                     'payload_summary': {
-    #                         'total_products': len(complete_payload.get('products', [])),
-    #                         'total_items': len(complete_payload.get('items', [])),
-    #                         'booking_date': complete_payload.get('bookingDate'),
-    #                         'comments': complete_payload.get('comments'),
-    #                         'client_id': client_id
-    #                     },
-    #                     'stripe':{
-    #                         "payment_url" :payment_url
+    #                     'stripe': {
+    #                         "payment_url": payment_url
     #                     },
     #                 }
                     
@@ -313,7 +311,7 @@ class CombinedBookingCustomerAPI(APIView):
     #             'message': 'Error processing combined booking request',
     #             'error': str(e)
     #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     def post(self, request):
         """
         Create/Update customer and booking in one API call
@@ -382,12 +380,11 @@ class CombinedBookingCustomerAPI(APIView):
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             logger.info(f"Successfully obtained Roller token for location {location.location_name}")
-            print("This is the compleate _payload = " , complete_payload)
+            
             # Step 4: Create booking in Roller system FIRST
             roller_booking_response = self._create_roller_booking_with_retry(
                 complete_payload, roller_token, location
             )
-            print("this is the boooking  response = " , roller_booking_response)
             
             # Step 5: Check if Roller booking was successful
             if not self._is_roller_booking_successful(roller_booking_response):
@@ -447,6 +444,13 @@ class CombinedBookingCustomerAPI(APIView):
                 
                 # Generate a unique booking ID
                 booking_unique_id = f"BK{datetime.now().strftime('%Y%m%d')}_{str(uuid.uuid4())[:8].upper()}"
+
+                # Extract Roller booking ID
+                roller_booking_id = None
+                if roller_booking_response.get('uniqueId'):
+                    roller_booking_id = roller_booking_response.get('uniqueId')
+                elif roller_booking_response.get('id'):
+                    roller_booking_id = roller_booking_response.get('id')
                 
                 # Step 7: Create local booking with new fields
                 booking_data = {
@@ -460,9 +464,11 @@ class CombinedBookingCustomerAPI(APIView):
                     'booking_status': 'live',  # Default value
                     'is_booking_paid': False,  # Default value
                     'deposit_made_in_doller': complete_payload.get('depositAmount', None),  # Renamed field
+                    'external_id': complete_payload.get("externalId"),
+                    'roller_booking_id': roller_booking_id,  # Store Roller's booking ID
                     'payload': json.dumps(complete_payload)
                 }
-                
+
                 # Add Roller response to payload before saving
                 current_payload = json.loads(complete_payload) if isinstance(complete_payload, str) else complete_payload
                 current_payload['roller_response'] = roller_booking_response
@@ -492,7 +498,79 @@ class CombinedBookingCustomerAPI(APIView):
                     )
                     logger.info(f"Stripe payment URL generated: {payment_url}")
                     
-                    # Step 9: Prepare response
+                    # Step 9: Send booking details email to customer
+                    try:
+                        logger.info(f"Attempting to send booking details email for booking {booking_id}")
+                        
+                        # Prepare customer name
+                        customer_name = f"{customer.first_name} {customer.last_name}"
+                        
+                        # Calculate deposit amount
+                        deposit_amount = (total_amount_dollars * deposit_percentage) / 100 if deposit_percentage > 0 else 0
+                        
+                        # Send booking details email
+                        email_sent = send_booking_details_email(
+                            customer_name=customer_name,
+                            customer_email=customer_email,
+                            booking_id=booking_id,
+                            stripe_payment_link=payment_url,
+                            total_amount=total_amount_dollars,
+                            booking_payload=current_payload,
+                            location_name=location.location_name
+                        )
+                        
+                        if email_sent:
+                            logger.info(f"Booking details email sent successfully for booking {booking_id}")
+                            
+                            # Update booking payload with email info
+                            try:
+                                payload_data = booking.payload
+                                if isinstance(payload_data, str):
+                                    payload_data = json.loads(payload_data)
+                                
+                                if not isinstance(payload_data, dict):
+                                    payload_data = {}
+                                
+                                # Add booking details email info to payload
+                                payload_data['booking_details_email'] = {
+                                    'sent_at': datetime.now().isoformat(),
+                                    'customer_email': customer_email,
+                                    'status': 'sent',
+                                    'email_type': 'booking_details'
+                                }
+                                
+                                booking.payload = json.dumps(payload_data)
+                                booking.save(update_fields=['payload'])
+                            except Exception as e:
+                                logger.error(f"Error updating booking with booking details email info: {str(e)}")
+                        
+                        else:
+                            logger.warning(f"Failed to send booking details email for booking {booking_id}")
+                            
+                            # Update booking payload with email failure
+                            try:
+                                payload_data = booking.payload
+                                if isinstance(payload_data, str):
+                                    payload_data = json.loads(payload_data)
+                                
+                                if not isinstance(payload_data, dict):
+                                    payload_data = {}
+                                
+                                payload_data['booking_details_email'] = {
+                                    'attempted_at': datetime.now().isoformat(),
+                                    'status': 'failed',
+                                    'email_type': 'booking_details'
+                                }
+                                
+                                booking.payload = json.dumps(payload_data)
+                                booking.save(update_fields=['payload'])
+                            except Exception as e:
+                                logger.error(f"Error updating booking with email failure info: {str(e)}")
+                                
+                    except Exception as e:
+                        logger.error(f"Error in booking details email sending process for booking {booking_id}: {str(e)}", exc_info=True)
+                    
+                    # Step 10: Prepare response
                     response_data = {
                         'success': True,
                         'message': 'Customer and booking processed successfully',
@@ -512,17 +590,32 @@ class CombinedBookingCustomerAPI(APIView):
                             'is_booking_paid': booking.is_booking_paid,
                             'location_id': booking.location_id.location_id if booking.location_id else None,
                             'payment_made': booking.payment_made,
-                            'creation_date': booking.creation_date.strftime('%Y-%m-%d %H:%M:%S') if booking.creation_date else None
+                            'creation_date': booking.creation_date.strftime('%Y-%m-%d %H:%M:%S') if booking.creation_date else None,
+                            'external_id': booking.external_id,
+                            'roller_booking_id': booking.roller_booking_id
                         },
                         'roller_booking': {
                             'success': True,
                             'response': roller_booking_response,
-                            'roller_booking_id': roller_booking_response.get('id'),
+                            'roller_booking_id': roller_booking_response.get('uniqueId'),
+                            'roller_booking_reference': roller_booking_response.get('bookingReference'),
                             'roller_external_id': roller_booking_response.get('externalId')
                         },
-                        'stripe': {
-                            "payment_url": payment_url
+                        'payment': {
+                            "payment_url": payment_url,
+                            "total_amount": total_amount_dollars,
+                            "deposit_percentage": deposit_percentage,
+                            "deposit_amount": deposit_amount,
+                            "booking_id": booking_id,
+                            "email_sent": email_sent if 'email_sent' in locals() else False
                         },
+                        'summary': {
+                            'total_items': len(current_payload.get('items', [])),
+                            'booking_date': current_payload.get('bookingDate'),
+                            'comments': current_payload.get('comments'),
+                            'client_id': client_id,
+                            'location_name': location.location_name
+                        }
                     }
                     
                     return Response(response_data, status=status.HTTP_201_CREATED)
@@ -532,7 +625,7 @@ class CombinedBookingCustomerAPI(APIView):
                     'success': False,
                     'message': 'Roller booking successful but failed to create local booking',
                     'errors': booking_serializer.errors,
-                    'roller_booking_id': roller_booking_response.get('id')
+                    'roller_booking_id': roller_booking_response.get('uniqueId')
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
         except Exception as e:
@@ -543,7 +636,10 @@ class CombinedBookingCustomerAPI(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # def _is_roller_booking_successful(self, roller_booking_response):
+
+
+
+    # # def _is_roller_booking_successful(self, roller_booking_response):
     #     """
     #     Check if Roller booking was successful based on response structure
     #     """
@@ -572,6 +668,42 @@ class CombinedBookingCustomerAPI(APIView):
     #     return False
 
 
+    # def _is_roller_booking_successful(self, roller_booking_response):
+    #     """
+    #     Check if Roller booking was successful based on response structure
+    #     """
+    #     if not roller_booking_response or not isinstance(roller_booking_response, dict):
+    #         return False
+
+    #     # Explicit error indicator
+    #     if 'error' in roller_booking_response:
+    #         return False
+
+    #     # Case 1: Actual Roller success response (current)
+    #     if (
+    #         roller_booking_response.get('bookingReference')
+    #         and roller_booking_response.get('uniqueId')
+    #     ):
+    #         return True
+
+    #     # Case 2: Wrapped success response
+    #     if roller_booking_response.get('success') is True:
+    #         response_data = roller_booking_response.get('response', {})
+    #         if isinstance(response_data, dict):
+    #             errors = response_data.get('errors', [])
+    #             if errors:
+    #                 logger.error(f"Roller booking has errors: {errors}")
+    #                 return False
+    #         return True
+
+    #     # Case 3: Legacy / alternate response
+    #     if 'id' in roller_booking_response:
+    #         return True
+
+    #     return False
+
+    # Update the CombinedBookingCustomerAPI to store roller_booking_id
+
     def _is_roller_booking_successful(self, roller_booking_response):
         """
         Check if Roller booking was successful based on response structure
@@ -583,30 +715,29 @@ class CombinedBookingCustomerAPI(APIView):
         if 'error' in roller_booking_response:
             return False
 
-        # Case 1: Actual Roller success response (current)
-        if (
-            roller_booking_response.get('bookingReference')
-            and roller_booking_response.get('uniqueId')
-        ):
-            return True
+        # Check for specific error structure in response
+        response_data = roller_booking_response.get('response', roller_booking_response)
+        
+        # Check for errors array
+        if isinstance(response_data, dict) and 'errors' in response_data:
+            errors = response_data['errors']
+            if errors and len(errors) > 0:
+                logger.error(f"Roller booking has errors: {errors}")
+                return False
 
-        # Case 2: Wrapped success response
-        if roller_booking_response.get('success') is True:
-            response_data = roller_booking_response.get('response', {})
-            if isinstance(response_data, dict):
-                errors = response_data.get('errors', [])
-                if errors:
-                    logger.error(f"Roller booking has errors: {errors}")
-                    return False
+        # Check for success indicators
+        if roller_booking_response.get('bookingReference') and roller_booking_response.get('uniqueId'):
             return True
-
-        # Case 3: Legacy / alternate response
+        
+        if roller_booking_response.get('uniqueId'):
+            return True
+        
         if 'id' in roller_booking_response:
             return True
 
         return False
 
-
+        
     def _create_roller_booking_with_retry(self, payload, api_token, location):
         """
         Create booking in Roller system with retry logic for token expiration
