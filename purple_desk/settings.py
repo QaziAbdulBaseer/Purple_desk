@@ -2,6 +2,9 @@
 Django settings for purple_desk project.
 """
 
+
+
+
 from pathlib import Path
 from datetime import timedelta
 import dj_database_url
@@ -40,6 +43,7 @@ if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
 # INSTALLED APPS
 # -------------------------
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'rest_framework',
+    'rest_framework_api_key',
     'rest_framework_simplejwt',
     'corsheaders',
     'myapp.apps.MyappConfig',
@@ -75,9 +80,10 @@ REST_FRAMEWORK = {
 # MIDDLEWARE
 # -------------------------
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

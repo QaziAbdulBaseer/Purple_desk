@@ -22,3 +22,20 @@
 10) uvicorn purple_desk.asgi:application --relo
 
 
+11) How to create an API key 
+
+  i) python manage.py shell
+
+  ii) past that code and run it 
+
+from rest_framework_api_key.models import APIKey
+
+# Create a new key
+api_key, key = APIKey.objects.create_key(name="my-service")
+
+# api_key → object stored in DB (has prefix)
+# key → the full secret you can use in requests
+print("Your API Key:", key)
+
+
+12) just copy the api key and save it (v5hgNd52.GpDAKWSa7rz0eMlzUsq3SAbRYYJbuFbF)
